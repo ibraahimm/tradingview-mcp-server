@@ -19,6 +19,11 @@
  *                box-drawing grid table (┌┬┐ ├┼┤ └┴┘ │ ─) + short summary to stdout, and
  *                writes the full untruncated results as CSV (default .claude/outputs/
  *                saudi-momentum.csv). This box-grid is the fixed, default report format.
+ *                After the summary it emits a "===CHART_LINKS===" sentinel line followed
+ *                by a markdown "Open chart" list (one clickable TradingView link per match).
+ *                The command splits stdout on that line: the part before goes verbatim in a
+ *                ```text code block; the part after is printed as markdown (outside the block)
+ *                so the links are clickable.
  *
  * Usage:
  *   node saudi-momentum.js stage=filter input=screen.json [gain=40 ema_fast=21 ...]
@@ -26,6 +31,11 @@
  *
  * Parameters (percent values are given as percents, e.g. gain=40 means 40%):
  *   gain (40) ema_fast (21) ema_slow (60) spread (5) adr (1) value (5000000)
+ *   spread_min (optional) — lower bound on ema_spread in percent. When set, the
+ *     strict fast>slow check is replaced by ema_spread >= spread_min, making
+ *     `spread` a two-sided band (e.g. spread_min=-4 spread=4 → ±4% around the
+ *     EMA crossover). Requires the caller to drop the server-side EMA{fast}>EMA{slow}
+ *     filter so near-crossover names actually reach this stage. Omit for default behavior.
  *
  * Input file paths can also be supplied on stdin instead of a file (input=- / filtered=- / lookup=-).
  */
@@ -48,6 +58,11 @@ const params = {
   ema_fast: num("ema_fast", 21),
   ema_slow: num("ema_slow", 60),
   spread: num("spread", 5),
+  // Optional lower bound on ema_spread (percent). When supplied, the strict
+  // fast>slow "confirmed uptrend" check is replaced by ema_spread >= spread_min,
+  // turning `spread` into a two-sided band (e.g. spread_min=-4 spread=4 → ±4%
+  // around the EMA crossover). When omitted, behavior is unchanged (fast>slow).
+  spread_min: args.spread_min !== undefined ? Number(args.spread_min) : null,
   adr: num("adr", 1),
   value: num("value", 5000000),
 };
@@ -168,6 +183,7 @@ function stageFilter() {
 
   const gainF = params.gain / 100;
   const spreadF = params.spread / 100;
+  const spreadMinF = params.spread_min != null ? params.spread_min / 100 : null;
   const adrF = params.adr / 100;
 
   const matches = [];
@@ -197,7 +213,11 @@ function stageFilter() {
 
     if (gain_from_low < gainF) continue;
     if (!(close > slow)) continue; // re-verify (server-side enforced)
-    if (!(fast > slow)) continue; // re-verify (server-side enforced)
+    if (spreadMinF != null) {
+      if (ema_spread < spreadMinF) continue; // two-sided band: lower bound
+    } else {
+      if (!(fast > slow)) continue; // confirmed uptrend (server-side enforced)
+    }
     if (ema_spread > spreadF) continue;
     if (adr_pct < adrF) continue;
     if (avg_value < params.value) continue;
@@ -256,6 +276,15 @@ const SHORT = ["Sym", "Name", "Close", "Chg", "Vol", "RVol", "Val", "Low%", "Spr
 const ALIGN = ["l", "l", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "l"];
 const NAME_MAX = 20; // truncate Company
 const SEC_MAX = 11; // truncate Sector
+
+// Separator between the fixed-width report (table + summary, which the command wraps
+// in a ```text code block) and the clickable markdown chart-links list (which MUST be
+// printed OUTSIDE the code block so the links render). The command splits stdout on
+// this exact line, prints the part before it verbatim inside the fence, and prints the
+// part after it as normal markdown. The sentinel line itself is never shown.
+const LINKS_SENTINEL = "===CHART_LINKS===";
+// TradingView interactive chart URL for a TADAWUL symbol.
+const chartUrl = (sym) => `https://www.tradingview.com/chart/?symbol=${sym}`;
 
 function stageReport() {
   if (!args.filtered) throw new Error("stage=report requires filtered=<filter.json|->");
@@ -382,6 +411,19 @@ function stageReport() {
 
   out.push("Scope: Saudi Main Market (TADAWUL) only — Nomu/parallel-market (9xxx), ETFs, and REITs/funds excluded.");
   out.push(`CSV: ${csvPath}`);
+
+  // ----- chart-links section (rendered OUTSIDE the code block by the command) -----
+  out.push(LINKS_SENTINEL);
+  if (rows.length) {
+    out.push("**Open chart (click a symbol):**");
+    out.push("");
+    rows.forEach((r, i) => {
+      const code = r.symbol.split(":")[1];
+      out.push(`${i + 1}. [${code} — ${trunc(r.description, 40)}](${chartUrl(r.symbol)})`);
+    });
+  } else {
+    out.push("_No matches — no chart links._");
+  }
 
   process.stdout.write(out.join("\n") + "\n");
 }

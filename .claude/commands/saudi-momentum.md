@@ -118,16 +118,23 @@ These rules are non-negotiable. **Never substitute symbols from any other market
    node .claude/scripts/saudi-momentum.js stage=report \
      filtered=.claude/scripts/.tmp/filtered.json lookup=.claude/scripts/.tmp/lookup.json
    ```
-   **Print the script's stdout to the user as-is, inside a fenced ```text code block** so the
-   box-drawing alignment is preserved. The script emits **one continuous box-grid table**
-   (Unicode `┌┬┐ ├┼┤ └┴┘ │ ─`) — short column headers (`Sym Name Close Chg Vol RVol Val Low%
-   Sprd ADR 3M 1Y 5Y 10Y All Cap Sec`), one stock per row, all 17 columns, with the
-   `TADAWUL:` prefix stripped and long Company/Sector names truncated — followed by the short
-   summary (matches, strongest 3, liquidity warnings, missing-data warnings, Saudi-Main-
-   Market-only scope, CSV path). The script also writes the **full, untruncated** results as a
-   CSV to `.claude/outputs/saudi-momentum.csv` (override with `csv=<path>`). Do NOT convert
-   the output to a Markdown pipe table, a `+---+` ASCII table, TSV, or per-stock blocks,
-   and do NOT split the table — print it verbatim.
+   The script's stdout has **two parts separated by a line that is exactly `===CHART_LINKS===`**:
+   - **Before the sentinel** — the box-grid table + summary. **Print this part as-is, inside a
+     fenced ```text code block** so the box-drawing alignment is preserved. The script emits
+     **one continuous box-grid table** (Unicode `┌┬┐ ├┼┤ └┴┘ │ ─`) — short column headers
+     (`Sym Name Close Chg Vol RVol Val Low% Sprd ADR 3M 1Y 5Y 10Y All Cap Sec`), one stock per
+     row, all 17 columns, with the `TADAWUL:` prefix stripped and long Company/Sector names
+     truncated — followed by the short summary (matches, strongest 3, liquidity warnings,
+     missing-data warnings, Saudi-Main-Market-only scope, CSV path). Do NOT convert this part
+     to a Markdown pipe table, a `+---+` ASCII table, TSV, or per-stock blocks, and do NOT
+     split the table — print it verbatim.
+   - **After the sentinel** — a markdown "**Open chart (click a symbol)**" list, one clickable
+     TradingView link per match. **Print this part as normal markdown OUTSIDE the code block**
+     (links do not render inside a ```text fence). Do **not** print the `===CHART_LINKS===`
+     line itself, and do **not** wrap the links in a code block.
+
+   The script also writes the **full, untruncated** results as a CSV to
+   `.claude/outputs/saudi-momentum.csv` (override with `csv=<path>`).
    - The grid is ~140–150 characters wide (17 columns). It renders cleanly as fixed-width
      text but needs a wide terminal. If you pass `maxwidth=<N>` and the grid exceeds it, the
      script prints a WIDTH PROBLEM message instead of a wrapped table and points to the CSV;
