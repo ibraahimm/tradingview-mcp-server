@@ -49,14 +49,24 @@ them straight to the script — the script owns the defaults and all the math.
 | `below_min` | `40`      | Min `belowATH = (ATH − close)/ATH` — still corrected / room left (%) |
 | `below_max` | `85`      | Max `belowATH` — excludes the permanently-broken wreckage (%) |
 | `offlow`    | `20`      | Min `offLow = close/52w_low − 1` — the recovery wave is underway (%) |
+| `offlow_max`| `60`      | Max `offLow` — drop names that have already rebounded a lot off the low (already-extended) (%) |
 | `p3m_min`   | `5`       | Min `Perf.3M` — a *meaningful* recent turn (%) |
 | `p3m_max`   | `40`      | Max `Perf.3M` — not overheated/unconsolidated (%) |
-| `p6m_min`   | `-10`     | Min `Perf.6M` — allows fresh turns still slightly negative on 6M (%) |
+| `p6m_min`   | `0`       | Min `Perf.6M` — require a positive 6-month trend (%) |
 | `p6m_max`   | `50`      | Max `Perf.6M` — not overextended (%) |
-| `p3y_max`   | `130`     | Max `Perf.3Y` — recency-of-correction guard. Lower to `≤20` or `≤0` to purge uptrends (%) |
+| `p3y_max`   | `50`      | Max `Perf.3Y` — recency-of-correction guard. Lower to `≤20` or `≤0` to purge uptrends further (%) |
+| `p5y_max`   | `80`      | Max `Perf.5Y` — drop names whose 5-year recovery is already large (already-extended) (%) |
+| `p10y_max`  | `250`     | Max `Perf.10Y` — drop 10-year mega-winners (applied locally; null 10Y = <10y history, allowed) (%) |
+| `min_years` | `5`       | Min years since listing — computed in the script from `first_bar_time` (timestamp of the first price bar). Younger IPOs excluded |
 | `value`     | `0`       | Min 30-day avg traded value (SAR). `0` = OFF (apply liquidity in a later layer) |
 | `nrhi_min`  | `0`       | Optional min `nrHi = close/52w_high` strength gate (%). `0` = descriptor only |
 | `market`    | `ksa-main`| Fixed scope: Saudi Main Market only (do not change) |
+
+**Listing age (`min_years`, default 5):** enforced via the **direct** field `first_bar_time`
+(epoch seconds of the first traded bar ≈ listing date); the script computes
+`ageYears = (now − first_bar_time)/yr` and drops anything younger than `min_years`. Do **not**
+use `Perf.5Y` existence as the listing proxy — TradingView returns a `Perf.5Y` value even for
+sub-5-year listings (e.g. recent IPOs), so the proxy wrongly admits young names.
 
 Example calls:
 - `/saudi-stage2`
@@ -84,10 +94,16 @@ Non-negotiable. **Never substitute symbols from any other market.**
      - `{ field:"type", operator:"equal", value:"stock" }`
      - `{ field:"Perf.3M", operator:"greater_or_equal", value:<p3m_min> }`
      - `{ field:"Perf.3M", operator:"less", value:<p3m_max> }`
-     - `{ field:"Perf.6M", operator:"greater", value:<p6m_min> }`
+     - `{ field:"Perf.6M", operator:"greater", value:<p6m_min> }`  (default 0)
      - `{ field:"Perf.6M", operator:"less", value:<p6m_max> }`
-     - `{ field:"Perf.3Y", operator:"less", value:<p3y_max> }`
-   - `columns`: `["description","close","all_time_high","price_52_week_high","price_52_week_low","Perf.3M","Perf.6M","Perf.Y","Perf.3Y","Perf.5Y","Perf.10Y","average_volume_30d_calc","market_cap_basic","sector"]`
+     - `{ field:"Perf.3Y", operator:"less", value:<p3y_max> }`  (default 50)
+     - `{ field:"Perf.5Y", operator:"less", value:<p5y_max> }`  (default 80; the 5Y ceiling)
+     - Do **not** push `Perf.10Y` server-side: `Perf.10Y < p10y_max` is applied **locally** so that
+       5–10-year names (null `Perf.10Y`) are kept; a server `less` filter would drop them. Same for
+       the `offLow` band (a ratio).
+   - `columns`: `["description","close","all_time_high","price_52_week_high","price_52_week_low","Perf.3M","Perf.6M","Perf.Y","Perf.3Y","Perf.5Y","Perf.10Y","first_bar_time","average_volume_30d_calc","market_cap_basic","sector"]`
+   - The listing-age requirement (`min_years`) is applied **locally** in the script from
+     `first_bar_time` — do not push it server-side.
    - `sort_by:"market_cap_basic"`, `sort_order:"desc"`, `limit:200`
    - If `total_count > 200`: re-run in price chunks (`close < 25`, then `close >= 25`) with the
      same filters and merge/de-dupe by symbol before writing the data file.
@@ -101,9 +117,9 @@ Non-negotiable. **Never substitute symbols from any other market.**
 4. **Run the filter stage**, forwarding the parsed params (omit any the user didn't supply):
    ```
    node .claude/scripts/saudi-stage2.js stage=filter input=.claude/scripts/.tmp/screen.json \
-     dd_min=<dd_min> below_min=<below_min> below_max=<below_max> offlow=<offlow> \
+     dd_min=<dd_min> below_min=<below_min> below_max=<below_max> offlow=<offlow> offlow_max=<offlow_max> \
      p3m_min=<p3m_min> p3m_max=<p3m_max> p6m_min=<p6m_min> p6m_max=<p6m_max> \
-     p3y_max=<p3y_max> value=<value> nrhi_min=<nrhi_min> \
+     p3y_max=<p3y_max> p5y_max=<p5y_max> p10y_max=<p10y_max> min_years=<min_years> value=<value> nrhi_min=<nrhi_min> \
      > .claude/scripts/.tmp/filtered.json
    ```
    The script handles the 9xxx/REIT exclusions, computes all metrics, applies every threshold
@@ -138,8 +154,14 @@ Non-negotiable. **Never substitute symbols from any other market.**
 - **`ATHx = ATH/52w_high`** flags an old/far peak (e.g. the 2006 TASI bubble). `ATHx ≥ 3` +
   strongly positive `Perf.3Y/10Y` ⇒ a mature uptrend far below an ancient peak, **not** a
   fresh first wave. The script surfaces these in the summary; tighten `p3y_max` to remove them.
-- **`Perf.5Y` is a descriptor, not a gate** here — it is unreliable when the peak sits outside
-  the 5-year window. Use `Perf.3Y`/`Perf.10Y` together to locate *when* the decline happened.
+- **Listing age uses `first_bar_time`, not `Perf.5Y`.** `first_bar_time` is the direct timestamp
+  of the first traded bar; the script requires `now − first_bar_time ≥ min_years`. The old
+  `Perf.5Y`-existence proxy was wrong — TradingView returns a `Perf.5Y` value even for sub-5-year
+  listings (verified: `4017` Fakeeh ~2y and `4263` SAL ~2.6y both have a `Perf.5Y`).
+- **`Perf.5Y` now plays two roles:** (a) `Perf.5Y < p5y_max` is a soft **ceiling** dropping names
+  whose 5-year recovery is already large; (b) a **descriptor** for locating *when* the decline
+  happened (with `Perf.3Y`/`Perf.10Y`). It is **not** the depth measure — `DDmax` (anchored to the
+  all-time high) is, because `Perf.5Y` is unreliable when the peak sits outside the 5-year window.
 - **No liquidity by default** (`value=0`): this is a discovery layer. Apply the liquidity +
   moving-average timing as a later, separate layer (or pass `value=…`).
 - **ADR/true drawdown caveats:** `52w_low` is a proxy for the cycle trough; a stock that bottomed

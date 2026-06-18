@@ -55,11 +55,15 @@ const params = {
   below_min: num("below_min", 40),
   below_max: num("below_max", 85),
   offlow: num("offlow", 20),
+  offlow_max: num("offlow_max", 60),
   p3m_min: num("p3m_min", 5),
   p3m_max: num("p3m_max", 40),
-  p6m_min: num("p6m_min", -10),
+  p6m_min: num("p6m_min", 0),
   p6m_max: num("p6m_max", 50),
-  p3y_max: num("p3y_max", 130),
+  p3y_max: num("p3y_max", 50),
+  p5y_max: num("p5y_max", 80),
+  p10y_max: num("p10y_max", 250),
+  min_years: num("min_years", 5),
   value: num("value", 0),
   nrhi_min: num("nrhi_min", 0),
 };
@@ -143,16 +147,27 @@ function stageFilter() {
     const p3m = s["Perf.3M"];
     const p6m = s["Perf.6M"];
     const p3y = s["Perf.3Y"];
+    const p5y = s["Perf.5Y"];
+    const fbt = s.first_bar_time; // epoch seconds of the first price bar (≈ listing date)
     const avgVol = s.average_volume_30d_calc;
 
     if ([close, ath, hi, lo, p3m, p6m, p3y].some((v) => v == null)) {
       skipped.push({ symbol: s.symbol, description: s.description });
       continue;
     }
+    // listing-age requirement (DIRECT, via first_bar_time): the first traded bar must be
+    // at least `min_years` old. This is exact — unlike Perf.5Y, which TradingView returns
+    // even for <5y listings (e.g. recent IPOs). Younger listings are excluded by design.
+    if (fbt == null) continue;
+    const ageYears = (Date.now() / 1000 - fbt) / 31557600; // seconds per 365.25-day year
+    if (ageYears < params.min_years) continue;
     // momentum band (re-verify; normally enforced server-side)
     if (p3m < params.p3m_min || p3m >= params.p3m_max) continue;
     if (p6m <= params.p6m_min || p6m >= params.p6m_max) continue;
     if (p3y >= params.p3y_max) continue;
+    if (p5y != null && p5y >= params.p5y_max) continue; // 5Y ceiling: drop already-large recoveries (when present)
+    const p10y = s["Perf.10Y"];
+    if (p10y != null && p10y >= params.p10y_max) continue; // 10Y ceiling (when present; null = <10y history, allowed)
 
     cand.push({
       symbol: s.symbol,
@@ -179,7 +194,7 @@ function stageFilter() {
   // Pass 2: progressive local gates — recorded as a funnel.
   const afterDD = cand.filter((r) => r.DDmax >= params.dd_min);
   const afterBelow = afterDD.filter((r) => r.belowATH >= params.below_min && r.belowATH <= params.below_max);
-  const afterOff = afterBelow.filter((r) => r.offLow >= params.offlow);
+  const afterOff = afterBelow.filter((r) => r.offLow >= params.offlow && r.offLow < params.offlow_max);
   const matches = afterOff.filter(
     (r) => (params.nrhi_min <= 0 || r.nrHi >= params.nrhi_min) && (params.value <= 0 || (r.avgVal != null && r.avgVal >= params.value)),
   );
@@ -253,7 +268,7 @@ function stageReport() {
   const fn = filtered.funnel || {};
   const out = [
     "Funnel (Saudi Main Market, after 9xxx/REIT exclusion):",
-    `  1. after server conditions (Perf.3M/6M/3Y + scope) : ${fn.server ?? "—"}`,
+    `  1. after base conditions (≥${p.min_years}y since listing, Perf.3M/6M/3Y/5Y + scope) : ${fn.server ?? "—"}`,
     `  2. after DDmax ≥ ${p.dd_min}%                       : ${fn.afterDD ?? "—"}`,
     `  3. after belowATH ∈ [${p.below_min},${p.below_max}]%        : ${fn.afterBelow ?? "—"}`,
     `  4. after offLow ≥ ${p.offlow}%                       : ${fn.afterOff ?? "—"}`,
@@ -273,8 +288,8 @@ function stageReport() {
     if (oldPeak.length) out.push(`Old/far peak flag (ATHx ≥ 3, likely pre-2006-bubble anchor): ${oldPeak.join(", ")}.`);
   }
   out.push(
-    `Filters: DDmax ≥ ${p.dd_min}%, belowATH ∈ [${p.below_min},${p.below_max}]%, offLow ≥ ${p.offlow}%, ` +
-      `Perf.3M ∈ [${p.p3m_min},${p.p3m_max})%, Perf.6M ∈ (${p.p6m_min},${p.p6m_max})%, Perf.3Y < ${p.p3y_max}%` +
+    `Filters: ≥${p.min_years}y since listing (first_bar_time), DDmax ≥ ${p.dd_min}%, belowATH ∈ [${p.below_min},${p.below_max}]%, offLow ∈ [${p.offlow},${p.offlow_max})%, ` +
+      `Perf.3M ∈ [${p.p3m_min},${p.p3m_max})%, Perf.6M ∈ (${p.p6m_min},${p.p6m_max})%, Perf.3Y < ${p.p3y_max}%, Perf.5Y < ${p.p5y_max}%, Perf.10Y < ${p.p10y_max}%` +
       (p.value > 0 ? `, value ≥ SAR ${compact(p.value)}` : ", value floor OFF") +
       (p.nrhi_min > 0 ? `, nrHi ≥ ${p.nrhi_min}%` : "") + ".",
   );
