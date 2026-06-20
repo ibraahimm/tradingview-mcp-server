@@ -298,11 +298,31 @@ function stageReport() {
     "",
     `States: ACTIVE-W1 ${count("ACTIVE-W1")} · ACTIVE-W2 ${count("ACTIVE-W2")} · GRAD★ ${count("GRAD★")} · FAILED ${count("FAILED")} · STALE ${count("STALE")} · EXPIRED ${count("EXPIRED")}.`,
     `New this run (${latestDate}): ${list(items.filter((r) => r.isNew))}.`,
-    `Promoted (appeared in both W1 and W2): ${list(items.filter((r) => r.promoted))}.`,
     `Near ATH (belowATH < 10%, descriptor): ${list(items.filter((r) => r.nearATH))}.`,
     `Graduation flag: Perf.5Y > ${grad_p5y}. Failure: close < first signal AND close < EMA200. Horizon: ${horizon_days}d (~${(horizon_days / 365.25).toFixed(1)}y). Stale: ${stale_days}d.`,
     `Ledger: ${ledgerPath}` + (args.csv ? ` · CSV export: ${args.csv}` : ""),
   ];
+
+  // Grouped sections (presentation only — derived from already-computed states/fields).
+  const nm = (r, n) => `${r.symbol.split(":")[1]} ${trunc(r.name, n)}`;
+  const promoted = items.filter((r) => r.promoted);
+  const w2 = items.filter((r) => r.state === "ACTIVE-W2");
+  const w1 = items.filter((r) => r.state === "ACTIVE-W1");
+  const below200 = items.filter((r) => r.vs200 != null && r.vs200 < 0).sort((a, b) => a.vs200 - b.vs200);
+  const grad = items.filter((r) => r.state === "GRAD★");
+  const failed = items.filter((r) => r.state === "FAILED");
+  const stale = items.filter((r) => r.state === "STALE");
+  out.push("");
+  out.push("── Groups ──");
+  out.push(`▸ Promoted W1→W2 (${promoted.length}): ${promoted.length ? promoted.map((r) => nm(r, 22)).join("; ") : "none"}`);
+  out.push(`▸ Active-W2 (${w2.length}): ${w2.length ? w2.map((r) => `${nm(r, 16)} (${sgn(r.gain)}%)`).join("; ") : "none"}`);
+  out.push(`▸ Active-W1 (${w1.length}): ${w1.length ? w1.map((r) => r.symbol.split(":")[1]).join(", ") : "none"}`);
+  out.push(
+    `▸ Below EMA200 watchlist (${below200.length}): ${below200.length ? below200.map((r) => `${r.symbol.split(":")[1]} (${sgn(r.vs200)})`).join(", ") : "none"}`,
+  );
+  if (grad.length) out.push(`▸ Graduated★ (${grad.length}): ${grad.map((r) => `${nm(r, 18)} (5Y ${r1(r.p5y)})`).join("; ")}`);
+  if (failed.length) out.push(`▸ Failed (${failed.length}): ${failed.map((r) => `${nm(r, 16)} (${sgn(r.gain)}%, v200 ${sgn(r.vs200)})`).join("; ")}`);
+  if (stale.length) out.push(`▸ Stale (${stale.length}): ${stale.map((r) => nm(r, 20)).join("; ")}`);
 
   out.push(LINKS_SENTINEL);
   out.push("**Open chart (click a symbol):**");
