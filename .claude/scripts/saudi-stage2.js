@@ -26,7 +26,7 @@
  *   ATHx     = ATH / price_52_week_high               // >~3 => peak is old/far (e.g. 2006 bubble)
  *
  * Parameters (all optional; percents given as percents, e.g. p3y_max=130 means 130%):
- *   dd_min (50)  below_min (40)  below_max (85)  offlow (20)
+ *   dd_min (50)  below_min (40)  below_max (95)  offlow (20)
  *   p3m_min (5)  p3m_max (40)  p6m_min (-10)  p6m_max (50)  p3y_max (130)
  *   value (0 = no liquidity floor, SAR)  nrhi_min (0 = descriptor only, %)
  * The Perf.* bounds are normally enforced server-side too; the script re-verifies them
@@ -53,7 +53,7 @@ const num = (k, def) => (args[k] !== undefined ? Number(args[k]) : def);
 const params = {
   dd_min: num("dd_min", 50),
   below_min: num("below_min", 40),
-  below_max: num("below_max", 85),
+  below_max: num("below_max", 95),
   offlow: num("offlow", 20),
   offlow_max: num("offlow_max", 60),
   p3m_min: num("p3m_min", 5),
@@ -77,6 +77,10 @@ function readJson(spec) {
 const REIT_RE = /REIT|Fund|ETF|Sukuk/i;
 const LINKS_SENTINEL = "===CHART_LINKS===";
 const chartUrl = (sym) => `https://www.tradingview.com/chart/?symbol=${sym}`;
+// TradingView returns market_cap_basic in USD (fundamental_currency_code = "USD"), while all
+// prices are in SAR. SAR is pegged to USD at 3.75, so convert market cap to SAR for consistency.
+const SAR_PER_USD = 3.75;
+const capSar = (usd) => (usd == null ? null : usd * SAR_PER_USD);
 
 function compact(n) {
   if (n == null || Number.isNaN(n)) return "—";
@@ -150,6 +154,9 @@ function stageFilter() {
     const p5y = s["Perf.5Y"];
     const fbt = s.first_bar_time; // epoch seconds of the first price bar (≈ listing date)
     const avgVol = s.average_volume_30d_calc;
+    const ema21 = s.EMA21; // EMA descriptors (optional): NOT gated — fetched only so the tracker
+    const ema60 = s.EMA60; // can evaluate FAILED (close < EMA200) on W1-only names. Absent EMA
+    const ema200 = s.EMA200; // (e.g. recent IPOs) is fine: stored as null, never drops a candidate.
 
     if ([close, ath, hi, lo, p3m, p6m, p3y].some((v) => v == null)) {
       skipped.push({ symbol: s.symbol, description: s.description });
@@ -182,6 +189,11 @@ function stageFilter() {
       tag: p3y <= 0 ? "★" : "⚠up", // ★ genuine recent correction; ⚠up uptrend-leaning
       sector: s.sector || "—",
       market_cap_basic: s.market_cap_basic,
+      // EMA descriptors (same fields/formulae as /saudi-wave2) — for the tracker only; not displayed.
+      ema21gap: ema21 != null ? (close / ema21 - 1) * 100 : null, // 21g
+      emaComp: ema21 != null && ema60 != null ? (ema21 / ema60 - 1) * 100 : null, // cmp
+      ext60: ema60 != null ? (close / ema60 - 1) * 100 : null, // x60
+      vs200: ema200 != null ? (close / ema200 - 1) * 100 : null, // v200 (drives the tracker FAILED rule)
       "Perf.3M": p3m,
       "Perf.6M": p6m,
       "Perf.Y": s["Perf.Y"],
@@ -240,7 +252,7 @@ function stageReport() {
     r.symbol, r.description, r.DDmax.toFixed(1), r.belowATH.toFixed(1), r.offLow.toFixed(1), r.nrHi.toFixed(1),
     r["Perf.3M"]?.toFixed(1) ?? "—", r["Perf.6M"]?.toFixed(1) ?? "—", r["Perf.Y"]?.toFixed(1) ?? "—",
     r["Perf.3Y"]?.toFixed(1) ?? "—", r["Perf.5Y"]?.toFixed(1) ?? "—", r["Perf.10Y"]?.toFixed(1) ?? "—",
-    r.athRatio?.toFixed(2) ?? "—", "SAR " + compact(r.avgVal), compact(r.market_cap_basic), r.sector, r.tag,
+    r.athRatio?.toFixed(2) ?? "—", "SAR " + compact(r.avgVal), "SAR " + compact(capSar(r.market_cap_basic)), r.sector, r.tag,
   ]);
   const csv = "﻿" + [HEADERS, ...csvRows].map((row) => row.map(csvCell).join(",")).join("\r\n") + "\r\n";
   mkdirSync(dirname(csvPath), { recursive: true });
@@ -251,7 +263,7 @@ function stageReport() {
     r.symbol.replace(/^TADAWUL:/, ""), trunc(r.description, NAME_MAX),
     r0(r.DDmax), r0(r.belowATH), r0(r.offLow), r0(r.nrHi),
     r0(r["Perf.3M"]), r0(r["Perf.6M"]), r0(r["Perf.Y"]), r0(r["Perf.3Y"]), r0(r["Perf.5Y"]), r0(r["Perf.10Y"]),
-    r1(r.athRatio), valM(r.avgVal), capc(r.market_cap_basic), trunc(r.sector || "—", SEC_MAX), r.tag,
+    r1(r.athRatio), valM(r.avgVal), capc(capSar(r.market_cap_basic)), trunc(r.sector || "—", SEC_MAX), r.tag,
   ]);
   const grid = renderGrid(SHORT, gridRows, ALIGN);
 

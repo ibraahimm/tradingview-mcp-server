@@ -47,7 +47,7 @@ them straight to the script — the script owns the defaults and all the math.
 |-------------|-----------|---------|
 | `dd_min`    | `50`      | Min correction depth `DDmax = (ATH − 52w_low)/ATH` (%) |
 | `below_min` | `40`      | Min `belowATH = (ATH − close)/ATH` — still corrected / room left (%) |
-| `below_max` | `85`      | Max `belowATH` — excludes the permanently-broken wreckage (%) |
+| `below_max` | `95`      | Max `belowATH` — excludes the permanently-broken wreckage (%) |
 | `offlow`    | `20`      | Min `offLow = close/52w_low − 1` — the recovery wave is underway (%) |
 | `offlow_max`| `60`      | Max `offLow` — drop names that have already rebounded a lot off the low (already-extended) (%) |
 | `p3m_min`   | `5`       | Min `Perf.3M` — a *meaningful* recent turn (%) |
@@ -101,7 +101,10 @@ Non-negotiable. **Never substitute symbols from any other market.**
      - Do **not** push `Perf.10Y` server-side: `Perf.10Y < p10y_max` is applied **locally** so that
        5–10-year names (null `Perf.10Y`) are kept; a server `less` filter would drop them. Same for
        the `offLow` band (a ratio).
-   - `columns`: `["description","close","all_time_high","price_52_week_high","price_52_week_low","Perf.3M","Perf.6M","Perf.Y","Perf.3Y","Perf.5Y","Perf.10Y","first_bar_time","average_volume_30d_calc","market_cap_basic","sector"]`
+   - `columns`: `["description","close","all_time_high","price_52_week_high","price_52_week_low","EMA21","EMA60","EMA200","Perf.3M","Perf.6M","Perf.Y","Perf.3Y","Perf.5Y","Perf.10Y","first_bar_time","average_volume_30d_calc","market_cap_basic","sector"]`
+   - `EMA21`/`EMA60`/`EMA200` are **descriptor-only** for the tracker (so W1-only names carry an
+     EMA200 reading for its FAILED rule). They are **not** filtered/gated and **not** shown in the
+     table or CSV — do **not** add EMA conditions to `filters`.
    - The listing-age requirement (`min_years`) is applied **locally** in the script from
      `first_bar_time` — do not push it server-side.
    - `sort_by:"market_cap_basic"`, `sort_order:"desc"`, `limit:200`
@@ -142,7 +145,15 @@ Non-negotiable. **Never substitute symbols from any other market.**
    - If you pass `maxwidth=<N>` and the grid exceeds it, the script prints a WIDTH PROBLEM
      message instead of a broken table — surface that rather than splitting the table.
 
-6. **Clean up** the temp data files only: delete `.claude/scripts/.tmp/`. Do NOT delete the
+6. **(Optional) Ingest into the unified tracker** — record this run's survivors into the
+   append-only journey ledger BEFORE cleanup deletes the temp file:
+   ```
+   node .claude/scripts/saudi-tracker.js stage=ingest filtered=.claude/scripts/.tmp/filtered.json source=W1
+   ```
+   Non-fatal: if it errors, surface the message but still finish the run. View the cohort
+   anytime with `/saudi-track`. Skip only if the user asked not to track this run.
+
+7. **Clean up** the temp data files only: delete `.claude/scripts/.tmp/`. Do NOT delete the
    persistent script or the CSV in `.claude/outputs/` (the CSV is a deliverable).
 
 ## Metric notes & limitations
@@ -162,6 +173,10 @@ Non-negotiable. **Never substitute symbols from any other market.**
   whose 5-year recovery is already large; (b) a **descriptor** for locating *when* the decline
   happened (with `Perf.3Y`/`Perf.10Y`). It is **not** the depth measure — `DDmax` (anchored to the
   all-time high) is, because `Perf.5Y` is unreliable when the peak sits outside the 5-year window.
+- **Market cap is converted USD→SAR.** TradingView returns `market_cap_basic` in **USD**
+  (`fundamental_currency_code = "USD"`), while prices are in SAR. The script multiplies by the
+  SAR/USD peg (3.75) so the `Cap` column is in SAR, consistent with `close`/`Val`. (`Val` =
+  `avg_volume × close` is already SAR.)
 - **No liquidity by default** (`value=0`): this is a discovery layer. Apply the liquidity +
   moving-average timing as a later, separate layer (or pass `value=…`).
 - **ADR/true drawdown caveats:** `52w_low` is a proxy for the cycle trough; a stock that bottomed
