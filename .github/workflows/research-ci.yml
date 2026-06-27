@@ -65,3 +65,6 @@ jobs:
 
       - name: Backtest — event-study self-test (fwd returns, terminal value, censoring, A/B)
         run: python -m research.backtest.selftest_event_study
+
+      - name: Backtest — governance self-test (time split / walk-forward / deflation / select-OOS)
+        run: python -m research.backtest.selftest_governance

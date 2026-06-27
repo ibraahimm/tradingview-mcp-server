@@ -32,13 +32,25 @@ else (right-censored: data ends, still listed):        fwd = null   # outcome un
 - `event_study(labeled, horizon, signal_col="passed")` → `{signals, rest}` aggregates — the A/B that
   shows whether the screen's survivors out-perform the rest at that horizon.
 
-## Gate
+## Governance (`governance.py`) — out-of-sample by default
 
-`selftest_event_study.py` (CI) asserts the labels by hand on a controlled panel — normal forward
-returns, the delisting terminal-value tail, right-censored nulls — plus the aggregates and the
-signals-vs-rest split.
+The discipline that makes an aggregate *trustworthy* rather than another `ext60_max` hindsight trap:
+
+- `time_split(labeled, cutoff)` → train/test **by date** (never random).
+- `summary_stats(values)` → `{n, mean, std, t, p}` (two-sided z-approx) for a forward-return sample.
+- `bonferroni(p, n_trials)` → deflate a best-of-K p-value (multiple testing).
+- `walk_forward(labeled, horizon, cutoffs)` → a fixed gate's **per-window** OOS aggregates.
+- `select_best_oos({config: (train, test)}, horizon)` → selects on **TRAIN**, reports the held-out
+  **TEST**, deflated by the number of configs. It will **not** pick the config that only looks good
+  on test — that is the whole point.
+
+## Gates (CI)
+
+- `selftest_event_study.py` — labels by hand (normal / terminal-value tail / censored null), aggregates, A/B.
+- `selftest_governance.py` — time split, stats, Bonferroni, walk-forward, and the select-on-train /
+  report-on-test / deflate discipline.
 
 ## Deferred
 
-Portfolio simulation (sizing, costs, ADV capacity, equity curve) and the research-governance
-controls (walk-forward, holdout, deflated metrics) build on this core; they are later increments.
+Portfolio simulation (sizing, costs, ADV capacity, equity curve) builds on this core; it is a later
+increment, and it is about *tradability* — which only matters once a gate has survived governance.
