@@ -35,7 +35,26 @@ RESULT: REJECT — MUST failures: R1, R2, R3, R4, R6
 
 | Dimension | Yahoo finding (confirmed) |
 |---|---|
-| **History depth** | Equities from **~2010-03** (SABIC/Al-Rajhi/Kingdom all start 2010-03-03); Aramco from its 2019 IPO; **TASI index back to 1998**. **Not 2006 for stocks.** |
+| **History depth** | **Individual equities from ~2010-03** (verified universe-wide, below); the **TASI *index* (`^TASI.SR`) goes back to 1998-10-19** but **no individual stock does**. **Not 2006 for stocks.** |
+
+### Universe-wide depth verification (corrects an earlier over-broad claim)
+
+The first "~2010" reading came from Yahoo's `range=max` response, which is **downsampled and truncated**
+(it returned ~196 capped points, hiding the true start). Re-checked properly with a **non-truncating
+monthly query from 1970** across **164 current Main-Market names**:
+
+```
+first-bar YEAR distribution:  2010: 85   2012: 7  2013: 2  2014: 3  2015: 3  2016: 2  2018: 2
+                              2019: 4  2020: 3  2021: 8  2022: 19  2023: 5  2024: 12  2025: 8  2026: 1
+oldest first-bar = 2010-02 (4002.SR);  start <= 2006-12-31:  0 / 164  (0%)
+```
+
+Every genuinely long-listed blue chip — SABIC (2010), Al-Rajhi (1120), STC (7010), Saudi Electricity
+(5110), the banks (1050/1060/1080/1140), all listed long before 2010 — starts at **exactly 2010-03-01**
+(a vendor data-inception artifact, not their listing dates). A direct pre-2000 daily probe confirms the
+split: **`^TASI.SR` returns 314 daily bars in 1998–99 (first 1998-10-19)**, while **SABIC/Al-Rajhi/STC
+return HTTP 400** for the same window. So Yahoo's "1998" Tadawul history is the **index only** — useful
+for index-level work, but individual-equity history (what a stock backtest needs) begins **2010-03**.
 | **Current vs delisted** | **Current only.** Delisted names (`1040.SR` Alawwal, `1090.SR`) return **HTTP 404** — survivorship-biased. |
 | **Adjusted vs unadjusted** | Both available: **raw OHLC** + **adjClose**. But adjClose is **dividend+split adjusted** (total-return-style), so it does **not** give a clean split-only price-return series. |
 | **Corporate actions** | Split + dividend **events** present (ratios + amounts with ex-dates) — usable to rebuild split-only adjustment with effort. |
