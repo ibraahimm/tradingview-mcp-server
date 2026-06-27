@@ -44,9 +44,11 @@ references another security or a future bar (the self-test asserts no cross-sec 
 
 ## Explicitly deferred (do NOT add ahead of the spec)
 
-- **Backtest** — event-study forward-return labeling (signal → +N-day returns, with delisting terminal
-  values from the reference) first; this is the layer that finally answers the `ext60_max` question
-  out-of-sample. Then portfolio simulation. The screen run produces the per-bar signals it labels.
+- **Event-study backtest core** is now implemented in `../backtest/` (forward-return labeling with
+  delisting terminal values + censoring, aggregates, signals-vs-rest A/B) — the layer that answers the
+  `ext60_max` question out-of-sample. It consumes the screen run's per-bar signals.
+- **Portfolio simulation** (sizing, costs, ADV capacity, equity curve) and **research governance**
+  (walk-forward, holdout, deflated metrics) build on that core — later increments.
 - Anything requiring real market data (ingestion, the production reference table, vendor wiring) — the
   panel builder consumes an *adjusted OHLCV frame*; producing that frame is the data layer, out of scope here.
 

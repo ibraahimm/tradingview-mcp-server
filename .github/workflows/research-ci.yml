@@ -62,3 +62,6 @@ jobs:
 
       - name: Engine — screen-run self-test (age_years + value/ADV + funnel + survivors)
         run: python -m research.engine.selftest_screen
+
+      - name: Backtest — event-study self-test (fwd returns, terminal value, censoring, A/B)
+        run: python -m research.backtest.selftest_event_study
