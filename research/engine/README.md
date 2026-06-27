@@ -15,6 +15,7 @@ research-side half of the two-implementation design (the live TS screener is the
 | `ratios` (8 structural features) | ✅ single-source `RATIO_EXPRS`; null-propagating |
 | **panel builder** (`panel.py`) | ✅ `(sec_id, date)` panel; per-security, as-of, reuses the gated functions |
 | **rule engine** (`rules.py`) | ✅ W1/W2/W3 pass/fail + first-failing-gate + funnel, driven by `../spec/rules.yaml` |
+| **screen run** (`screen.py`) | ✅ joins `age_years` (reference) + `value`/ADV (liquidity), then funnel + survivors over the panel |
 
 Acceptance gates (all green; wired into CI):
 
@@ -30,6 +31,10 @@ python -m research.engine.selftest_panel
 # rule engine: W1/W2/W3 decisions + funnel order (row-wise == frame-wise)
 python research/spec/conformance/rule_runner.py
 # -> PASS: 4 rule case(s) across ['W1', 'W2', 'W3'], coverage OK.
+
+# screen run: age_years + value/ADV enrichment, funnel + survivors (2 runs)
+python -m research.engine.selftest_screen
+# -> PASS: screen-run self-test OK
 ```
 
 The panel builder reuses the **same** golden-vector-gated functions per security, so every column is
@@ -39,11 +44,9 @@ references another security or a future bar (the self-test asserts no cross-sec 
 
 ## Explicitly deferred (do NOT add ahead of the spec)
 
-- **Screen run** — joining `age_years` (reference) and `value`/ADV (liquidity) onto the price panel,
-  then `evaluate_frame`/`funnel` over it to reproduce a live W1/W2/W3 run. The rule *logic* is done and
-  gated; what remains is wiring those two non-price inputs in.
-- **Backtest** — event-study forward-return labeling first (the layer that answers the `ext60_max`
-  question out-of-sample), then portfolio sim.
+- **Backtest** — event-study forward-return labeling (signal → +N-day returns, with delisting terminal
+  values from the reference) first; this is the layer that finally answers the `ext60_max` question
+  out-of-sample. Then portfolio simulation. The screen run produces the per-bar signals it labels.
 - Anything requiring real market data (ingestion, the production reference table, vendor wiring) — the
   panel builder consumes an *adjusted OHLCV frame*; producing that frame is the data layer, out of scope here.
 
