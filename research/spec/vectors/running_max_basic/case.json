@@ -1,0 +1,10 @@
+{
+  "case_id": "running_max_basic",
+  "spec_version": "1.0.0",
+  "target": {"kind": "function", "id": "running_max", "params": {"field": "high"}},
+  "description": "ATH as a true all-time running maximum of `high` from the first bar (no lookback cap).",
+  "input_file": "input_bars.csv",
+  "expected_file": "expected.csv",
+  "tolerance": {"abs": 1e-9, "rel": 0.0},
+  "null_token": ""
+}

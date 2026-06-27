@@ -14,7 +14,7 @@ Usage:
 """
 from __future__ import annotations
 import csv, json, sys, re, os, calendar, importlib
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 SPEC_DIR = Path(__file__).resolve().parent.parent          # research/spec
@@ -77,7 +77,46 @@ def ratios(row):
     }
 
 
-REFERENCE_FUNCTIONS = {"ema": ema, "perf_calendar": perf_calendar, "ratios": ratios}
+def _sub_years(d: date, years: int) -> date:
+    y = d.year - int(years)
+    return date(y, d.month, min(d.day, calendar.monthrange(y, d.month)[1]))
+
+
+def running_max(rows, params):
+    field = params.get("field", "high")
+    lb = params.get("lookback_years")
+    dates = [date.fromisoformat(r["date"]) for r in rows]
+    vals = [float(r[field]) for r in rows]
+    out = []
+    for i in range(len(rows)):
+        if lb:
+            start = _sub_years(dates[i], lb)
+            window = [vals[j] for j in range(i + 1) if dates[j] >= start]
+        else:
+            window = vals[: i + 1]               # all-time running max from the first bar
+        out.append(max(window))
+    return out
+
+
+def rolling_extreme(rows, params):
+    field, weeks, op = params["field"], int(params["weeks"]), params["op"]
+    dates = [date.fromisoformat(r["date"]) for r in rows]
+    vals = [float(r[field]) for r in rows]
+    out = []
+    for i in range(len(rows)):
+        start = dates[i] - timedelta(days=weeks * 7)     # window [date - weeks*7d, date], inclusive
+        window = [vals[j] for j in range(i + 1) if dates[j] >= start]
+        out.append(max(window) if op == "max" else min(window))
+    return out
+
+
+REFERENCE_FUNCTIONS = {
+    "ema": ema,
+    "perf_calendar": perf_calendar,
+    "running_max": running_max,
+    "rolling_extreme": rolling_extreme,
+    "ratios": ratios,
+}
 
 
 # ---------------- harness ----------------
@@ -109,17 +148,14 @@ def run_case(cdir: Path, funcs) -> list[str]:
     exp = _read_csv(cdir / case["expected_file"])
     fid = tgt["id"]
 
-    if tgt["kind"] == "function" and fid == "ema":
-        got = funcs["ema"]([float(r["close"]) for r in rows], tgt.get("params", {}))
+    if tgt["kind"] == "function":
+        params = tgt.get("params", {})
+        # ema consumes a close series; perf_calendar / running_max / rolling_extreme consume rows.
+        got = funcs["ema"]([float(r["close"]) for r in rows], params) if fid == "ema" else funcs[fid](rows, params)
+        out_col = next(c for c in exp[0].keys() if c not in ("idx", "date"))   # the single output column
         for i, e in enumerate(exp):
-            if not _eq(got[i], _num(e["ema"]), tol):
-                fails.append(f"{cdir.name}[idx{i}].ema: got {got[i]} != exp {e['ema']!r}")
-    elif tgt["kind"] == "function" and fid == "perf_calendar":
-        got = funcs["perf_calendar"](rows, tgt.get("params", {}))
-        col = tgt.get("output", "perf")
-        for i, e in enumerate(exp):
-            if not _eq(got[i], _num(e[col]), tol):
-                fails.append(f"{cdir.name}[idx{i}].{col}: got {got[i]} != exp {e[col]!r}")
+            if not _eq(got[i], _num(e[out_col]), tol):
+                fails.append(f"{cdir.name}[idx{i}].{out_col}: got {got[i]} != exp {e[out_col]!r}")
     elif tgt["kind"] == "expr" and fid == "ratios":
         cols = [c for c in exp[0].keys() if c != "idx"]
         for i, (r, e) in enumerate(zip(rows, exp)):

@@ -1,0 +1,10 @@
+{
+  "case_id": "running_max_lookback",
+  "spec_version": "1.0.0",
+  "target": {"kind": "function", "id": "running_max", "params": {"field": "high", "lookback_years": 1}},
+  "description": "Running maximum capped to a trailing lookback window (lookback_years=1): max(high) over [date - 1y, date], so an ancient peak drops out once it ages past the window.",
+  "input_file": "input_bars.csv",
+  "expected_file": "expected.csv",
+  "tolerance": {"abs": 1e-9, "rel": 0.0},
+  "null_token": ""
+}

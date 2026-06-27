@@ -58,6 +58,42 @@ def perf_calendar(rows, params) -> list:
     return joined.get_column("perf").to_list()     # None where no ref (target < first date)
 
 
+# ----------------------------------------------------------- running_max (ath)
+def running_max(rows, params) -> list:
+    """spec function `running_max`: all-time running max of `field` from the first bar
+    (Polars cum_max), or, when `lookback_years` is set, a trailing calendar-year rolling max."""
+    field = params.get("field", "high")
+    lb = params.get("lookback_years")
+    df = pl.DataFrame({
+        "i": list(range(len(rows))),
+        "date": [date.fromisoformat(r["date"]) for r in rows],
+        "v": [float(r[field]) for r in rows],
+    }).sort("date")
+    if lb:
+        res = df.rolling(index_column="date", period=f"{int(lb)}y", closed="both").agg(
+            pl.col("v").max().alias("out"))
+        df = df.join(res, on="date", how="left")
+    else:
+        df = df.with_columns(out=pl.col("v").cum_max())
+    return df.sort("i").get_column("out").to_list()
+
+
+# ------------------------------------------------ rolling_extreme (52-week H/L)
+def rolling_extreme(rows, params) -> list:
+    """spec function `rolling_extreme`: op(field) over the calendar window
+    [date - weeks*7d, date] inclusive, via a Polars time-rolling aggregation."""
+    field, weeks, op = params["field"], int(params["weeks"]), params["op"]
+    df = pl.DataFrame({
+        "i": list(range(len(rows))),
+        "date": [date.fromisoformat(r["date"]) for r in rows],
+        "v": [float(r[field]) for r in rows],
+    }).sort("date")
+    agg = (pl.col("v").max() if op == "max" else pl.col("v").min()).alias("out")
+    res = df.rolling(index_column="date", period=f"{weeks * 7}d", closed="both").agg(agg)
+    df = df.join(res, on="date", how="left")
+    return df.sort("i").get_column("out").to_list()
+
+
 # ----------------------------------------------------------------------- ratios
 # Single source of truth for the structural ratios: Polars expressions over panel columns.
 # The conformance adapter evaluates them on a 1-row frame; the panel builder will reuse the

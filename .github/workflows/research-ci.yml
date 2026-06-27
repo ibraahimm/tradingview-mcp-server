@@ -53,3 +53,6 @@ jobs:
       - name: Engine — golden vectors via the real FUNCTIONS adapter
         # Drives the Polars engine (not the reference impl) through the same frozen vectors.
         run: python research/spec/conformance/reference_runner.py --adapter=research.engine.conformance:FUNCTIONS
+
+      - name: Engine — panel builder self-test (isolation / warmup / null-propagation / consistency)
+        run: python -m research.engine.selftest_panel

@@ -94,9 +94,9 @@ features:
   - {id: perf_10y, function: perf_calendar, params: {months: 120}, unit: percent, nullable: true, vectors: [perf_1m]}
 
   # Window anchors (intermediate; emitted for audit + used by ratios)
-  - {id: ath,      function: running_max,     params: {field: high},                 unit: price, nullable: false, vectors: []}
-  - {id: high_52w, function: rolling_extreme, params: {field: high, weeks: 52, op: max}, unit: price, nullable: false, vectors: []}
-  - {id: low_52w,  function: rolling_extreme, params: {field: low,  weeks: 52, op: min}, unit: price, nullable: false, vectors: []}
+  - {id: ath,      function: running_max,     params: {field: high},                 unit: price, nullable: false, vectors: [running_max_basic, running_max_lookback]}
+  - {id: high_52w, function: rolling_extreme, params: {field: high, weeks: 52, op: max}, unit: price, nullable: false, vectors: [rolling_extreme_max]}
+  - {id: low_52w,  function: rolling_extreme, params: {field: low,  weeks: 52, op: min}, unit: price, nullable: false, vectors: [rolling_extreme_min]}
 
   # Structural ratios — pure per-bar expressions. Units: percent. Validated by ratios_basic.
   # NULL PROPAGATION: a ratio is null if any input is null (e.g. ext60 is null while ema60 is in warmup).

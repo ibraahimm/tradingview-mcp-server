@@ -10,5 +10,7 @@ from . import functions as fx
 FUNCTIONS = {
     "ema": fx.ema,
     "perf_calendar": fx.perf_calendar,
+    "running_max": fx.running_max,
+    "rolling_extreme": fx.rolling_extreme,
     "ratios": fx.ratios,
 }

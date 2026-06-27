@@ -1,0 +1,10 @@
+{
+  "case_id": "rolling_extreme_max",
+  "spec_version": "1.0.0",
+  "target": {"kind": "function", "id": "rolling_extreme", "params": {"field": "high", "weeks": 1, "op": "max"}},
+  "description": "Trailing-window maximum over a calendar window [date - weeks*7d, date], inclusive. weeks=1 (7 days) so it is hand-computable; the 52w-high feature binds weeks=52.",
+  "input_file": "input_bars.csv",
+  "expected_file": "expected.csv",
+  "tolerance": {"abs": 1e-9, "rel": 0.0},
+  "null_token": ""
+}
