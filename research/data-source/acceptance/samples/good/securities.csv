@@ -1,0 +1,5 @@
+vendor_id,ticker,name,list_date,delist_date,delist_reason,terminal_value
+V001,2222,Saudi Aramco,2019-12-11,,,
+V002,8280,LIVA Insurance,2009-12-08,,,
+V003,1040,Alawwal Bank,2003-01-01,2019-06-16,merged,16.30
+V004,4001,Old Industrial Co,2004-01-01,2009-03-15,liquidated,0.50

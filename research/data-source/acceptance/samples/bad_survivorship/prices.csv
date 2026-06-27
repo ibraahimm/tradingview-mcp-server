@@ -1,0 +1,3 @@
+vendor_id,date,open,high,low,close,close_unadj,adj_factor,volume
+W001,2020-01-02,10,10,10,10,10,1.0,1000
+W002,2021-01-04,20,20,20,20,20,1.0,1000

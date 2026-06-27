@@ -38,6 +38,9 @@ jobs:
           fi
           echo "OK: production guard correctly rejects illustrative seed data"
 
+      - name: Data-source — vendor acceptance harness self-test (good passes / bad fail)
+        run: python research/data-source/acceptance/selftest_acceptance.py
+
   engine-conformance:
     name: research engine passes the golden vectors
     runs-on: ubuntu-latest
