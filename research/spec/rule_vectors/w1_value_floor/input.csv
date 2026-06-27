@@ -1,0 +1,3 @@
+label,age_years,perf_3m,perf_6m,perf_3y,perf_5y,perf_10y,ddmax,below_ath,off_low,ext60,nrhi,value
+Vpass,10,17,29,-20,-25,-8,77,68,39,7.6,98,10000000
+Vfail,10,17,29,-20,-25,-8,77,68,39,7.6,98,1000000

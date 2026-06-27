@@ -1,0 +1,8 @@
+{
+  "case_id": "w2_defaults",
+  "spec_version": "1.0.0",
+  "rule": "W2",
+  "description": "W2 at default params: a clean continuation pass, a fail on the binding coil (ema_comp out of band), and a fail on perf_1y<=0 (the W2 confirmed-uptrend inversion of W1).",
+  "input_file": "input.csv",
+  "expected_file": "expected.csv"
+}

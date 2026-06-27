@@ -9,10 +9,15 @@
 # age>=min_years) is NOT encoded here — it is resolved point-in-time from the reference model
 # (../reference) and applied before any rule. Rules assume an already-eligible security.
 #
-# Predicate operators: ge (>=), gt (>), le (<=), lt (<), in_co [lo,hi) (closed-open),
-# in_cc [lo,hi] (closed-closed). `null_action` says what to do when an input feature is null:
-#   skip  = treat predicate as satisfied (do not drop on missing data)
-#   drop  = treat predicate as failed (drop the candidate)
+# Predicate operators:
+#   ge (>=)  gt (>)  le (<=)  lt (<)
+#   in_co [lo,hi)   in_oo (lo,hi)   in_cc [lo,hi]
+# `value` may be a literal, a "@param" reference, or a 2-element list of either (for the
+# interval operators). `null_action` says what to do when the input feature is null:
+#   skip = treat the predicate as satisfied (do not drop on missing data)
+#   drop = treat the predicate as failed (drop the candidate)
+# `enabled_when` (optional) is a "<param> <op> <number>" guard; the predicate is only applied
+# when it holds (e.g. nrhi_min > 0). A disabled predicate is skipped entirely.
 
 spec_version: "1.0.0"
 
@@ -23,30 +28,34 @@ rules:
     title: "First wave (deep-correction turn off the multi-year low)"
     params:
       min_years: 5
-      p3m_min: 5,  p3m_max: 40
-      p6m_min: 0,  p6m_max: 50
+      p3m_min: 5
+      p3m_max: 40
+      p6m_min: 0
+      p6m_max: 50
       p3y_max: 50
       p5y_max: 80
       p10y_max: 250
       dd_min: 50
-      below_min: 40, below_max: 95
-      offlow_min: 20, offlow_max: 60
+      below_min: 40
+      below_max: 95
+      offlow_min: 20
+      offlow_max: 60
       ext60_max: 10        # overheated-extension ceiling (backtest-derived; see ARCHITECTURE/ext60 history)
       nrhi_min: 0          # 0 = descriptor only
       value_min: 0         # SAR; 0 = OFF
-    funnel:                 # ordered; each step is reported as a survivor count
+    funnel:                # ordered; each step is reported as a survivor count
       - {feature: age_years, op: ge, value: "@min_years", null_action: drop}
-      - {feature: perf_3m,  op: in_co, value: ["@p3m_min", "@p3m_max"], null_action: drop}
-      - {feature: perf_6m,  op: in_oo, value: ["@p6m_min", "@p6m_max"], null_action: drop}
-      - {feature: perf_3y,  op: lt, value: "@p3y_max",  null_action: drop}
-      - {feature: perf_5y,  op: lt, value: "@p5y_max",  null_action: skip}   # null = <5y history, allowed
-      - {feature: perf_10y, op: lt, value: "@p10y_max", null_action: skip}   # null = <10y history, allowed
-      - {feature: ddmax,    op: ge, value: "@dd_min",   null_action: drop}
-      - {feature: below_ath,op: in_cc, value: ["@below_min", "@below_max"], null_action: drop}
-      - {feature: off_low,  op: in_co, value: ["@offlow_min", "@offlow_max"], null_action: drop}
-      - {feature: ext60,    op: le, value: "@ext60_max", null_action: skip}  # null ema60 (recent IPO) = not dropped
-      - {feature: nrhi,     op: ge, value: "@nrhi_min",  null_action: skip, enabled_when: "nrhi_min > 0"}
-      - {feature: value,    op: ge, value: "@value_min", null_action: drop,  enabled_when: "value_min > 0"}
+      - {feature: perf_3m, op: in_co, value: ["@p3m_min", "@p3m_max"], null_action: drop}
+      - {feature: perf_6m, op: in_oo, value: ["@p6m_min", "@p6m_max"], null_action: drop}
+      - {feature: perf_3y, op: lt, value: "@p3y_max", null_action: drop}
+      - {feature: perf_5y, op: lt, value: "@p5y_max", null_action: skip}    # null = <5y history, allowed
+      - {feature: perf_10y, op: lt, value: "@p10y_max", null_action: skip}  # null = <10y history, allowed
+      - {feature: ddmax, op: ge, value: "@dd_min", null_action: drop}
+      - {feature: below_ath, op: in_cc, value: ["@below_min", "@below_max"], null_action: drop}
+      - {feature: off_low, op: in_co, value: ["@offlow_min", "@offlow_max"], null_action: drop}
+      - {feature: ext60, op: le, value: "@ext60_max", null_action: skip}    # null ema60 (recent IPO) = not dropped
+      - {feature: nrhi, op: ge, value: "@nrhi_min", null_action: skip, enabled_when: "nrhi_min > 0"}
+      - {feature: value, op: ge, value: "@value_min", null_action: drop, enabled_when: "value_min > 0"}
     tag:
       star: "perf_3y <= 0"        # genuine recent correction
       warn_up: "perf_3y > 0"      # uptrend-leaning
@@ -56,55 +65,70 @@ rules:
     title: "Second wave (first EMA coil, reclaim, resume)"
     params:
       min_years: 5
-      p1m_min: 0,  p1m_max: 15
-      p3m_min: 0,  p3m_max: 40
-      p6m_min: 3,  p6m_max: 80
+      p1m_min: 0
+      p1m_max: 15
+      p3m_min: 0
+      p3m_max: 40
+      p6m_min: 3
+      p6m_max: 80
       py_min: 0
       p3y_max: 100
       p5y_max: 200
       p10y_max: 400
       dd_min: 45
-      below_min: 20, below_max: 80
-      offlow_min: 30, offlow_max: 100
-      ema_gap_min: -2, ema_gap_max: 5     # the coil: ema_comp band
-      ext21_max: 10                       # reclaimed ema21 but not extended
-      nrhi_min: 0, value_min: 0
+      below_min: 20
+      below_max: 80
+      offlow_min: 30
+      offlow_max: 100
+      ema_gap_min: -2      # the coil: ema_comp band
+      ema_gap_max: 5
+      ext21_max: 10        # reclaimed ema21 but not extended
+      nrhi_min: 0
+      value_min: 0
     funnel:
       - {feature: age_years, op: ge, value: "@min_years", null_action: drop}
       - {feature: perf_1m, op: in_oo, value: ["@p1m_min", "@p1m_max"], null_action: drop}
       - {feature: perf_3m, op: in_co, value: ["@p3m_min", "@p3m_max"], null_action: drop}
       - {feature: perf_6m, op: in_oo, value: ["@p6m_min", "@p6m_max"], null_action: drop}
-      - {feature: perf_1y, op: gt, value: "@py_min", null_action: drop}        # confirmed uptrend (W2 inverts W1)
+      - {feature: perf_1y, op: gt, value: "@py_min", null_action: drop}     # confirmed uptrend (W2 inverts W1)
       - {feature: perf_3y, op: lt, value: "@p3y_max", null_action: drop}
       - {feature: perf_5y, op: lt, value: "@p5y_max", null_action: skip}
-      - {feature: perf_10y,op: lt, value: "@p10y_max", null_action: skip}
-      - {feature: ddmax,   op: ge, value: "@dd_min", null_action: drop}
+      - {feature: perf_10y, op: lt, value: "@p10y_max", null_action: skip}
+      - {feature: ddmax, op: ge, value: "@dd_min", null_action: drop}
       - {feature: below_ath, op: in_cc, value: ["@below_min", "@below_max"], null_action: drop}
       - {feature: off_low, op: in_co, value: ["@offlow_min", "@offlow_max"], null_action: drop}
-      - {feature: ext60,   op: gt, value: 0, null_action: drop}                # Stage-2 trend: close > EMA60
+      - {feature: ext60, op: gt, value: 0, null_action: drop}               # Stage-2 trend: close > EMA60
       - {feature: ema_comp, op: in_cc, value: ["@ema_gap_min", "@ema_gap_max"], null_action: drop}  # the coil (binding)
       - {feature: ema21gap, op: in_cc, value: [0, "@ext21_max"], null_action: drop}                 # reclaim, not extended
-      - {feature: nrhi,  op: ge, value: "@nrhi_min",  null_action: skip, enabled_when: "nrhi_min > 0"}
+      - {feature: nrhi, op: ge, value: "@nrhi_min", null_action: skip, enabled_when: "nrhi_min > 0"}
       - {feature: value, op: ge, value: "@value_min", null_action: drop, enabled_when: "value_min > 0"}
     tag:
-      star: "vs200 > 0"     # full Stage-2 alignment (close > EMA200)
-      warn_early: "vs200 <= 0"  # early — long downtrend not yet up
+      star: "vs200 > 0"          # full Stage-2 alignment (close > EMA200)
+      warn_early: "vs200 <= 0"   # early — long downtrend not yet up
 
   # -------------------------------------------------------------------------
   W3:  # /saudi-wave3 — mature re-coil near highs (NOT a corrected screen)
     title: "Third wave (mature trend, next contraction near new highs)"
     params:
       min_years: 5
-      vs200_min: 0                       # gate: mature trend (close > EMA200)
-      ema_gap_min: -2, ema_gap_max: 5     # the coil
+      vs200_min: 0         # gate: mature trend (close > EMA200)
+      ema_gap_min: -2      # the coil
+      ema_gap_max: 5
       ext21_max: 10
-      nrhi_min: 78, nrhi_max: 98          # pulled back from a recent high (active gate in W3)
-      p1m_min: 0,  p1m_max: 15
-      p3m_min: 0,  p3m_max: 40
-      p6m_min: 0,  p6m_max: 100
-      py_min: 0,   py_max: 200
-      p3y_min: 50, p3y_max: 300           # Perf.3Y MIN is the primary W3 discriminator
-      p5y_min: 30, p5y_max: 500
+      nrhi_min: 78         # pulled back from a recent high (active gate in W3)
+      nrhi_max: 98
+      p1m_min: 0
+      p1m_max: 15
+      p3m_min: 0
+      p3m_max: 40
+      p6m_min: 0
+      p6m_max: 100
+      py_min: 0
+      py_max: 200
+      p3y_min: 50          # Perf.3Y MIN is the primary W3 discriminator
+      p3y_max: 300
+      p5y_min: 30
+      p5y_max: 500
       p10y_max: 1000
       value_min: 0
     funnel:
@@ -115,14 +139,14 @@ rules:
       - {feature: perf_1y, op: in_oo, value: ["@py_min", "@py_max"], null_action: drop}
       - {feature: perf_3y, op: in_co, value: ["@p3y_min", "@p3y_max"], null_action: drop}
       - {feature: perf_5y, op: in_co, value: ["@p5y_min", "@p5y_max"], null_action: skip}
-      - {feature: perf_10y,op: lt, value: "@p10y_max", null_action: skip}
-      - {feature: ext60,   op: gt, value: 0, null_action: drop}        # close > EMA60
-      - {feature: vs200,   op: gt, value: "@vs200_min", null_action: drop}  # mature: close > EMA200
+      - {feature: perf_10y, op: lt, value: "@p10y_max", null_action: skip}
+      - {feature: ext60, op: gt, value: 0, null_action: drop}               # close > EMA60
+      - {feature: vs200, op: gt, value: "@vs200_min", null_action: drop}    # mature: close > EMA200
       - {feature: ema_comp, op: in_cc, value: ["@ema_gap_min", "@ema_gap_max"], null_action: drop}
       - {feature: ema21gap, op: in_cc, value: [0, "@ext21_max"], null_action: drop}
-      - {feature: nrhi,    op: in_cc, value: ["@nrhi_min", "@nrhi_max"], null_action: drop}
-      - {feature: value,   op: ge, value: "@value_min", null_action: drop, enabled_when: "value_min > 0"}
+      - {feature: nrhi, op: in_cc, value: ["@nrhi_min", "@nrhi_max"], null_action: drop}
+      - {feature: value, op: ge, value: "@value_min", null_action: drop, enabled_when: "value_min > 0"}
     tag:
-      star: "below_ath < 10"   # at/near new highs
+      star: "below_ath < 10"      # at/near new highs
       climbing: "below_ath >= 10"
     notes: "DDmax/belowATH/offLow are DESCRIPTORS in W3 (shown, not gated)."

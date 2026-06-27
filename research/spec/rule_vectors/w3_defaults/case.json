@@ -1,0 +1,8 @@
+{
+  "case_id": "w3_defaults",
+  "spec_version": "1.0.0",
+  "rule": "W3",
+  "description": "W3 at default params: a mature re-coil pass, a fail on the perf_3y minimum (the primary W3 discriminator), and a fail on the nrhi pull-back band (sitting at a fresh high, nrhi>98).",
+  "input_file": "input.csv",
+  "expected_file": "expected.csv"
+}

@@ -1,0 +1,8 @@
+{
+  "case_id": "w1_defaults",
+  "spec_version": "1.0.0",
+  "rule": "W1",
+  "description": "W1 at default params: a clean pass, an in_co fail (perf_3m), the ext60 ceiling fail, a null-skip (perf_5y/10y), and a null-drop (ddmax). Pins ordered evaluation + null handling.",
+  "input_file": "input.csv",
+  "expected_file": "expected.csv"
+}

@@ -14,6 +14,7 @@ research-side half of the two-implementation design (the live TS screener is the
 | `rolling_extreme` → `high_52w`/`low_52w` | ✅ Polars time-rolling over `[date-weeks·7d, date]` |
 | `ratios` (8 structural features) | ✅ single-source `RATIO_EXPRS`; null-propagating |
 | **panel builder** (`panel.py`) | ✅ `(sec_id, date)` panel; per-security, as-of, reuses the gated functions |
+| **rule engine** (`rules.py`) | ✅ W1/W2/W3 pass/fail + first-failing-gate + funnel, driven by `../spec/rules.yaml` |
 
 Acceptance gates (all green; wired into CI):
 
@@ -25,6 +26,10 @@ python research/spec/conformance/reference_runner.py --adapter=research.engine.c
 # panel builder: isolation / warmup / null-propagation / consistency
 python -m research.engine.selftest_panel
 # -> PASS: panel self-test OK
+
+# rule engine: W1/W2/W3 decisions + funnel order (row-wise == frame-wise)
+python research/spec/conformance/rule_runner.py
+# -> PASS: 4 rule case(s) across ['W1', 'W2', 'W3'], coverage OK.
 ```
 
 The panel builder reuses the **same** golden-vector-gated functions per security, so every column is
@@ -34,8 +39,11 @@ references another security or a future bar (the self-test asserts no cross-sec 
 
 ## Explicitly deferred (do NOT add ahead of the spec)
 
-- **Rule evaluation** (`../spec/rules.yaml`) — W1/W2/W3 pass/fail over the panel — and the **backtest**
-  (event-study + portfolio sim). These are the next layers and arrive with their own tests.
+- **Screen run** — joining `age_years` (reference) and `value`/ADV (liquidity) onto the price panel,
+  then `evaluate_frame`/`funnel` over it to reproduce a live W1/W2/W3 run. The rule *logic* is done and
+  gated; what remains is wiring those two non-price inputs in.
+- **Backtest** — event-study forward-return labeling first (the layer that answers the `ext60_max`
+  question out-of-sample), then portfolio sim.
 - Anything requiring real market data (ingestion, the production reference table, vendor wiring) — the
   panel builder consumes an *adjusted OHLCV frame*; producing that frame is the data layer, out of scope here.
 

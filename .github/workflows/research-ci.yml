@@ -48,7 +48,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install engine dependencies
-        run: pip install --quiet polars
+        run: pip install --quiet polars pyyaml
 
       - name: Engine — golden vectors via the real FUNCTIONS adapter
         # Drives the Polars engine (not the reference impl) through the same frozen vectors.
@@ -56,3 +56,6 @@ jobs:
 
       - name: Engine — panel builder self-test (isolation / warmup / null-propagation / consistency)
         run: python -m research.engine.selftest_panel
+
+      - name: Engine — rule-vector conformance (W1/W2/W3 decisions + funnel order)
+        run: python research/spec/conformance/rule_runner.py

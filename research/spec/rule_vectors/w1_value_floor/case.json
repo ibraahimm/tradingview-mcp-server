@@ -1,0 +1,9 @@
+{
+  "case_id": "w1_value_floor",
+  "spec_version": "1.0.0",
+  "rule": "W1",
+  "params_overrides": {"value_min": 5000000},
+  "description": "Exercises enabled_when turning ON: with value_min=5,000,000 the liquidity gate activates — a high-turnover name passes, a low-turnover one fails at `value`.",
+  "input_file": "input.csv",
+  "expected_file": "expected.csv"
+}
