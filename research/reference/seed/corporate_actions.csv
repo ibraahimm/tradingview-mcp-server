@@ -1,0 +1,3 @@
+sec_id,ca_type,ex_date,ratio,amount,currency,affects_price_return,source,last_reviewed,notes
+TDWL000001,dividend,2024-12-08,,1.26,SAR,false,illustrative,2026-06-27,Ordinary cash dividend — total-return series only (illustrative amount)
+TDWL000002,split,2015-06-01,2,,SAR,true,illustrative,2026-06-27,Illustrative 2-for-1 split — adjusts the price-return series

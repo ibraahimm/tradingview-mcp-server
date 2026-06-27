@@ -1,0 +1,29 @@
+{
+  "profile": "tabular-data-resource",
+  "name": "corporate_actions",
+  "title": "Corporate actions used for price/total-return adjustment",
+  "format": "csv",
+  "missingValues": [""],
+  "primaryKey": ["sec_id", "ca_type", "ex_date"],
+  "schema": {
+    "fields": [
+      {"name": "sec_id", "type": "string", "constraints": {"required": true, "pattern": "^TDWL[0-9]{6}$"}},
+      {"name": "ca_type", "type": "string", "constraints": {"required": true, "enum": ["split", "reverse_split", "par_change", "capital_increase", "capital_decrease", "rights", "dividend", "special_dividend", "bonus_shares"]}, "description": "Action class. split/reverse_split/par_change/capital_*/bonus_shares affect the price-return series; dividend/special_dividend affect total-return only."},
+      {"name": "ex_date", "type": "date", "constraints": {"required": true}, "description": "Ex-date (ISO): the first date the price reflects the action."},
+      {"name": "ratio", "type": "number", "description": "Share-multiplier for split-like actions (e.g. 10 = 10-for-1). Null for cash actions."},
+      {"name": "amount", "type": "number", "description": "Cash per share in `currency` for dividend-like actions. Null for split-like actions."},
+      {"name": "currency", "type": "string", "constraints": {"enum": ["SAR"]}},
+      {"name": "affects_price_return", "type": "boolean", "constraints": {"required": true}, "description": "True for split/par/capital/bonus; false for ordinary dividends. Explicit so the adjustment policy is auditable per row."},
+      {"name": "source", "type": "string", "constraints": {"required": true}},
+      {"name": "last_reviewed", "type": "date", "constraints": {"required": true}},
+      {"name": "notes", "type": "string"}
+    ],
+    "foreignKeys": [
+      {"fields": "sec_id", "reference": {"resource": "security_master", "fields": "sec_id"}}
+    ]
+  },
+  "x-invariants": [
+    "exactly one of {ratio, amount} is populated per row, matching ca_type",
+    "adjustment factors are derived from this table; the panel stores unadj_close + adj_factor for audit"
+  ]
+}

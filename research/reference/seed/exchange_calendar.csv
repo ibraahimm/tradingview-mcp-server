@@ -1,0 +1,6 @@
+date,is_trading_day,session,holiday_name,source
+2025-06-01,true,regular,,illustrative
+2025-06-05,false,closed,Eid al-Adha,illustrative
+2025-06-06,false,closed,Weekend (Fri),illustrative
+2025-06-07,false,closed,Weekend (Sat),illustrative
+2025-06-08,true,regular,,illustrative

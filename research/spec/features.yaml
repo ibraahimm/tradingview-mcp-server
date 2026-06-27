@@ -1,0 +1,122 @@
+# Canonical feature specification — machine-readable registry.
+#
+# This file is the single authoritative binding of feature name -> algorithm + params.
+# Both the live TypeScript screener and the Python research engine MUST implement these
+# definitions and pass the golden vectors in ./vectors/ (see ./conformance/runner_contract.md).
+#
+# PRECEDENCE: this spec wins all semantic conflicts. Divergence from TradingView is a
+# documented, monitored delta (see ../../validation/CONFORMANCE.md) — never silently
+# "fixed" by editing a definition here to match TV.
+#
+# Changing any definition is a spec change: bump `spec_version` (semver), add/adjust a
+# golden vector, and the panel must be rebuilt under the new version (recorded in run manifests).
+
+spec_version: "1.0.0"
+
+conventions:
+  units: "percent"          # ratio-style features are emitted in percent (x100), matching the live screener
+  price_basis: "adjusted"   # all price inputs are split/dividend adjusted
+  return_basis: "price"     # performance features are price-return (a separate total-return series exists for P&L)
+  calendar: "exchange"      # all windows use the TADAWUL trading calendar (reference/exchange_calendar)
+  null_policy: "emit null (never 0, never a NaN sentinel) when a feature's preconditions are unmet"
+  timezone: "Asia/Riyadh"
+  rounding: "none at compute time; comparison tolerance is defined per field in the conformance contract"
+
+# ---------------------------------------------------------------------------
+# ALGORITHMS  (parameterized; these are what golden vectors validate)
+# ---------------------------------------------------------------------------
+functions:
+
+  ema:
+    summary: "Exponential moving average; recursive; seeded on the first available bar."
+    params: {length: "int > 0"}
+    inputs: [close]
+    definition: |
+      alpha   = 2 / (length + 1)
+      ema[0]  = close[0]
+      ema[t]  = alpha*close[t] + (1 - alpha)*ema[t-1]
+    emit: "null while bar_count < length (warmup); the recursive value thereafter"
+    notes: |
+      Seed = first available close (NOT an SMA seed). For history >> length the seed washes
+      out, so the engine<->TV delta is negligible for long-listed names and material only for
+      short-history names. That residual is expected and monitored, not 'fixed'.
+
+  perf_calendar:
+    summary: "Price return over a calendar window, anchored as-of-or-before."
+    params: {months: "int > 0"}
+    inputs: [close, date]
+    definition: |
+      target = date[t] minus `months` calendar months
+      ref    = close on the LAST trading day whose date <= target   (as-of-or-before)
+      perf   = (close[t] / ref - 1) * 100
+    emit: "null when target < the security's first trading date (insufficient history)"
+    notes: |
+      Calendar-anchored, NOT a fixed trading-day count. Rejected alternative: fixed bar counts
+      (e.g. 63 bars ~ 3M) drift from both real elapsed time and from TV's calendar anchoring.
+
+  running_max:
+    summary: "Running maximum from listing (or a capped lookback), as-of. Used for ATH."
+    params: {field: "high|close", lookback_years: "optional int; default: none (true all-time)"}
+    inputs: [high]
+    definition: |
+      start  = first bar of the security, OR (date[t] - lookback_years) if lookback_years set
+      ath[t] = max(field[s]) for all s in [start, t]
+    notes: "Use high when available, else close. lookback_years lets a strategy refuse an ancient (e.g. 2006) peak."
+
+  rolling_extreme:
+    summary: "Trailing 52-week (calendar) maximum/minimum, as-of."
+    params: {field: "high|low|close", weeks: 52, op: "max|min"}
+    inputs: [high, low]
+    definition: |
+      window   = [date[t] - weeks*7 days, date[t]]
+      value[t] = op(field[s]) for all s in window
+    notes: "52w high uses high; 52w low uses low; fall back to close when OHLC absent (documented delta)."
+
+# ---------------------------------------------------------------------------
+# FEATURES  (named bindings emitted into the panel)
+#   - function-based features bind an algorithm + params
+#   - expr-based features are pure per-bar expressions over other columns
+# ---------------------------------------------------------------------------
+features:
+
+  # Moving averages — algorithm validated by ema_n3 (same function, length=3, hand-computable)
+  - {id: ema21,  function: ema, params: {length: 21},  warmup_bars: 21,  unit: price, nullable: true, vectors: [ema_n3]}
+  - {id: ema60,  function: ema, params: {length: 60},  warmup_bars: 60,  unit: price, nullable: true, vectors: [ema_n3]}
+  - {id: ema200, function: ema, params: {length: 200}, warmup_bars: 200, unit: price, nullable: true, vectors: [ema_n3]}
+
+  # Performance windows — algorithm validated by perf_1m (same function, months=1)
+  - {id: perf_1m,  function: perf_calendar, params: {months: 1},   unit: percent, nullable: true, vectors: [perf_1m]}
+  - {id: perf_3m,  function: perf_calendar, params: {months: 3},   unit: percent, nullable: true, vectors: [perf_1m]}
+  - {id: perf_6m,  function: perf_calendar, params: {months: 6},   unit: percent, nullable: true, vectors: [perf_1m]}
+  - {id: perf_1y,  function: perf_calendar, params: {months: 12},  unit: percent, nullable: true, vectors: [perf_1m]}
+  - {id: perf_3y,  function: perf_calendar, params: {months: 36},  unit: percent, nullable: true, vectors: [perf_1m]}
+  - {id: perf_5y,  function: perf_calendar, params: {months: 60},  unit: percent, nullable: true, vectors: [perf_1m]}
+  - {id: perf_10y, function: perf_calendar, params: {months: 120}, unit: percent, nullable: true, vectors: [perf_1m]}
+
+  # Window anchors (intermediate; emitted for audit + used by ratios)
+  - {id: ath,      function: running_max,     params: {field: high},                 unit: price, nullable: false, vectors: []}
+  - {id: high_52w, function: rolling_extreme, params: {field: high, weeks: 52, op: max}, unit: price, nullable: false, vectors: []}
+  - {id: low_52w,  function: rolling_extreme, params: {field: low,  weeks: 52, op: min}, unit: price, nullable: false, vectors: []}
+
+  # Structural ratios — pure per-bar expressions. Units: percent. Validated by ratios_basic.
+  # NULL PROPAGATION: a ratio is null if any input is null (e.g. ext60 is null while ema60 is in warmup).
+  - {id: ddmax,     expr: "(ath - low_52w)/ath * 100", inputs: [ath, low_52w],    unit: percent, nullable: true, vectors: [ratios_basic]}
+  - {id: below_ath, expr: "(ath - close)/ath * 100",   inputs: [ath, close],      unit: percent, nullable: true, vectors: [ratios_basic]}
+  - {id: off_low,   expr: "(close/low_52w - 1) * 100", inputs: [close, low_52w],  unit: percent, nullable: true, vectors: [ratios_basic]}
+  - {id: nrhi,      expr: "close/high_52w * 100",      inputs: [close, high_52w], unit: percent, nullable: true, vectors: [ratios_basic]}
+  - {id: ext60,     expr: "(close/ema60 - 1) * 100",   inputs: [close, ema60],    unit: percent, nullable: true, vectors: [ratios_basic]}
+  - {id: ema21gap,  expr: "(close/ema21 - 1) * 100",   inputs: [close, ema21],    unit: percent, nullable: true, vectors: [ratios_basic]}
+  - {id: ema_comp,  expr: "(ema21/ema60 - 1) * 100",   inputs: [ema21, ema60],    unit: percent, nullable: true, vectors: [ratios_basic]}
+  - {id: vs200,     expr: "(close/ema200 - 1) * 100",  inputs: [close, ema200],   unit: percent, nullable: true, vectors: [ratios_basic]}
+
+# ---------------------------------------------------------------------------
+# AS-OF CORRECTNESS RULES  (enforced in the engine, audited by historical reconciliation)
+# ---------------------------------------------------------------------------
+as_of_rules:
+  - "No feature at bar t may reference any bar whose date > date[t]."
+  - "ath uses the running max from the security's first bar (or lookback cap) — never the global series max."
+  - "52-week and performance windows index by the exchange calendar, not naive calendar days."
+  - "perf_* and any window emit null when available history < the window length."
+  - "ema emits null until warmup_bars is satisfied."
+  - "Structural ratios emit null if any input is null."
+  - "Liquidity / ADV (value) is computed from trailing windows only."

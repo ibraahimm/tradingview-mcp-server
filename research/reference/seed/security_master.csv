@@ -1,0 +1,6 @@
+sec_id,legal_name,list_date,delist_date,delist_reason,terminal_value,terminal_value_basis,succeeds_sec_id,country,currency,source,last_reviewed,notes
+TDWL000001,Saudi Arabian Oil Co (Aramco),2019-12-11,,,,,,SA,SAR,illustrative,2026-06-27,Large-cap main-board stock (ticker 2222)
+TDWL000002,LIVA Insurance Company,2009-12-08,,,,,,SA,SAR,illustrative,2026-06-27,Ticker 8280; renamed over time (sec_id stable across rename)
+TDWL000003,Bonyan REIT Fund,2018-07-25,,,,,,SA,SAR,illustrative,2026-06-27,REIT — excluded by security_type
+TDWL000004,First Avenue Real Estate Development Co,2024-10-16,,,,,,SA,SAR,illustrative,2026-06-27,Nomu/parallel (ticker 9610) — excluded by board
+TDWL000005,Alawwal Bank,2003-01-01,2019-06-16,merged,16.30,acquirer_stock,,SA,SAR,illustrative,2026-06-27,Delisted via SABB(1060) merger — survivorship example; terminal_value is an illustrative placeholder

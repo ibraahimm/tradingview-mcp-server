@@ -1,0 +1,21 @@
+{
+  "profile": "tabular-data-resource",
+  "name": "exchange_calendar",
+  "title": "TADAWUL trading calendar (drives all window indexing)",
+  "format": "csv",
+  "missingValues": [""],
+  "primaryKey": ["date"],
+  "schema": {
+    "fields": [
+      {"name": "date", "type": "date", "constraints": {"required": true, "unique": true}, "description": "Calendar date (ISO). The table must cover the full backtest span continuously."},
+      {"name": "is_trading_day", "type": "boolean", "constraints": {"required": true}, "description": "True if the exchange held a session. Captures the 2013 Thu-Fri→Fri-Sat weekend change and Eid/holiday closures implicitly."},
+      {"name": "session", "type": "string", "constraints": {"enum": ["regular", "half", "closed"]}, "description": "Session type; informational."},
+      {"name": "holiday_name", "type": "string", "description": "Holiday label when closed; null on trading/normal days."},
+      {"name": "source", "type": "string", "constraints": {"required": true}}
+    ]
+  },
+  "x-invariants": [
+    "rolling 52-week / Perf windows and the backtest loop step over rows where is_trading_day = true",
+    "naive calendar-day arithmetic is forbidden; all bar indexing uses this table"
+  ]
+}

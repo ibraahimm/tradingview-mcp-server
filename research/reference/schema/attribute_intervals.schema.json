@@ -1,0 +1,27 @@
+{
+  "profile": "tabular-data-resource",
+  "name": "attribute_intervals",
+  "title": "Time-varying security classification, as dated intervals",
+  "format": "csv",
+  "missingValues": [""],
+  "primaryKey": ["sec_id", "attribute", "valid_from"],
+  "schema": {
+    "fields": [
+      {"name": "sec_id", "type": "string", "constraints": {"required": true, "pattern": "^TDWL[0-9]{6}$"}},
+      {"name": "attribute", "type": "string", "constraints": {"required": true, "enum": ["board", "security_type"]}, "description": "Which classification this interval describes."},
+      {"name": "value", "type": "string", "constraints": {"required": true, "enum": ["main", "nomu", "stock", "reit", "etf", "fund", "sukuk", "other"]}, "description": "board ∈ {main,nomu}; security_type ∈ {stock,reit,etf,fund,sukuk,other}."},
+      {"name": "valid_from", "type": "date", "constraints": {"required": true}, "description": "Inclusive start (ISO)."},
+      {"name": "valid_to", "type": "date", "description": "Exclusive end; null = open/current. Must be > valid_from. No overlap per (sec_id, attribute)."},
+      {"name": "source", "type": "string", "constraints": {"required": true}},
+      {"name": "last_reviewed", "type": "date", "constraints": {"required": true}},
+      {"name": "notes", "type": "string"}
+    ],
+    "foreignKeys": [
+      {"fields": "sec_id", "reference": {"resource": "security_master", "fields": "sec_id"}}
+    ]
+  },
+  "x-invariants": [
+    "intervals for the same (sec_id, attribute) must not overlap and should be contiguous",
+    "value domain depends on attribute: board→{main,nomu}; security_type→{stock,reit,etf,fund,sukuk,other}"
+  ]
+}

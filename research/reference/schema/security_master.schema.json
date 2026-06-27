@@ -1,0 +1,28 @@
+{
+  "profile": "tabular-data-resource",
+  "name": "security_master",
+  "title": "Security master — one row per stable security identifier",
+  "format": "csv",
+  "missingValues": [""],
+  "primaryKey": ["sec_id"],
+  "schema": {
+    "fields": [
+      {"name": "sec_id", "type": "string", "constraints": {"required": true, "unique": true, "pattern": "^TDWL[0-9]{6}$"}, "description": "Opaque immutable surrogate. Never reused. The join key everywhere."},
+      {"name": "legal_name", "type": "string", "constraints": {"required": true}, "description": "Current legal/display name (renames keep the same sec_id)."},
+      {"name": "list_date", "type": "date", "constraints": {"required": true}, "description": "First trading date on TADAWUL (ISO). Basis for age_years."},
+      {"name": "delist_date", "type": "date", "description": "Last trading date; null if still listed."},
+      {"name": "delist_reason", "type": "string", "constraints": {"enum": ["merged", "acquired", "suspended", "liquidated", "voluntary", "regulatory", "other"]}, "description": "Required when delist_date is set."},
+      {"name": "terminal_value", "type": "number", "description": "Final per-share value realized at delisting, in SAR (for forward-return labeling). Required when delist_date is set."},
+      {"name": "terminal_value_basis", "type": "string", "constraints": {"enum": ["cash", "acquirer_stock", "residual", "zero", "unknown"]}, "description": "How terminal_value was determined."},
+      {"name": "succeeds_sec_id", "type": "string", "constraints": {"pattern": "^TDWL[0-9]{6}$"}, "description": "Predecessor sec_id for merger/spin-off lineage; null otherwise."},
+      {"name": "country", "type": "string", "constraints": {"enum": ["SA"]}, "description": "Domicile/exchange country."},
+      {"name": "currency", "type": "string", "constraints": {"enum": ["SAR"]}, "description": "Trading currency."},
+      {"name": "source", "type": "string", "constraints": {"required": true}, "description": "Provenance of this row (e.g. tadawul, vendorX, illustrative)."},
+      {"name": "last_reviewed", "type": "date", "constraints": {"required": true}, "description": "Date a human last verified this row."},
+      {"name": "notes", "type": "string"}
+    ],
+    "foreignKeys": [
+      {"fields": "succeeds_sec_id", "reference": {"resource": "security_master", "fields": "sec_id"}}
+    ]
+  }
+}

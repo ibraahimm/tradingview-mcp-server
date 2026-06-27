@@ -1,0 +1,11 @@
+sec_id,attribute,value,valid_from,valid_to,source,last_reviewed,notes
+TDWL000001,board,main,2019-12-11,,illustrative,2026-06-27,
+TDWL000001,security_type,stock,2019-12-11,,illustrative,2026-06-27,
+TDWL000002,board,main,2009-12-08,,illustrative,2026-06-27,
+TDWL000002,security_type,stock,2009-12-08,,illustrative,2026-06-27,
+TDWL000003,board,main,2018-07-25,,illustrative,2026-06-27,
+TDWL000003,security_type,reit,2018-07-25,,illustrative,2026-06-27,Excluded from the stock universe
+TDWL000004,board,nomu,2024-10-16,,illustrative,2026-06-27,Nomu did not exist before ~2017 — no earlier interval
+TDWL000004,security_type,stock,2024-10-16,,illustrative,2026-06-27,
+TDWL000005,board,main,2003-01-01,2019-06-16,illustrative,2026-06-27,Closed at delisting
+TDWL000005,security_type,stock,2003-01-01,2019-06-16,illustrative,2026-06-27,

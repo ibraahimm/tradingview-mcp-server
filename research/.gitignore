@@ -1,0 +1,9 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+.venv/
+
+# Backtest build outputs (vintage dumps, materialized panels) — never commit data
+panel/*.parquet
+ingest/raw/
+manifests/*.json

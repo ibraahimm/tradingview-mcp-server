@@ -1,0 +1,6 @@
+sec_id,ticker,exchange,valid_from,valid_to,source,last_reviewed
+TDWL000001,2222,TADAWUL,2019-12-11,,illustrative,2026-06-27
+TDWL000002,8280,TADAWUL,2009-12-08,,illustrative,2026-06-27
+TDWL000003,4347,TADAWUL,2018-07-25,,illustrative,2026-06-27
+TDWL000004,9610,TADAWUL,2024-10-16,,illustrative,2026-06-27
+TDWL000005,1040,TADAWUL,2003-01-01,2019-06-16,illustrative,2026-06-27

@@ -1,0 +1,55 @@
+name: research-ci
+
+# Protects the research foundation: the spec layer, the reference/PIT layer, and the
+# production-reference validation assumptions. Runs on every change under research/.
+on:
+  push:
+    paths:
+      - 'research/**'
+      - '.github/workflows/research-ci.yml'
+  pull_request:
+    paths:
+      - 'research/**'
+      - '.github/workflows/research-ci.yml'
+
+jobs:
+  foundation-gates:
+    name: spec + reference gates (stdlib only)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Spec — golden vectors (reference implementation)
+        run: python research/spec/conformance/reference_runner.py
+
+      - name: Reference — seed integrity (PK/FK/enum/pattern/interval/concurrency)
+        run: python research/reference/validate.py
+
+      - name: Reference — production guard MUST reject illustrative seeds
+        # Protects the illustrative-vs-production boundary: --require-production must FAIL on
+        # seed data. A pass here means the guard regressed and examples could leak into production.
+        run: |
+          if python research/reference/validate.py --require-production; then
+            echo "::error::--require-production unexpectedly PASSED on illustrative seed data"
+            exit 1
+          fi
+          echo "OK: production guard correctly rejects illustrative seed data"
+
+  engine-conformance:
+    name: research engine passes the golden vectors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install engine dependencies
+        run: pip install --quiet polars
+
+      - name: Engine — golden vectors via the real FUNCTIONS adapter
+        # Drives the Polars engine (not the reference impl) through the same frozen vectors.
+        run: python research/spec/conformance/reference_runner.py --adapter=research.engine.conformance:FUNCTIONS

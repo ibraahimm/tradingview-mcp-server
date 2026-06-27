@@ -1,0 +1,26 @@
+{
+  "profile": "tabular-data-resource",
+  "name": "ticker_map",
+  "title": "TADAWUL exchange code ⇄ sec_id, with validity ranges",
+  "format": "csv",
+  "missingValues": [""],
+  "primaryKey": ["sec_id", "valid_from"],
+  "schema": {
+    "fields": [
+      {"name": "sec_id", "type": "string", "constraints": {"required": true, "pattern": "^TDWL[0-9]{6}$"}},
+      {"name": "ticker", "type": "string", "constraints": {"required": true, "pattern": "^[0-9]{4}$"}, "description": "TADAWUL 4-digit code as displayed at the time. NOT a stable key."},
+      {"name": "exchange", "type": "string", "constraints": {"required": true, "enum": ["TADAWUL"]}},
+      {"name": "valid_from", "type": "date", "constraints": {"required": true}},
+      {"name": "valid_to", "type": "date", "description": "Exclusive end; null = current."},
+      {"name": "source", "type": "string", "constraints": {"required": true}},
+      {"name": "last_reviewed", "type": "date", "constraints": {"required": true}}
+    ],
+    "foreignKeys": [
+      {"fields": "sec_id", "reference": {"resource": "security_master", "fields": "sec_id"}}
+    ]
+  },
+  "x-invariants": [
+    "for any (ticker, date) at most one sec_id is valid — codes may be reused across time but never concurrently",
+    "intervals per sec_id must not overlap"
+  ]
+}

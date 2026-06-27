@@ -1,0 +1,13 @@
+req_id,tier,requirement,weight,result,evidence,notes
+R1,MUST,Survivorship-free universe; delisted coverage back through 2006,gate,,,
+R2,MUST,Adjusted AND unadjusted OHLCV (or raw + adjustment factors),gate,,,
+R3,MUST,Corporate actions: splits/reverse/par/capital/dividends with ex-dates+ratios,gate,,,
+R4,MUST,Stable security identifier independent of TADAWUL code + ticker-change history,gate,,,
+R5,MUST,Trading-calendar coverage / inferable trading days (incl. 2013 weekend change),gate,,,
+R7,MUST,Reconcilable vs a second source / TradingView history,gate,,,
+R10,MUST,License permits research use + storing derived panel + bulk history,gate,,,
+R6,SHOULD,Delisting metadata: date + reason + terminal value,3,,,
+R8,SHOULD,Coverage completeness + quality (gap rate; suspended flagged; SAR; turnover),3,,,
+R11,SHOULD,Bulk delivery + stable schema + vintage/point-in-time semantics,2,,,
+R9,NICE,Point-in-time board/security-type classification history,1,,,
+R12,NICE,Operational fit (rate limits/cost for one-time full history),1,,,

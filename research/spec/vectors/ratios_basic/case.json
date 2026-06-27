@@ -1,0 +1,10 @@
+{
+  "case_id": "ratios_basic",
+  "spec_version": "1.0.0",
+  "target": {"kind": "expr", "id": "ratios"},
+  "description": "All structural ratios for one bar, using the LIVA/8280 values (close 11.90, ATH 122, 52wL 9.37, 52wH 14.47, EMA21 11.68, EMA60 9.77, EMA200 11.54). Confirms percent units and null-propagation semantics.",
+  "input_file": "input_bars.csv",
+  "expected_file": "expected.csv",
+  "tolerance": {"abs": 1e-6, "rel": 1e-9},
+  "null_token": ""
+}

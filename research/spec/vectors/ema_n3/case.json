@@ -1,0 +1,10 @@
+{
+  "case_id": "ema_n3",
+  "spec_version": "1.0.0",
+  "target": {"kind": "function", "id": "ema", "params": {"length": 3}},
+  "description": "EMA recursion, first-close seed, and warmup nulling (bar_count < length -> null). Length=3 so every value is hand-computable: alpha=0.5.",
+  "input_file": "input_bars.csv",
+  "expected_file": "expected.csv",
+  "tolerance": {"abs": 1e-9, "rel": 0.0},
+  "null_token": ""
+}

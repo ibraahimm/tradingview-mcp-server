@@ -1,0 +1,41 @@
+{
+  "profile": "tabular-data-resource",
+  "name": "oracle_record",
+  "title": "Forward validation oracle — one TV capture per (capture_ts, sec_id)",
+  "description": "Daily after-close capture of TradingView's live values + screen decisions, used to monitor the engine<->TV delta over time. NOT a source of backtest history. See ../CONFORMANCE.md.",
+  "format": "jsonl",
+  "missingValues": [""],
+  "primaryKey": ["capture_ts", "sec_id"],
+  "schema": {
+    "fields": [
+      {"name": "capture_ts", "type": "datetime", "constraints": {"required": true}, "description": "When the capture ran (UTC). Distinguishes as-captured from later TV revisions."},
+      {"name": "as_of_date", "type": "date", "constraints": {"required": true}, "description": "The trading date the captured values represent."},
+      {"name": "sec_id", "type": "string", "constraints": {"required": true, "pattern": "^TDWL[0-9]{6}$"}, "description": "Resolved from ticker via reference/ticker_map as-of as_of_date. The join key."},
+      {"name": "ticker_asof", "type": "string", "constraints": {"required": true, "pattern": "^[0-9]{4}$"}},
+      {"name": "source", "type": "string", "constraints": {"required": true, "enum": ["tradingview"]}},
+
+      {"name": "ema21", "type": "number"}, {"name": "ema60", "type": "number"}, {"name": "ema200", "type": "number"},
+      {"name": "perf_1m", "type": "number"}, {"name": "perf_3m", "type": "number"}, {"name": "perf_6m", "type": "number"},
+      {"name": "perf_1y", "type": "number"}, {"name": "perf_3y", "type": "number"}, {"name": "perf_5y", "type": "number"},
+      {"name": "perf_10y", "type": "number"},
+      {"name": "ath", "type": "number"}, {"name": "high_52w", "type": "number"}, {"name": "low_52w", "type": "number"},
+      {"name": "ddmax", "type": "number"}, {"name": "below_ath", "type": "number"}, {"name": "off_low", "type": "number"},
+      {"name": "nrhi", "type": "number"}, {"name": "ext60", "type": "number"}, {"name": "ema21gap", "type": "number"},
+      {"name": "ema_comp", "type": "number"}, {"name": "vs200", "type": "number"},
+
+      {"name": "w1_pass", "type": "boolean", "description": "TV-evaluated W1 decision (null if not evaluable)."},
+      {"name": "w2_pass", "type": "boolean"},
+      {"name": "w3_pass", "type": "boolean"},
+
+      {"name": "engine_spec_version", "type": "string", "constraints": {"pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}, "description": "Spec version the engine used when this row was reconciled (provenance)."},
+      {"name": "capture_tool_version", "type": "string", "description": "Version of the capture job."}
+    ],
+    "foreignKeys": [
+      {"fields": "sec_id", "reference": {"resource": "security_master", "fields": "sec_id"}}
+    ]
+  },
+  "x-invariants": [
+    "append-only; never mutate a captured row (a TV revision is a NEW row with a later capture_ts)",
+    "rule decisions (w*_pass) are compared to the engine's evaluation of ../spec/rules.yaml under CONFORMANCE.md borderline handling"
+  ]
+}

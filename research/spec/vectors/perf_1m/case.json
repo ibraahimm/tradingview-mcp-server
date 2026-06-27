@@ -1,0 +1,11 @@
+{
+  "case_id": "perf_1m",
+  "spec_version": "1.0.0",
+  "target": {"kind": "function", "id": "perf_calendar", "params": {"months": 1},
+             "output": "perf"},
+  "description": "Calendar-anchored 1-month price return with as-of-or-before reference lookup, and null when the target date precedes the first bar.",
+  "input_file": "input_bars.csv",
+  "expected_file": "expected.csv",
+  "tolerance": {"abs": 1e-9, "rel": 1e-12},
+  "null_token": ""
+}
