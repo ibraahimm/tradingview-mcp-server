@@ -80,3 +80,6 @@ jobs:
 
       - name: Backtest — regime self-test (PIT drawdown / regime flags / causality / episodes)
         run: python -m research.backtest.selftest_regime
+
+      - name: Backtest — lifecycle self-test (stage linkage causality/window/chain + prob_greater)
+        run: python -m research.backtest.selftest_lifecycle

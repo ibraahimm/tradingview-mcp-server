@@ -157,6 +157,77 @@ normal  120 1206  +2.69(.08) +2.1  +0.54(.45) | 857 +3.96(.01)*+2.5  +1.55(.03)*
 
 ---
 
+## SEQUENTIAL LIFECYCLE TEST — the lifecycle is REAL as a classifier; W2 is the tradeable value-add; W3 is a success MARKER, not an entry
+
+Evaluates the waves as ONE pipeline (collapse → W1 entry → W2 confirmation → W3 normal trend), measuring
+the *incremental* value of each stage rather than each wave standalone. Pre-registered: link window
+**K=504 td (~2y)** max gap between consecutive stages; horizons **[20,60,120,252,504]** (the lifecycle is
+multi-year); cluster-robust block bootstrap; stage-improvement = **P(mean_later > mean_earlier)**. Two
+views: **TRADEABLE** (enter at each stage's own trigger, prior stage required in the *past* — look-ahead
+free) and **DIAGNOSTIC** (split W1 entries by whether they *later* progress — uses the future on purpose,
+to test the lifecycle as a classifier). Driver: `research/lifecycle_run.py`.
+
+Funnel (raw triggers): W1 36,060 → W1→W2 (linked) 16,250 → W1→W2→W3 (linked) 5,594.
+
+### TRADEABLE — enter at the stage trigger (abs%, selection%, step-up P vs previous stage)
+```
+   H  stage         n     abs%(p)   sel%(p)   step-up P(abs>prev)
+  20  W1          3608  +0.62(.25) +0.18(.28)
+  20  W1->W2      1956  +1.59(.00) +0.65(.00)   P=0.93   <- W2 improves W1 (abs AND selection)
+  20  W1->W2->W3   820  +1.04(.08) +0.10(.70)   P=0.21   <- W3 entry is WORSE than W2
+ 120  W1          1371  +3.08(.03) +0.23(.69)
+ 120  W1->W2       782  +4.48(.00) +1.45(.06)   P=0.77   <- W2 still improves W1
+ 120  W1->W2->W3   320  +2.78(.24) +1.24(.24)   P=0.26   <- W3 entry worse
+ 252  W1           919 +12.22(.00) +2.20(.11)
+ 252  W1->W2       526  +7.68(.00) +1.38(.35)   P=0.13   <- at long H, entering LATER captures less
+ 504  W1           599 +18.82(.00) +2.82(.18)
+ 504  W1->W2       366  +8.66(.01) -0.42(.85)   P=0.03
+ 504  W1->W2->W3   156  -1.00(.81) +1.86(.70)   P=0.07   <- W3 entry: the run is already spent
+```
+- **W1→W2 genuinely improves on W1 at trading horizons (≤120d)** — higher absolute (step-up P 0.77–0.93)
+  *and* selection turns significant (20d +0.65, p.00). This cross-confirms the regime finding (W2 = real
+  selection). **W2 is the value-add stage.**
+- **W3 as a third sequential ENTRY adds nothing — it subtracts** (step-up P 0.21–0.26 at ≤120d; negative
+  at 504d). By the time W3 confirms you are buying a spent move.
+- At long horizons the *earlier* entry (W1) shows the biggest absolute — it captures the whole recovery —
+  but that is largely beta (selection insignificant), consistent with W1 = timing/beta.
+
+### DIAGNOSTIC — do W1 entries that LATER progress separate winners from failures? (uses future)
+```
+   H  W1 group       n     abs%(p)   hit%     conf-W2 vs fail
+ 120  fail-W2      567  -4.32(.03)   31%
+ 120  conf-W2 all  865  +6.75(.00)   57%     P=1.00, d=+11.1pp
+ 120  conf-W3      451  +9.80(.00)   63%
+ 252  fail-W2      407  -0.60(.87)   32%
+ 252  conf-W3      315 +25.32(.00)   73%     (conf-W2 all: P=1.00, d=+17.0pp)
+ 504  fail-W2      292  +0.42(.97)   32%
+ 504  conf-W3      214 +42.20(.00)   80%     (conf-W2 all: P=1.00, d=+22.3pp)
+```
+- **Decisive.** W1 entries that NEVER confirm W2 earn **−4.3% (120d), 31% hit** — the failed recoveries /
+  falling knives. Those that confirm earn **+6.8%, 57% hit (P=1.00 better)**. Those that reach W3 earn
+  **+9.8 / +25.3 / +42.2%** with hit-rate climbing **63→73→80%**. The lifecycle progression is an
+  extremely powerful EX-POST classifier of recovery success — exactly the design thesis.
+
+### Synthesis — what the lifecycle test actually proves
+1. **The lifecycle is REAL.** Progression W1→W2→W3 cleanly tracks recovery quality (diagnostic: monotone,
+   huge separation, P=1.00). Hypothesis #2 ("W2 removes failed recoveries, keeps successes") is confirmed.
+2. **W2 is the tradeable refinement** — it both filters the −4% failure cohort *and* improves the entry
+   (better absolute + real selection) at ≤120d. W1→W2 is the methodology's genuine progressive step.
+3. **W3 does NOT refine as an entry — it MARKS completion.** Reaching W3 is the strongest success signal
+   (great for *classification / monitoring / exit*), but entering at the W3 trigger buys an exhausted run.
+   This is the central failure point: the information W3 carries is real, but the value is already priced.
+
+### Failure points (inputs to the disciplined Phase-2 search)
+- **F1 — W3 is mis-cast as an entry.** Its forward upside is spent; it belongs as a hold/exit/monitor
+  state, or its gates (Perf.3Y≥50 etc.) mechanically pick already-run names.
+- **F2 — the prize is EX-ANTE progression.** The diagnostic separates winners from failures only *with
+  hindsight*. A feature that predicts, AT W1/W2 ENTRY, which names will progress to W3 would convert the
+  classifier into a tradeable edge.
+- **F3 — the −4% fail-W2 cohort** (falling knives that never confirm) is the costliest error; flagging it
+  at W1 entry (skip / size-down) is high value.
+
+---
+
 ## (Original W1-only section follows)
 
 
