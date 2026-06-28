@@ -1,5 +1,25 @@
 # Official Saudi Exchange Source — Result (2026-06-28)
 
+## UPDATE (2026-06-28, later): #1 + #3 resolved — the delivered data is ADJUSTED
+
+- **#3 close semantics — RESOLVED.** The API field `previousClosePrice` actually carries the
+  **same-day close** (every value lies within that day's [low, high], including IPO days with no
+  prior session). The `close` column is correct; returns are trustworthy.
+- **#1 adjusted series — RESOLVED, better than expected.** The endpoint exposes `tableTabId=0` =
+  **back-adjusted** (splits/bonus) and `tableTabId=1` = as-traded raw. **The delivered files were
+  extracted with `tableTabId=0`, so they are already the ADJUSTED (price-return) series** — the
+  split-discontinuity worry does not apply. Independently verified here: across **949,901 daily
+  returns only 0.008% exceed ±15% and 6 exceed ±30%** (raw splits would cluster at −50%/−90%); the
+  series is smooth across known split dates. ⇒ **R2/R3 effectively satisfied** by the adjusted series.
+  (`tableTabId=1` raw is optional — for independent verification or explicit dividend reconstruction.)
+- **Consequence for the indicative run:** it was already on adjusted data, so its numbers are
+  indicative-but-real, **not** split artifacts. Remaining gap for a trustworthy verdict = **#2** below.
+- **Only #2 remains:** delisting terminal values — worklist at
+  `../reference/curation/delisted_terminal_values.csv` (20 names).
+
+---
+
+
 The depth question (`DEPTH_PROBE.md`) is **resolved**, and better than expected. Daily history for
 individual Tadawul equities **to 2001, including delisted names**, is obtainable from the **official
 Saudi Exchange historical-reports endpoint** (extracted via a tested R script, run from a residential
