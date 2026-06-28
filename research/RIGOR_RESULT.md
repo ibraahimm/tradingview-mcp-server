@@ -58,6 +58,44 @@ cluster-robust inference. W3 is suggestive but fragile. W1 is dead.
 
 ---
 
+## ROBUSTNESS — net-of-cost + cluster-robust (block bootstrap). Only W3 @120d survives everything.
+
+Block bootstrap by month (B=5000, preserves same-date cross-sectional + temporal correlation, so the
+i.i.d. t-stat's optimism is removed), round-trip cost = 31 bps (Saudi regulated commission both sides):
+
+```
+rule  H    n   gross%  net%  boot_p   95% CI (gross)   net>0 @95%?
+W2   20  2208  +0.62  +0.31  0.002  [+0.24, +1.00]      no
+W2   60  1262  +0.88  +0.57  0.048  [+0.01, +1.76]      no
+W2  120   892  +1.47  +1.16  0.050  [+0.01, +2.94]      no
+W3   20  1580  +0.62  +0.31  0.008  [+0.17, +1.09]      no
+W3   60   892  +1.16  +0.85  0.016  [+0.22, +2.17]      no
+W3  120   631  +2.57  +2.26  0.003  [+0.84, +4.32]     YES
+W1  20..120                  0.18-0.69  CI spans 0       no   (dead, as before)
+```
+
+- **W2 (continuation): real but NOT tradeable.** The gross excess survives the cluster-robust bootstrap
+  (boot p 0.002 at 20d, CI excludes 0) — so it is a genuine market-neutral pattern, *not* a t-stat
+  artifact. But it is **too small to survive 31 bps of cost**: net 95% CI includes 0 at every horizon.
+- **W3 (mature re-coil) @120d: survives the FULL gauntlet.** market-neutral ✓, deflated (p_defl 0.031) ✓,
+  cluster-robust block bootstrap (p 0.003) ✓, **and net of costs** — net mean **+2.26%**, net 95% CI
+  ≈ [+0.53%, +4.01%] **excludes zero**. It is a low-turnover, ~6-month-hold signal, which is exactly why
+  a single round-trip cost barely dents a +2.57% move. (Even at 50 bps it stays net-positive.)
+- **W1: dead at every horizon** gross and net — the `ext60_max` thesis is conclusively noise.
+
+### Bottom line of the whole project
+From a hindsight finding that was **noise** (`ext60_max`, n=15) to a properly-validated edge candidate:
+**W3 @120d is the single configuration that passes market-neutralization, multiple-testing deflation,
+cluster-robust inference, *and* transaction costs.** The platform did its job — it killed the false
+positives (W1, and W2 once costs were charged) and let one real candidate through.
+
+**Still required before trading W3 @120d** (do not over-read a single survivor):
+1. 120-day **walk-forward** stability (the 60d walk-forward was recency-concentrated — confirm it holds pre-2020).
+2. Genuine **out-of-sample** confirmation on a future vintage (paper-track it forward).
+3. Capacity/liquidity at the names W3 selects; sensitivity to the cost assumption.
+
+---
+
 ## (Original W1-only section follows)
 
 

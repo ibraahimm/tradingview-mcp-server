@@ -74,3 +74,6 @@ jobs:
 
       - name: Backtest — rigor self-test (non-overlap dedup / market-neutral excess)
         run: python -m research.backtest.selftest_rigor
+
+      - name: Backtest — robustness self-test (net-of-cost / block bootstrap)
+        run: python -m research.backtest.selftest_robust
