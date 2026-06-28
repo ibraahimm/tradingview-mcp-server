@@ -12,12 +12,23 @@ bonus-share discontinuities distort returns until corporate-action adjustment is
 delisted names lack terminal values (right-censored at the tail). Treat every number as indicative.
 """
 from __future__ import annotations
+import csv
 import datetime
 import glob
 import os
 import sys
 
 import polars as pl
+
+TERMINALS = "research/reference/curation/delisted_terminal_values.csv"
+
+
+def _load_terminals() -> dict:
+    if not os.path.exists(TERMINALS):
+        return {}
+    return {r["sec_id"]: float(r["terminal_value"])
+            for r in csv.DictReader(open(TERMINALS, encoding="utf-8-sig"))
+            if r.get("terminal_value") not in (None, "")}
 
 sys.path.insert(0, os.getcwd())
 from research.engine.panel import build_panel                      # noqa: E402
@@ -62,9 +73,13 @@ def main():
         pl.col("date").min().alias("list_date"), pl.col("date").max().alias("last_date")
     ).with_columns(
         delist_date=pl.when(pl.col("last_date") < CUT).then(pl.col("last_date")).otherwise(None),
-        terminal_value=pl.lit(None, dtype=pl.Float64),   # pending curation (track B)
     )
-    print(f"   delisted/suspended (proxy): {sm.filter(pl.col('delist_date').is_not_null()).height}")
+    tv = _load_terminals()
+    tvdf = pl.DataFrame({"sec_id": list(tv), "terminal_value": list(tv.values())},
+                        schema={"sec_id": pl.Utf8, "terminal_value": pl.Float64})
+    sm = sm.join(tvdf, on="sec_id", how="left")
+    print(f"   delisted/suspended: {sm.filter(pl.col('delist_date').is_not_null()).height} | "
+          f"terminal values loaded: {sm.filter(pl.col('terminal_value').is_not_null()).height}")
 
     print(">> build_panel ...")
     panel = build_panel(prices)
