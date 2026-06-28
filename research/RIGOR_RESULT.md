@@ -96,6 +96,67 @@ positives (W1, and W2 once costs were charged) and let one real candidate throug
 
 ---
 
+## CONDITIONAL REGIME TEST — W1 is market-TIMING (beta), W2 is SELECTION but only in NORMAL regimes
+
+The rigor/robust passes conditioned only on each *name's* deep correction and pooled across all
+regimes. This tests the original W1 thesis directly: *does the edge live in market-wide crisis /
+deep-drawdown environments, and is it stock-**selection** skill or market-**timing**/recovery (beta)?*
+Pre-registered regimes (declared before testing, no threshold fishing): market drawdown from a
+**trailing-1y high** (not ATH — the 2006 bubble would otherwise mark a decade as "drawdown") at
+**dd≥20%** and **dd≥35%**, plus **below-EMA200**; "normal" = dd<20%. Two readings: **B = absolute**
+forward return (includes the market bounce → timing/beta), **A = selection** = market-neutral excess
+(name minus same-date cohort → removes the bounce). Cluster-robust block bootstrap. `mkt%` = the
+market's own forward return (the beta benchmark). Driver: `research/regime_run.py`.
+
+Regime coverage (6,326 market days): dd≥20% 23%, dd≥35% 11%, below200 38%, normal 77% — crises are a
+genuine minority (validates the rolling-drawdown choice; an ATH measure would have been ~always-on).
+
+```
+W1                                            W2
+regime    H    n   B abs(p)  mkt   A sel(p)   |  n    B abs(p)  mkt   A sel(p)
+dd>=20%  20  358  +1.22(.32) +2.0  -0.81(.20) | 82  +0.85(.51) +2.1  -1.26(.28)
+dd>=20%  60  218  +1.70(.59) +3.0  -1.31(.18) | 57  +3.75(.28) +4.8  -1.11(.58)
+dd>=20% 120  165  +5.95(.05) +8.2  -2.00(.30) | 35  +7.64(.13) +8.2  -0.63(.82)
+dd>=35%  20   69  +6.81(.01) +9.4  -2.51(.21) |  4  [n=4 — degenerate, ignore]
+dd>=35%  60   57  +8.07(.02)+11.6  -3.54(.07) |  3  [n=3 — degenerate, ignore]
+normal   20 3250  +0.55(.33) +0.2  +0.29(.07) |2126 +1.54(.00)*+0.8  +0.69(.00)*
+normal   60 1688  +1.40(.26) +0.7  +0.70(.06) |1205 +2.40(.01)*+1.4  +0.98(.03)*
+normal  120 1206  +2.69(.08) +2.1  +0.54(.45) | 857 +3.96(.01)*+2.5  +1.55(.03)*
+```
+
+### W1 — market-TIMING / recovery exposure, NOT selection (and slightly negative selection in crises)
+- In the deepest crises (**dd≥35%**) W1 names post large **absolute** returns (+6.8%/+8.1%, p<0.05) —
+  but the **market itself returned more** (mkt +9.4%/+11.6%), and **selection is negative** (−2.5/−3.5):
+  W1 names *underperform their own peers* during crises. The big absolute number is **pure market
+  bounce (beta)**, not skill. Verdict: **TIMING/recovery**.
+- Leave-one-crisis-out (dd≥20%): the weak positive **absolute** collapses when **2008** is removed
+  (60d +1.70→−0.45) — it is 2008/beta-driven. **Selection stays negative across every leave-out** (a
+  stable non-edge). The dd≥35% timing is necessarily concentrated in the one or two episodes deep
+  enough to qualify.
+- **Answer to the original W1 hypothesis:** "deep-correction names bought in a market crisis outperform
+  as it recovers" is true **only in the trivial beta sense** — you would have done as well or better
+  holding the index. **No stock-selection alpha; if anything negative.** The unconditional "no edge" was
+  not masking a hidden conditional selection edge.
+
+### W2 — stock-SELECTION skill, but in NORMAL regimes, not crises
+- W2's edge is significant and consistent **only in the `normal` regime**: selection **A +0.69/+0.98/
+  +1.55%** (p .00/.03/.03) at 20/60/120d, and absolute **B > mkt** (it beats beta too). This *locates*
+  the real W2 signal found in the robust pass — it is a **continuation/coil setup that needs a
+  functioning uptrend**, exactly what crises remove.
+- In crisis regimes W2 shows **no selection edge** (point estimates negative; dd≥35% n=3–4 is degenerate
+  — the p=0.000 there is a tiny-sample artifact, **not** evidence). Crisis buckets are also underpowered,
+  but there is no hint of hidden crisis alpha.
+- Verdict: **SELECTION, normal-regime only.**
+
+### Bottom line
+- **W1 = TIMING/beta**, not selection — the crisis thesis holds only as market exposure (and is
+  2008-concentrated). It is *not* a stock picker.
+- **W2 = SELECTION**, and counter-intuitively in **normal** markets, not the deep-drawdown environment.
+- *Caveat:* crisis cells are small/underpowered and the dd≥35% buckets lean on the 1–2 deepest episodes;
+  read the W1 timing result as "beta, mostly 2008", not a precise estimate.
+
+---
+
 ## (Original W1-only section follows)
 
 

@@ -77,3 +77,6 @@ jobs:
 
       - name: Backtest — robustness self-test (net-of-cost / block bootstrap)
         run: python -m research.backtest.selftest_robust
+
+      - name: Backtest — regime self-test (PIT drawdown / regime flags / causality / episodes)
+        run: python -m research.backtest.selftest_regime
