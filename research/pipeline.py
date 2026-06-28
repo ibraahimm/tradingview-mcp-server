@@ -40,9 +40,13 @@ from research.backtest import governance as G                       # noqa: E402
 CUT = datetime.date(2026, 6, 1)   # last bar before this => delisted/suspended
 
 
-def load(companies_dir: str) -> pl.DataFrame:
+def load(src: str) -> pl.DataFrame:
+    """Load the canonical OHLCV frame. `src` may be a vintage Parquet (preferred — fast, vintage-
+    backed) or a directory of per-company CSVs (raw extractor output / an ingest raw dir)."""
+    if src.endswith(".parquet"):
+        return pl.read_parquet(src)
     frames = []
-    for f in sorted(glob.glob(os.path.join(companies_dir, "*.csv"))):
+    for f in sorted(glob.glob(os.path.join(src, "*.csv"))):
         try:
             df = pl.read_csv(f, infer_schema_length=3000, ignore_errors=True)
         except Exception:
@@ -59,6 +63,8 @@ def load(companies_dir: str) -> pl.DataFrame:
             pl.col("volume").cast(pl.Float64, strict=False),
         ).drop_nulls(["date", "close", "high", "low"]).filter(pl.col("close") > 0)
         frames.append(df)
+    if not frames:
+        raise SystemExit(f"no readable company CSVs found in {src!r}")
     return pl.concat(frames)
 
 

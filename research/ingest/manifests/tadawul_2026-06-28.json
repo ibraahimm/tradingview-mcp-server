@@ -1,0 +1,24 @@
+{
+  "dataset": "tadawul",
+  "vintage": "2026-06-28",
+  "ingested_at_utc": "2026-06-28T08:31:44.498235+00:00",
+  "source_path": "/mnt/c/Users/ibrah/Downloads/استخراج بيانات تداول/tadawul_data/companies",
+  "raw_dir": "research/ingest/raw/tadawul/2026-06-28",
+  "n_files": 291,
+  "n_rows": 951419,
+  "n_securities": 291,
+  "date_min": "2001-12-31",
+  "date_max": "2026-06-25",
+  "columns": [
+    "sec_id",
+    "date",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume"
+  ],
+  "dataset_fingerprint_sha256": "60cbf97011f0bbe03cd694e675131cd959afc294c48d862ede088c8cdceef2ec",
+  "parquet_path": "research/panel/tadawul_2026-06-28.parquet",
+  "parquet_sha256": "a63dfdda934ac901a31e2452247752bafc29f8cb2a7a2bfcf0cee15f9ff49892"
+}

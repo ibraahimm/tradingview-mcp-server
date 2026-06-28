@@ -1,5 +1,66 @@
 # Rigor Pass — Result (2026-06-28)
 
+## UPDATE — W1/W2/W3 jointly (deflated by n_trials = 12). W2 & W3 show a real signal; W1 does not.
+
+*Data provenance: vintage **2026-06-28** (manifest `ingest/manifests/tadawul_2026-06-28.json`;
+951,419 rows / 291 securities / 2001-12-31→2026-06-25; fingerprint `60cbf970…`). Run from the
+vintage-backed Parquet `research/panel/tadawul_2026-06-28.parquet` — reproduced bit-for-bit.*
+
+```
+rule config       H    raw   indep  mean_xs%   t      p     p_deflated
+W1  default       20  36060  3608    +0.18  +1.36  0.174    1.000
+W1  default       60  36060  1906    +0.47  +1.43  0.153    1.000
+W1  default      120  36060  1371    +0.23  +0.42  0.673    1.000
+W1  ext60 OFF     60  44135  2033    +0.49  +1.47  0.142    1.000     (A/B delta vs gate-on: -0.02 pp)
+W2  default       20  18051  2208    +0.62  +3.79  0.000    0.002  ***  <- survives deflation
+W2  default       60  18051  1262    +0.88  +2.23  0.026    0.312
+W2  default      120  18051   892    +1.47  +2.10  0.036    0.431
+W3  default       20  10758  1580    +0.62  +2.86  0.004    0.051   .
+W3  default       60  10758   892    +1.16  +2.32  0.020    0.244
+W3  default      120  10758   631    +2.57  +3.01  0.003    0.031  *   <- survives deflation
+```
+
+**Walk-forward (60d market-neutral excess) — sign stability is the real test:**
+```
+period      W1            W2            W3
+<=2010   -1.41 (t-1.0)  +2.71 (t1.5)  +1.50 (t0.5,n20)
+<=2015   +1.39 (t2.2)   +0.74 (t1.0)  +0.75 (t1.0)
+<=2020   +1.10 (t2.1)   +1.48 (t2.2)  +0.03 (t0.0)
+<=2026   -0.53 (t-0.9)  +0.43 (t0.6)  +1.74 (t2.2)
+```
+
+- **W1 — no edge (confirmed):** every deflated p ≈ 1.0; walk-forward **flips sign** (+/-); ext60_max A/B
+  = -0.02 pp (inert). The original `ext60_max` question is closed: noise.
+- **W2 (second wave / continuation) — a real, positive, deflation-surviving signal at short horizon:**
+  +0.62% excess @ 20d, **p_deflated = 0.002**, and **positive in all four walk-forward windows** (no
+  sign flip). The most robust result in the project.
+- **W3 (mature re-coil) — positive, deflation-surviving at long horizon (120d, p_deflated = 0.031),**
+  positive across walk-forward, but **recency-concentrated** (driven by 2020-2026, t2.2; flat 2015-2020)
+  -> more fragile than W2.
+
+**Why this is plausible, not just data-mining:** it matches the theses — *deep-correction* (W1) names
+mean-revert / show no edge, while *continuation* (W2) and *mature-trend* (W3) setups do carry positive
+forward excess. And the walk-forward sign-consistency (esp. W2) is the signature data-mining usually fails.
+
+**Caveats before calling it tradeable (the same discipline that killed ext60_max applies here):**
+1. **No transaction costs.** W2 @ 20d gross excess +0.62%; Saudi round-trip (~0.155% commission + spread)
+   could halve it. W3 @ 120d (+2.57%) has more cushion.
+2. **t-stats are optimistic** — dedup removes within-name autocorrelation, but signals cluster in time
+   (cross-sectional correlation) which inflates t. A block-bootstrap / cluster-robust SE is the honest
+   next test; expect the effective significance to weaken.
+3. **Multiple testing across the whole project** is larger than the 12 deflated here — W2 @ 20d
+   (p_defl 0.002) has margin to survive that; W3 @ 120d (0.031) likely would not.
+4. Equal-weight benchmark; one market; one vintage.
+
+**Honest standing:** W2 (short-horizon continuation) is a **promising, deflation-surviving, walk-forward-
+consistent** excess-return signal — the first real positive in the project — pending cost modelling and
+cluster-robust inference. W3 is suggestive but fragile. W1 is dead.
+
+---
+
+## (Original W1-only section follows)
+
+
 First defensible, out-of-sample evaluation of the W1 screen on **real** data (adjusted,
 survivorship-inclusive Saudi Exchange, 2001–2026, 288 names incl. 20 delisted with curated
 terminal values). Method: **market-neutral excess** returns (signal minus the cross-sectional date

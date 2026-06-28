@@ -6,4 +6,5 @@ __pycache__/
 # Backtest build outputs (vintage dumps, materialized panels) — never commit data
 panel/*.parquet
 ingest/raw/
-manifests/*.json
+/manifests/*.json          # top-level per-run manifests (gitignored)
+# NOTE: ingest provenance manifests under ingest/manifests/ ARE committed (no raw data).

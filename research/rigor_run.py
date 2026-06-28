@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Rigor pass on real data: market-neutral excess returns, non-overlapping signals, walk-forward,
-Bonferroni deflation — and the ext60_max A/B (the original question), now on real Saudi data.
+"""Rigor pass on real data for W1/W2/W3: market-neutral excess, non-overlapping signals,
+walk-forward, Bonferroni deflation. Includes the ext60_max A/B for W1.
 
     python -m research.rigor_run <companies_dir>
 
@@ -23,11 +23,24 @@ from research.backtest.rigor import add_excess, with_td_idx, dedup_signals, stud
 from research.backtest.governance import summary_stats, bonferroni  # noqa: E402
 
 HORIZONS = [20, 60, 120]
-CONFIGS = {"W1 (ext60_max=10)": None, "W1 (ext60 OFF)": {"ext60_max": 999}}
+# (rule, config label, params_override)
+SPECS = [("W1", "default", None), ("W1", "ext60 OFF", {"ext60_max": 999}),
+         ("W2", "default", None), ("W3", "default", None)]
+WF_CUTS = [datetime.date(2010, 1, 1), datetime.date(2015, 1, 1),
+           datetime.date(2020, 1, 1), datetime.date(2026, 7, 1)]
 
 
 def f(x, d=2):
     return "  n/a" if x is None else f"{x:+.{d}f}"
+
+
+def walkforward(kept, horizon):
+    prev, out = None, []
+    for c in WF_CUTS:
+        w = kept.filter(pl.col("date") <= c) if prev is None else kept.filter((pl.col("date") > prev) & (pl.col("date") <= c))
+        out.append((c, summary_stats([v for v in w.get_column(f"xs_{horizon}").to_list() if v is not None])))
+        prev = c
+    return out
 
 
 def main():
@@ -46,35 +59,34 @@ def main():
     labeled = with_td_idx(add_excess(
         label_forward_returns(compute_value(compute_age_years(panel, sm)), sm, horizons=HORIZONS), HORIZONS))
 
-    n_trials = len(CONFIGS) * len(HORIZONS)
-    print(f"\nMARKET-NEUTRAL EXCESS return on NON-OVERLAPPING signals (deflated by n_trials={n_trials}):\n")
-    print(f"{'config':20} {'H':>4} {'raw':>7} {'indep':>6} {'mean_xs%':>9} {'t':>7} {'p':>7} {'p_defl':>7}")
+    n_trials = len(SPECS) * len(HORIZONS)
+    print(f"\nMARKET-NEUTRAL EXCESS, NON-OVERLAPPING signals, deflated by n_trials={n_trials}:\n")
+    print(f"{'rule':4} {'config':10} {'H':>4} {'raw':>7} {'indep':>6} {'mean_xs%':>9} {'t':>6} {'p':>6} {'p_defl':>7}")
     rules = R.load_rules()
-    studies = {}
-    for cname, ov in CONFIGS.items():
-        decided = R.evaluate_frame(rules["W1"], labeled, ov)
+    a60 = {}
+    wf = {}
+    for rule, cfg, ov in SPECS:
+        decided = R.evaluate_frame(rules[rule], labeled, ov)
         for h in HORIZONS:
             st = study(decided, h, excess=True)
-            studies[(cname, h)] = st
-            print(f"{cname:20} {h:>4} {st['raw_signals']:>7} {st['independent']:>6} "
-                  f"{f(st['mean']):>9} {f(st['t']):>7} {f(st['p'],3):>7} {f(bonferroni(st['p'], n_trials),3):>7}")
+            if h == 60:
+                a60[(rule, cfg)] = st
+            print(f"{rule:4} {cfg:10} {h:>4} {st['raw_signals']:>7} {st['independent']:>6} "
+                  f"{f(st['mean']):>9} {f(st['t']):>6} {f(st['p'],3):>6} {f(bonferroni(st['p'], n_trials),3):>7}")
+        if cfg == "default":
+            wf[rule] = walkforward(dedup_signals(decided, 60), 60)
+        del decided
 
-    print("\next60_max A/B at 60d (does the ceiling improve out-of-sample excess?):")
-    a, b = studies[("W1 (ext60_max=10)", 60)], studies[("W1 (ext60 OFF)", 60)]
-    print(f"   with ext60_max=10 : mean_xs {f(a['mean'])}%  (indep n={a['independent']})")
-    print(f"   ext60 OFF         : mean_xs {f(b['mean'])}%  (indep n={b['independent']})")
-    print(f"   delta (gate − off): {f((a['mean'] or 0) - (b['mean'] or 0))} pp")
+    print("\next60_max A/B for W1 @ 60d (the original question):")
+    g, o = a60[("W1", "default")], a60[("W1", "ext60 OFF")]
+    print(f"   gate on  +{g['mean']:.2f}% (n={g['independent']})  |  gate off +{o['mean']:.2f}% (n={o['independent']})"
+          f"  |  delta {f((g['mean'] or 0) - (o['mean'] or 0))} pp")
 
-    print("\nWalk-forward (W1 ext60_max=10, 60d, market-neutral excess, per period):")
-    decided = R.evaluate_frame(rules["W1"], labeled, None)
-    kept = dedup_signals(decided, 60)
-    prev = None
-    for c in [datetime.date(2010, 1, 1), datetime.date(2015, 1, 1), datetime.date(2020, 1, 1), datetime.date(2026, 7, 1)]:
-        w = kept.filter(pl.col("date") <= c) if prev is None else kept.filter((pl.col("date") > prev) & (pl.col("date") <= c))
-        vals = [v for v in w.get_column("xs_60").to_list() if v is not None]
-        st = summary_stats(vals)
-        print(f"   <= {c}:  n={st['n']:>4}  mean_xs {f(st['mean'])}%  t {f(st['t'])}")
-        prev = c
+    for rule in ("W1", "W2", "W3"):
+        print(f"\nWalk-forward {rule} (default, 60d market-neutral excess):")
+        for c, st in wf[rule]:
+            print(f"   <= {c}:  n={st['n']:>4}  mean_xs {f(st['mean'])}%  t {f(st['t'])}")
+
     print("\nDONE (indicative-rigorous; market-neutral, deflated, OOS).")
 
 
