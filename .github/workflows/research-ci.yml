@@ -71,3 +71,6 @@ jobs:
 
       - name: Backtest — governance self-test (time split / walk-forward / deflation / select-OOS)
         run: python -m research.backtest.selftest_governance
+
+      - name: Backtest — rigor self-test (non-overlap dedup / market-neutral excess)
+        run: python -m research.backtest.selftest_rigor
