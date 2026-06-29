@@ -81,8 +81,13 @@ resolution elsewhere. The state machine never changes.
 Faithfulness = (1)+(3): a shared executable contract **and** identical reproduction of the live tool —
 explicitly **not** "produces similar-looking statistics."
 
-## 6. What this increment does NOT do (next increment)
+## 6. Event-generation + historical replay (built on the proven state machine)
 
-This delivers the faithful **tracker-on-a-ledger**. It does **not** yet generate the ledger from the
-historical panel (the daily-cadence event-GENERATION layer, A2/A4), nor re-point the research
-evaluation onto journey outcomes. Those are the next increment, built on this proven state machine.
+`research/backtest/replay.py` + `research/replay_run.py` generate ledger events from the engine's
+W1/W2 pass-rows under the **daily-cadence** adaptation (A2/A4) and replay the journeys with the proven
+tracker. Gated by `selftest_replay`. Two cadence artifacts to read carefully (they are ADAPTATION,
+not documented methodology): under daily evaluation the **promotion rate is inflated** (almost any W1
+name eventually also forms a W2 coil if you look every day — the live sparse tracker promotes far
+less), and long-lived recurring names accumulate into **EXPIRED** journeys (the journey never resets).
+Compare today's live tracker to the historical journey *shapes* (promoted reach higher peak gains;
+FAILED are falling knives), not to the cadence-inflated rates directly.
