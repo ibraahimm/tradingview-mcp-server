@@ -191,18 +191,11 @@ function journeyString(evs) {
   return out.join("→");
 }
 
-function stageReport() {
-  const ledgerPath = args.ledger || DEFAULT_LEDGER;
-  const grad_p5y = num("grad_p5y", 2000);
-  const stale_days = num("stale_days", 120);
-  const horizon_days = num("horizon_days", 1826); // ~5 years
-  const ledger = readLedger(ledgerPath);
-  if (!ledger.length) {
-    process.stdout.write(`No tracker ledger yet at ${ledgerPath} — run /saudi-stage2 or /saudi-wave2 (which ingest) first.\n`);
-    return;
-  }
-
-  // group events by symbol (chronological)
+// Roll the ledger into one journey + lifecycle state per symbol. `now` is the as-of epoch (ms):
+// wall-clock for the live report, or a fixed as-of for deterministic conformance / PIT replay. This
+// is the SINGLE source of the journey/state logic — both stage=report and stage=conform call it, and
+// the research Python tracker (research/backtest/tracker.py) is conformed against its output.
+function buildItems(ledger, now, { grad_p5y, stale_days, horizon_days }) {
   const bySym = new Map();
   let latestDate = "";
   for (const e of ledger) {
@@ -210,8 +203,6 @@ function stageReport() {
     bySym.get(e.symbol).push(e);
     if (e.date > latestDate) latestDate = e.date;
   }
-  const now = Date.now();
-
   const items = [];
   for (const [sym, raw] of bySym) {
     const evs = raw.slice().sort((a, b) => a.ts - b.ts);
@@ -264,6 +255,40 @@ function stageReport() {
     });
   }
   items.sort((a, b) => (b.gain ?? -1e9) - (a.gain ?? -1e9));
+  return { items, latestDate };
+}
+
+// stage=conform — machine-readable per-symbol journey/state, sorted by symbol, for cross-implementation
+// (JS↔Python) differential testing. `asof=YYYY-MM-DD` fixes the clock so output is deterministic.
+function stageConform() {
+  const ledgerPath = args.ledger || DEFAULT_LEDGER;
+  const now = args.asof ? Date.parse(args.asof + "T00:00:00Z") : Date.now();
+  const { items } = buildItems(readLedger(ledgerPath), now, {
+    grad_p5y: num("grad_p5y", 2000), stale_days: num("stale_days", 120), horizon_days: num("horizon_days", 1826),
+  });
+  const sorted = {};
+  for (const r of items.slice().sort((a, b) => (a.symbol < b.symbol ? -1 : a.symbol > b.symbol ? 1 : 0)))
+    sorted[r.symbol] = {
+      state: r.state, journey: r.journey, runs: r.runs, gain: round(r.gain, 4),
+      first_close: r.first_close, close: r.close, belowATH: r.belowATH, offLow: r.offLow,
+      p5y: r.p5y, vs200: r.vs200, isNew: r.isNew, promoted: r.promoted, nearATH: r.nearATH,
+    };
+  process.stdout.write(JSON.stringify(sorted, null, 2) + "\n");
+}
+
+function stageReport() {
+  const ledgerPath = args.ledger || DEFAULT_LEDGER;
+  const grad_p5y = num("grad_p5y", 2000);
+  const stale_days = num("stale_days", 120);
+  const horizon_days = num("horizon_days", 1826); // ~5 years
+  const ledger = readLedger(ledgerPath);
+  if (!ledger.length) {
+    process.stdout.write(`No tracker ledger yet at ${ledgerPath} — run /saudi-stage2 or /saudi-wave2 (which ingest) first.\n`);
+    return;
+  }
+
+  const now = args.asof ? Date.parse(args.asof + "T00:00:00Z") : Date.now();
+  const { items, latestDate } = buildItems(ledger, now, { grad_p5y, stale_days, horizon_days });
 
   // optional CSV export of the per-symbol summary
   if (args.csv) {
@@ -337,7 +362,8 @@ const stage = args.stage || "report";
 try {
   if (stage === "ingest") stageIngest();
   else if (stage === "report") stageReport();
-  else throw new Error(`unknown stage='${stage}' (expected ingest|report)`);
+  else if (stage === "conform") stageConform();
+  else throw new Error(`unknown stage='${stage}' (expected ingest|report|conform)`);
 } catch (err) {
   process.stderr.write("saudi-tracker.js error: " + err.message + "\n");
   process.exit(1);

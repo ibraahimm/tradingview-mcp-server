@@ -49,6 +49,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
       - name: Install engine dependencies
         run: pip install --quiet polars pyyaml
@@ -83,3 +86,6 @@ jobs:
 
       - name: Backtest — lifecycle self-test (stage linkage causality/window/chain + prob_greater)
         run: python -m research.backtest.selftest_lifecycle
+
+      - name: Backtest — tracker conformance (Python == golden == live saudi-tracker.js)
+        run: python -m research.backtest.selftest_tracker
