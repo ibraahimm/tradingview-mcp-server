@@ -7,7 +7,7 @@
 ```
 You are resuming work on this repository (TradingView MCP server + the Saudi Main Market wave-screening
 system W1/W2/W3 + tracker + a Python research/backtesting platform). Before doing ANYTHING else, read
-these files in full (repo-relative paths) and run the git command, to reconstruct context:
+these files in full (repo-relative paths) and run the git commands, to reconstruct context:
 
 1. .claude/HANDOFF.md                         — START HERE: current state, decisions, findings, open items
 2. research/spec/TESTING.md                   — the official / conformance / experimental conventions (MUST follow)
@@ -17,7 +17,9 @@ these files in full (repo-relative paths) and run the git command, to reconstruc
 6. .claude/commands/saudi-wave2.md            — W2 live command spec
 7. .claude/commands/saudi-wave3.md            — W3 live command spec
 8. .claude/commands/saudi-track.md            — tracker command spec
-9. run: git log --oneline -30                 — recent history (HEAD = latest commit; do not assume)
+9. run: git status --short  AND  git log --oneline -15
+                                             — reconstruct working-tree + commit context: uncommitted/untracked
+                                               (WIP) changes AND recent history (HEAD = latest; do not assume)
 
 Then follow these working rules for the whole session:
 
