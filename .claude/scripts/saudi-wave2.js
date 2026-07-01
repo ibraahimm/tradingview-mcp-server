@@ -36,7 +36,7 @@
  *                             offLow in [offlow, offlow_max)
  *   Stage-2 trend           : close > EMA60                       (EMA200 is a descriptor, NOT a gate —
  *                             a name recovering from a deep drop often still has EMA60 < a falling EMA200)
- *   pullback / resumption   : close >= EMA21 AND ema21gap <= ext21_max   (reclaimed, not extended)
+ *   pullback / resumption   : close >= EMA21   (reclaimed; the 10% extension cap was REMOVED 2026-06-30)
  *                             emaComp in [ema_gap_min, ema_gap_max]      (fast EMA coiled near the mid EMA)
  *                             Perf.1M in (p1m_min, p1m_max)              (monthly momentum already turned up)
  *   confirmed uptrend       : Perf.1Y > py_min
@@ -44,9 +44,9 @@
  *                             Perf.3Y < p3y_max, Perf.5Y < p5y_max, Perf.10Y < p10y_max
  *
  * Parameters (all optional; percents given as percents):
- *   dd_min (45)  below_min (20)  below_max (80)  offlow (30)  offlow_max (100)
- *   ema_gap_min (-2)  ema_gap_max (5)  ext21_max (10)
- *   p1m_min (0)  p1m_max (15)  p3m_min (0)  p3m_max (40)  p6m_min (3)  p6m_max (80)
+ *   dd_min (45)  below_min (20)  below_max (80)  offlow (35)  offlow_max (80)
+ *   ema_gap_min (-2)  ema_gap_max (5)
+ *   p1m_min (0)  p1m_max (15)  p3m_min (0)  p3m_max (40)  p6m_min (-10)  p6m_max (80)
  *   py_min (0)  p3y_max (100)  p5y_max (200)  p10y_max (400)
  *   min_years (5)  value (0 = no liquidity floor, SAR)  nrhi_min (0 = descriptor only, %)
  * The Perf.* bounds are normally enforced server-side too; the script re-verifies them
@@ -74,19 +74,18 @@ const params = {
   dd_min: num("dd_min", 45),
   below_min: num("below_min", 20),
   below_max: num("below_max", 80),
-  offlow: num("offlow", 30),
-  offlow_max: num("offlow_max", 100),
+  offlow: num("offlow", 35),         // 30->35 (2026-07-01, formal request)
+  offlow_max: num("offlow_max", 80), // 100->80 (2026-07-01, formal request)
   ema_gap_min: num("ema_gap_min", -2),
   ema_gap_max: num("ema_gap_max", 5),
-  ext21_max: num("ext21_max", 10),
   p1m_min: num("p1m_min", 0),
   p1m_max: num("p1m_max", 15),
   p3m_min: num("p3m_min", 0),
   p3m_max: num("p3m_max", 40),
-  p6m_min: num("p6m_min", 3),
+  p6m_min: num("p6m_min", -10),      // 3->-10 (2026-07-01, formal request)
   p6m_max: num("p6m_max", 80),
   py_min: num("py_min", 0),
-  p3y_max: num("p3y_max", 100),
+  p3y_max: num("p3y_max", 130),      // 100->130 (2026-07-01, formal request)
   p5y_max: num("p5y_max", 200),
   p10y_max: num("p10y_max", 400),
   min_years: num("min_years", 5),
@@ -240,8 +239,7 @@ function stageFilter() {
   const afterTrend = afterOff.filter((r) => r.ext60 > 0); // close > EMA60
   const afterPull = afterTrend.filter(
     (r) =>
-      r.ema21gap >= 0 && // close >= EMA21 (reclaimed)
-      r.ema21gap <= params.ext21_max && // not extended above EMA21
+      r.ema21gap >= 0 && // close >= EMA21 (reclaimed) — 10% extension cap REMOVED 2026-06-30
       r.emaComp >= params.ema_gap_min &&
       r.emaComp <= params.ema_gap_max, // fast EMA coiled near the mid EMA
   );
@@ -330,7 +328,7 @@ function stageReport() {
     `  3. after belowATH ∈ [${p.below_min},${p.below_max}]%                 : ${fn.afterBelow ?? "—"}`,
     `  4. after offLow ∈ [${p.offlow},${p.offlow_max})%                : ${fn.afterOff ?? "—"}`,
     `  5. after trend close > EMA60                  : ${fn.afterTrend ?? "—"}`,
-    `  6. after EMA21 pullback (reclaim ≤+${p.ext21_max}%, EMA21/EMA60 ∈ [${p.ema_gap_min},${p.ema_gap_max}]%) = survivors : ${fn.final ?? rows.length}`,
+    `  6. after EMA21 reclaim (close ≥ EMA21, EMA21/EMA60 ∈ [${p.ema_gap_min},${p.ema_gap_max}]%) = survivors : ${fn.final ?? rows.length}`,
     "",
     grid.text,
     "",
@@ -347,7 +345,7 @@ function stageReport() {
   }
   out.push(
     `Filters: ≥${p.min_years}y listing (first_bar_time), DDmax ≥ ${p.dd_min}%, belowATH ∈ [${p.below_min},${p.below_max}]%, offLow ∈ [${p.offlow},${p.offlow_max})%, ` +
-      `close > EMA60, close ∈ [EMA21, +${p.ext21_max}%], EMA21/EMA60 ∈ [${p.ema_gap_min},${p.ema_gap_max}]%, ` +
+      `close > EMA60, close ≥ EMA21, EMA21/EMA60 ∈ [${p.ema_gap_min},${p.ema_gap_max}]%, ` +
       `Perf.1M ∈ (${p.p1m_min},${p.p1m_max})%, Perf.3M ∈ [${p.p3m_min},${p.p3m_max})%, Perf.6M ∈ (${p.p6m_min},${p.p6m_max})%, ` +
       `Perf.1Y > ${p.py_min}%, Perf.3Y < ${p.p3y_max}%, Perf.5Y < ${p.p5y_max}%, Perf.10Y < ${p.p10y_max}%` +
       (p.value > 0 ? `, value ≥ SAR ${compact(p.value)}` : ", value floor OFF") +

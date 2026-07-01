@@ -57,19 +57,21 @@ them straight to the script — the script owns the defaults and all the math.
 | `dd_min`     | `45`    | Min correction depth `DDmax = (ATH − 52w_low)/ATH` (%) |
 | `below_min`  | `20`    | Min `belowATH = (ATH − close)/ATH` — still corrected / room left (%) |
 | `below_max`  | `80`    | Max `belowATH` — excludes still-wreckage names (%) |
-| `offlow`     | `30`    | Min `offLow = close/52w_low − 1` — first wave already advanced (%) |
-| `offlow_max` | `100`   | Max `offLow` — not over-extended off the low (≤100% = not doubled) (%) |
+| `offlow`     | `35`    | Min `offLow = close/52w_low − 1` — first wave already advanced. Raised 30→35 on 2026-07-01 (%) |
+| `offlow_max` | `80`    | Max `offLow` — not over-extended off the low. Lowered 100→80 on 2026-07-01 (%) |
 | `ema_gap_min`| `-2`    | Min `EMA21/EMA60 − 1` — the coil: fast EMA may sit just below the mid EMA (%) |
 | `ema_gap_max`| `5`     | Max `EMA21/EMA60 − 1` — fast EMA not far above the mid EMA (still coiled) (%) |
-| `ext21_max`  | `10`    | Max `close/EMA21 − 1` — reclaimed EMA21 but not extended above it (%) |
+
+> **Removed 2026-06-30:** the `ext21_max` extension cap (max `close/EMA21 − 1`). W2 still requires the
+> **reclaim** (`close ≥ EMA21`); only the upper "not-extended" cap is gone — see the W1 note for the rationale.
 | `p1m_min`    | `0`     | Min `Perf.1M` — monthly momentum already turned up (>0) (%) |
 | `p1m_max`    | `15`    | Max `Perf.1M` — the recent month is not vertical/overheated (%) |
 | `p3m_min`    | `0`     | Min `Perf.3M` (%) |
 | `p3m_max`    | `40`    | Max `Perf.3M` — not overheated (%) |
-| `p6m_min`    | `3`     | Min `Perf.6M` — medium-term uptrend (%) |
+| `p6m_min`    | `-10`   | Min `Perf.6M`. Lowered 3→-10 on 2026-07-01 (%) |
 | `p6m_max`    | `80`    | Max `Perf.6M` — only orderly wave-1 advances (%) |
 | `py_min`     | `0`     | Min `Perf.1Y` — confirmed 1-year uptrend (>0) (%) |
-| `p3y_max`    | `100`   | Max `Perf.3Y` — keep to moderate recoveries, not mature multibaggers (%) |
+| `p3y_max`    | `130`   | Max `Perf.3Y` — keep to moderate recoveries. Raised 100→130 on 2026-07-01 (%) |
 | `p5y_max`    | `200`   | Max `Perf.5Y` — allow large recovery (wave 2 wants recovered names) (%) |
 | `p10y_max`   | `400`   | Max `Perf.10Y` (applied locally; null 10Y = <10y history, allowed) (%) |
 | `min_years`  | `5`     | Min years since listing — computed from `first_bar_time`. Younger IPOs excluded |
@@ -111,10 +113,10 @@ Non-negotiable. **Never substitute symbols from any other market.**
      - `{ field:"Perf.1M", operator:"less", value:<p1m_max> }`  (default 15)
      - `{ field:"Perf.3M", operator:"greater_or_equal", value:<p3m_min> }`  (default 0)
      - `{ field:"Perf.3M", operator:"less", value:<p3m_max> }`  (default 40)
-     - `{ field:"Perf.6M", operator:"greater", value:<p6m_min> }`  (default 3)
+     - `{ field:"Perf.6M", operator:"greater", value:<p6m_min> }`  (default -10)
      - `{ field:"Perf.6M", operator:"less", value:<p6m_max> }`  (default 80)
      - `{ field:"Perf.Y", operator:"greater", value:<py_min> }`  (default 0)
-     - `{ field:"Perf.3Y", operator:"less", value:<p3y_max> }`  (default 100)
+     - `{ field:"Perf.3Y", operator:"less", value:<p3y_max> }`  (default 130)
      - `{ field:"Perf.5Y", operator:"less", value:<p5y_max> }`  (default 200)
      - Do **not** push `Perf.10Y` server-side: `Perf.10Y < p10y_max` is applied **locally** so that
        5–10-year names (null `Perf.10Y`) are kept. Do **not** push the EMA/structure ratios
@@ -134,7 +136,7 @@ Non-negotiable. **Never substitute symbols from any other market.**
    ```
    node .claude/scripts/saudi-wave2.js stage=filter input=.claude/scripts/.tmp/screen.json \
      dd_min=<dd_min> below_min=<below_min> below_max=<below_max> offlow=<offlow> offlow_max=<offlow_max> \
-     ema_gap_min=<ema_gap_min> ema_gap_max=<ema_gap_max> ext21_max=<ext21_max> \
+     ema_gap_min=<ema_gap_min> ema_gap_max=<ema_gap_max> \
      p1m_min=<p1m_min> p1m_max=<p1m_max> p3m_min=<p3m_min> p3m_max=<p3m_max> p6m_min=<p6m_min> p6m_max=<p6m_max> \
      py_min=<py_min> p3y_max=<p3y_max> p5y_max=<p5y_max> p10y_max=<p10y_max> min_years=<min_years> value=<value> nrhi_min=<nrhi_min> \
      > .claude/scripts/.tmp/filtered.json

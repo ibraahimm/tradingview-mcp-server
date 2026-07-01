@@ -32,7 +32,7 @@ def _frame():
     for i, dt in enumerate(DATES):
         r = dict(sec_id="AAA", date=dt, close=10.0, volume=aaa_vol[i], **BASE)
         if i == 3:
-            r["ext60"] = 20.0          # bar3 (2020-01-04) breaks the ext60 ceiling
+            r["ext60"] = 20.0          # bar3: high ext60 — no longer gated (extension cap removed 2026-06-30)
         rows.append(r)
     for dt in DATES:                    # BBB: same features, but listed only days ago -> fails age
         rows.append(dict(sec_id="BBB", date=dt, close=10.0, volume=100, **BASE))
@@ -68,13 +68,13 @@ def main() -> int:
     final = funnel[-1][1]
     check(fbase == 10, f"funnel base should be 10, got {fbase}")
     check(after_age == 5, f"after age_years should be 5 (BBB dropped), got {after_age}")
-    check(final == 4, f"final survivors should be 4, got {final}")
-    check(surv.height == 4 and final == surv.height, "survivors must equal final funnel count")
+    check(final == 5, f"final survivors should be 5 (all AAA bars; ext60 no longer gates), got {final}")
+    check(surv.height == 5 and final == surv.height, "survivors must equal final funnel count")
     check(set(surv.get_column("sec_id").to_list()) == {"AAA"}, "only AAA should survive")
     surv_dates = set(surv.get_column("date").to_list())
-    check(surv_dates == {DATES[0], DATES[1], DATES[2], DATES[4]},
-          f"AAA survivors should be bars 0,1,2,4 (bar3 fails ext60), got {sorted(surv_dates)}")
-    check(d[("AAA", DATES[3])]["first_fail"] == "ext60", "AAA bar3 should fail at ext60")
+    check(surv_dates == set(DATES),
+          f"AAA survivors should be all 5 bars (ext60 cap removed), got {sorted(surv_dates)}")
+    check(d[("AAA", DATES[3])]["passed"] is True, "AAA bar3 (ext60=20) should now PASS (extension cap removed)")
     # funnel monotonic non-increasing
     counts = [c for _, c in funnel]
     check(all(counts[i] >= counts[i + 1] for i in range(len(counts) - 1)), "funnel not monotonic")
@@ -82,8 +82,9 @@ def main() -> int:
     # ---- Run 2: enable the value floor (value_min=1200) -> computed value participates ----
     surv2, _, decided2 = run_screen(prices, sm, "W1", params_overrides={"value_min": 1200}, value_window=3)
     d2 = {(r["sec_id"], r["date"]): r for r in decided2.iter_rows(named=True)}
-    check(surv2.height == 1, f"with value_min=1200 only AAA bar4 should survive, got {surv2.height}")
+    check(surv2.height == 2, f"with value_min=1200 AAA bars 3,4 survive (value>=1200), got {surv2.height}")
     check(d2[("AAA", DATES[4])]["passed"] is True, "AAA bar4 (value 1666.7) should pass value floor")
+    check(d2[("AAA", DATES[3])]["passed"] is True, "AAA bar3 (value 1333.3) should pass (ext60 no longer gates)")
     check(d2[("AAA", DATES[2])]["first_fail"] == "value", "AAA bar2 (value 1000<1200) should fail at value")
     check(d2[("AAA", DATES[0])]["first_fail"] == "value", "AAA bar0 (value null) should drop at value")
 

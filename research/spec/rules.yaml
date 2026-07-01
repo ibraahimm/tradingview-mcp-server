@@ -30,17 +30,16 @@ rules:
       min_years: 5
       p3m_min: 5
       p3m_max: 40
-      p6m_min: 0
+      p6m_min: -30        # 0->-30 on 2026-07-01 (formal request): admit recent ignitions still negative on 6M
       p6m_max: 50
-      p3y_max: 50
-      p5y_max: 80
+      p3y_max: 100        # 50->100 on 2026-07-01 (formal request)
+      p5y_max: 100        # 80->100 on 2026-07-01 (formal request)
       p10y_max: 250
       dd_min: 50
       below_min: 40
-      below_max: 95
-      offlow_min: 20
-      offlow_max: 60
-      ext60_max: 10        # overheated-extension ceiling (backtest-derived; see ARCHITECTURE/ext60 history)
+      below_max: 100      # raised 95->100 on 2026-06-30: admit the most-corrected names (deep-correction launches)
+      offlow_min: 35      # 20->35 on 2026-07-01 (formal request): later entry zone (more selective)
+      offlow_max: 80      # 60->80 on 2026-07-01 (formal request)
       nrhi_min: 0          # 0 = descriptor only
       value_min: 0         # SAR; 0 = OFF
     funnel:                # ordered; each step is reported as a survivor count
@@ -53,7 +52,7 @@ rules:
       - {feature: ddmax, op: ge, value: "@dd_min", null_action: drop}
       - {feature: below_ath, op: in_cc, value: ["@below_min", "@below_max"], null_action: drop}
       - {feature: off_low, op: in_co, value: ["@offlow_min", "@offlow_max"], null_action: drop}
-      - {feature: ext60, op: le, value: "@ext60_max", null_action: skip}    # null ema60 (recent IPO) = not dropped
+      # ext60 extension cap REMOVED (decision 2026-06-30): cap cut as many early winners as knives — see ARCHITECTURE/ext60 history
       - {feature: nrhi, op: ge, value: "@nrhi_min", null_action: skip, enabled_when: "nrhi_min > 0"}
       - {feature: value, op: ge, value: "@value_min", null_action: drop, enabled_when: "value_min > 0"}
     tag:
@@ -69,20 +68,19 @@ rules:
       p1m_max: 15
       p3m_min: 0
       p3m_max: 40
-      p6m_min: 3
+      p6m_min: -10        # 3->-10 on 2026-07-01 (formal request)
       p6m_max: 80
       py_min: 0
-      p3y_max: 100
+      p3y_max: 130        # 100->130 on 2026-07-01 (formal request)
       p5y_max: 200
       p10y_max: 400
       dd_min: 45
       below_min: 20
       below_max: 80
-      offlow_min: 30
-      offlow_max: 100
+      offlow_min: 35      # 30->35 on 2026-07-01 (formal request)
+      offlow_max: 80      # 100->80 on 2026-07-01 (formal request)
       ema_gap_min: -2      # the coil: ema_comp band
       ema_gap_max: 5
-      ext21_max: 10        # reclaimed ema21 but not extended
       nrhi_min: 0
       value_min: 0
     funnel:
@@ -99,7 +97,7 @@ rules:
       - {feature: off_low, op: in_co, value: ["@offlow_min", "@offlow_max"], null_action: drop}
       - {feature: ext60, op: gt, value: 0, null_action: drop}               # Stage-2 trend: close > EMA60
       - {feature: ema_comp, op: in_cc, value: ["@ema_gap_min", "@ema_gap_max"], null_action: drop}  # the coil (binding)
-      - {feature: ema21gap, op: in_cc, value: [0, "@ext21_max"], null_action: drop}                 # reclaim, not extended
+      - {feature: ema21gap, op: ge, value: 0, null_action: drop}     # reclaim: close >= EMA21 (10% extension cap REMOVED 2026-06-30)
       - {feature: nrhi, op: ge, value: "@nrhi_min", null_action: skip, enabled_when: "nrhi_min > 0"}
       - {feature: value, op: ge, value: "@value_min", null_action: drop, enabled_when: "value_min > 0"}
     tag:

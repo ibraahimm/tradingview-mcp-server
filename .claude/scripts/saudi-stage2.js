@@ -26,7 +26,7 @@
  *   ATHx     = ATH / price_52_week_high               // >~3 => peak is old/far (e.g. 2006 bubble)
  *
  * Parameters (all optional; percents given as percents, e.g. p3y_max=130 means 130%):
- *   dd_min (50)  below_min (40)  below_max (95)  offlow (20)
+ *   dd_min (50)  below_min (40)  below_max (100)  offlow (35)  offlow_max (80)
  *   p3m_min (5)  p3m_max (40)  p6m_min (-10)  p6m_max (50)  p3y_max (130)
  *   value (0 = no liquidity floor, SAR)  nrhi_min (0 = descriptor only, %)
  * The Perf.* bounds are normally enforced server-side too; the script re-verifies them
@@ -53,15 +53,15 @@ const num = (k, def) => (args[k] !== undefined ? Number(args[k]) : def);
 const params = {
   dd_min: num("dd_min", 50),
   below_min: num("below_min", 40),
-  below_max: num("below_max", 95),
-  offlow: num("offlow", 20),
-  offlow_max: num("offlow_max", 60),
+  below_max: num("below_max", 100), // raised 95->100 (2026-06-30): admit the most-corrected names
+  offlow: num("offlow", 35),        // 20->35 (2026-07-01, formal request): later entry zone
+  offlow_max: num("offlow_max", 80), // 60->80 (2026-07-01, formal request)
   p3m_min: num("p3m_min", 5),
   p3m_max: num("p3m_max", 40),
-  p6m_min: num("p6m_min", 0),
+  p6m_min: num("p6m_min", -30),     // 0->-30 (2026-07-01, formal request): admit recent ignitions still negative on 6M
   p6m_max: num("p6m_max", 50),
-  p3y_max: num("p3y_max", 50),
-  p5y_max: num("p5y_max", 80),
+  p3y_max: num("p3y_max", 100),     // 50->100 (2026-07-01, formal request)
+  p5y_max: num("p5y_max", 100),     // 80->100 (2026-07-01, formal request)
   p10y_max: num("p10y_max", 250),
   min_years: num("min_years", 5),
   value: num("value", 0),
@@ -154,9 +154,9 @@ function stageFilter() {
     const p5y = s["Perf.5Y"];
     const fbt = s.first_bar_time; // epoch seconds of the first price bar (≈ listing date)
     const avgVol = s.average_volume_30d_calc;
-    const ema21 = s.EMA21; // EMA descriptors (optional): NOT gated — fetched only so the tracker
-    const ema60 = s.EMA60; // can evaluate FAILED (close < EMA200) on W1-only names. Absent EMA
-    const ema200 = s.EMA200; // (e.g. recent IPOs) is fine: stored as null, never drops a candidate.
+    const ema21 = s.EMA21; // descriptor only (tracker)
+    const ema60 = s.EMA60; // tracker descriptor (ext60); extension cap removed 2026-06-30
+    const ema200 = s.EMA200; // descriptor only (tracker FAILED rule).
 
     if ([close, ath, hi, lo, p3m, p6m, p3y].some((v) => v == null)) {
       skipped.push({ symbol: s.symbol, description: s.description });
@@ -189,10 +189,11 @@ function stageFilter() {
       tag: p3y <= 0 ? "★" : "⚠up", // ★ genuine recent correction; ⚠up uptrend-leaning
       sector: s.sector || "—",
       market_cap_basic: s.market_cap_basic,
-      // EMA descriptors (same fields/formulae as /saudi-wave2) — for the tracker only; not displayed.
+      // EMA-derived (same fields/formulae as /saudi-wave2). ext60/ema21gap/emaComp/vs200 are tracker
+      // descriptors only (the ext60 extension cap was removed 2026-06-30). None are shown in the table/CSV.
       ema21gap: ema21 != null ? (close / ema21 - 1) * 100 : null, // 21g
       emaComp: ema21 != null && ema60 != null ? (ema21 / ema60 - 1) * 100 : null, // cmp
-      ext60: ema60 != null ? (close / ema60 - 1) * 100 : null, // x60
+      ext60: ema60 != null ? (close / ema60 - 1) * 100 : null, // x60 — tracker descriptor (no longer gated)
       vs200: ema200 != null ? (close / ema200 - 1) * 100 : null, // v200 (drives the tracker FAILED rule)
       "Perf.3M": p3m,
       "Perf.6M": p6m,
@@ -207,6 +208,8 @@ function stageFilter() {
   const afterDD = cand.filter((r) => r.DDmax >= params.dd_min);
   const afterBelow = afterDD.filter((r) => r.belowATH >= params.below_min && r.belowATH <= params.below_max);
   const afterOff = afterBelow.filter((r) => r.offLow >= params.offlow && r.offLow < params.offlow_max);
+  // NOTE: the ext60 extension cap was REMOVED 2026-06-30 (it cut as many early winners as knives;
+  // ext60 is still computed as a tracker descriptor, but no longer gates entry).
   const matches = afterOff.filter(
     (r) => (params.nrhi_min <= 0 || r.nrHi >= params.nrhi_min) && (params.value <= 0 || (r.avgVal != null && r.avgVal >= params.value)),
   );

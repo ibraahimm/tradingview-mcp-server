@@ -47,20 +47,24 @@ them straight to the script — the script owns the defaults and all the math.
 |-------------|-----------|---------|
 | `dd_min`    | `50`      | Min correction depth `DDmax = (ATH − 52w_low)/ATH` (%) |
 | `below_min` | `40`      | Min `belowATH = (ATH − close)/ATH` — still corrected / room left (%) |
-| `below_max` | `95`      | Max `belowATH` — excludes the permanently-broken wreckage (%) |
-| `offlow`    | `20`      | Min `offLow = close/52w_low − 1` — the recovery wave is underway (%) |
-| `offlow_max`| `60`      | Max `offLow` — drop names that have already rebounded a lot off the low (already-extended) (%) |
+| `below_max` | `100`     | Max `belowATH` (%). Raised 95→100 on 2026-06-30 to admit the most-corrected names (deep-correction launches); set lower to re-exclude near-wreckage |
+| `offlow`    | `35`      | Min `offLow = close/52w_low − 1` — recovery underway. Raised 20→35 on 2026-07-01 (later, more-selective entry) (%) |
+| `offlow_max`| `80`      | Max `offLow` — not over-extended off the low. Raised 60→80 on 2026-07-01 (%) |
 | `p3m_min`   | `5`       | Min `Perf.3M` — a *meaningful* recent turn (%) |
 | `p3m_max`   | `40`      | Max `Perf.3M` — not overheated/unconsolidated (%) |
-| `p6m_min`   | `0`       | Min `Perf.6M` — require a positive 6-month trend (%) |
+| `p6m_min`   | `-30`     | Min `Perf.6M`. Lowered 0→-30 on 2026-07-01 to admit recent ignitions still negative on 6M (%) |
 | `p6m_max`   | `50`      | Max `Perf.6M` — not overextended (%) |
-| `p3y_max`   | `50`      | Max `Perf.3Y` — recency-of-correction guard. Lower to `≤20` or `≤0` to purge uptrends further (%) |
-| `p5y_max`   | `80`      | Max `Perf.5Y` — drop names whose 5-year recovery is already large (already-extended) (%) |
+| `p3y_max`   | `100`     | Max `Perf.3Y` — recency-of-correction guard (raised 50→100 on 2026-07-01). Lower to `≤20`/`≤0` to purge uptrends (%) |
+| `p5y_max`   | `100`     | Max `Perf.5Y` — 5-year recovery ceiling (raised 80→100 on 2026-07-01) (%) |
 | `p10y_max`  | `250`     | Max `Perf.10Y` — drop 10-year mega-winners (applied locally; null 10Y = <10y history, allowed) (%) |
 | `min_years` | `5`       | Min years since listing — computed in the script from `first_bar_time` (timestamp of the first price bar). Younger IPOs excluded |
 | `value`     | `0`       | Min 30-day avg traded value (SAR). `0` = OFF (apply liquidity in a later layer) |
 | `nrhi_min`  | `0`       | Optional min `nrHi = close/52w_high` strength gate (%). `0` = descriptor only |
 | `market`    | `ksa-main`| Fixed scope: Saudi Main Market only (do not change) |
+
+> **Removed 2026-06-30:** the `ext60_max` extension cap (max `close/EMA60 − 1`). A path-level review of the
+> last 3 months showed it cut as many early winners (e.g. +30%, +13%) as it dodged knives; `ext60` is now a
+> tracker descriptor only, not a gate.
 
 **Listing age (`min_years`, default 5):** enforced via the **direct** field `first_bar_time`
 (epoch seconds of the first traded bar ≈ listing date); the script computes
@@ -94,17 +98,18 @@ Non-negotiable. **Never substitute symbols from any other market.**
      - `{ field:"type", operator:"equal", value:"stock" }`
      - `{ field:"Perf.3M", operator:"greater_or_equal", value:<p3m_min> }`
      - `{ field:"Perf.3M", operator:"less", value:<p3m_max> }`
-     - `{ field:"Perf.6M", operator:"greater", value:<p6m_min> }`  (default 0)
+     - `{ field:"Perf.6M", operator:"greater", value:<p6m_min> }`  (default -30)
      - `{ field:"Perf.6M", operator:"less", value:<p6m_max> }`
-     - `{ field:"Perf.3Y", operator:"less", value:<p3y_max> }`  (default 50)
-     - `{ field:"Perf.5Y", operator:"less", value:<p5y_max> }`  (default 80; the 5Y ceiling)
+     - `{ field:"Perf.3Y", operator:"less", value:<p3y_max> }`  (default 100)
+     - `{ field:"Perf.5Y", operator:"less", value:<p5y_max> }`  (default 100; the 5Y ceiling)
      - Do **not** push `Perf.10Y` server-side: `Perf.10Y < p10y_max` is applied **locally** so that
        5–10-year names (null `Perf.10Y`) are kept; a server `less` filter would drop them. Same for
        the `offLow` band (a ratio).
    - `columns`: `["description","close","all_time_high","price_52_week_high","price_52_week_low","EMA21","EMA60","EMA200","Perf.3M","Perf.6M","Perf.Y","Perf.3Y","Perf.5Y","Perf.10Y","first_bar_time","average_volume_30d_calc","market_cap_basic","sector"]`
    - `EMA21`/`EMA60`/`EMA200` are **descriptor-only** for the tracker (so W1-only names carry an
-     EMA200 reading for its FAILED rule). They are **not** filtered/gated and **not** shown in the
-     table or CSV — do **not** add EMA conditions to `filters`.
+     EMA200 reading for its FAILED rule, plus `ext60`/`ema21gap`/`vs200` columns). They are **not**
+     pushed to `filters` server-side, **not** shown in the table or CSV, and **no longer gate** entry
+     (the `ext60_max` extension cap was removed 2026-06-30) — do **not** add EMA conditions to `filters`.
    - The listing-age requirement (`min_years`) is applied **locally** in the script from
      `first_bar_time` — do not push it server-side.
    - `sort_by:"market_cap_basic"`, `sort_order:"desc"`, `limit:200`
@@ -134,8 +139,8 @@ Non-negotiable. **Never substitute symbols from any other market.**
    ```
    The script's stdout has **two parts separated by a line that is exactly `===CHART_LINKS===`**:
    - **Before the sentinel** — a **Funnel block** (counts after server conditions → DDmax →
-     belowATH → offLow → final survivors), then the **box-grid table + summary**. **Print this
-     whole part as-is inside a fenced ```text code block.** Table columns (fixed order):
+     belowATH → offLow → final survivors), then the **box-grid
+     table + summary**. **Print this whole part as-is inside a fenced ```text code block.** Table columns (fixed order):
      `Sym Name DD% bATH offL nrHi 3M 6M 1Y 3Y 5Y 10Y ATHx Val Cap Sec Tag`, where **Tag** is
      `★` for `Perf.3Y ≤ 0` (genuine recent correction) and `⚠up` for `Perf.3Y > 0`
      (uptrend-leaning). Do NOT convert it to a Markdown/ASCII/TSV table and do NOT split it.
@@ -177,6 +182,12 @@ Non-negotiable. **Never substitute symbols from any other market.**
   (`fundamental_currency_code = "USD"`), while prices are in SAR. The script multiplies by the
   SAR/USD peg (3.75) so the `Cap` column is in SAR, consistent with `close`/`Val`. (`Val` =
   `avg_volume × close` is already SAR.)
+- **`ext60` extension cap — REMOVED 2026-06-30 (was: reject `close/EMA60 − 1 > 10%`).** The cap was
+  originally backtest-derived (the most-stretched W1-origin entries appeared to mean-revert), but a
+  pooled 20-year rigor re-test found it statistically **inert**, and a day-by-day review of the last
+  3 months showed it **cut as many early winners as knives** — it would have rejected `2380` (+30%),
+  `5110` (+13%) and `2050` (+12%) to avoid a few −15% names, and the single most-extended name was a
+  clean winner. `ext60` is retained as a tracker descriptor only; it no longer gates entry.
 - **No liquidity by default** (`value=0`): this is a discovery layer. Apply the liquidity +
   moving-average timing as a later, separate layer (or pass `value=…`).
 - **ADR/true drawdown caveats:** `52w_low` is a proxy for the cycle trough; a stock that bottomed
