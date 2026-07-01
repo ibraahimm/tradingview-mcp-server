@@ -66,6 +66,9 @@ jobs:
       - name: Engine — rule-vector conformance (W1/W2/W3 decisions + funnel order)
         run: python research/spec/conformance/rule_runner.py
 
+      - name: Methodology parity — live saudi-stage2.js / saudi-wave2.js == rules.yaml gates
+        run: python research/spec/conformance/methodology_parity.py
+
       - name: Engine — screen-run self-test (age_years + value/ADV + funnel + survivors)
         run: python -m research.engine.selftest_screen
 
