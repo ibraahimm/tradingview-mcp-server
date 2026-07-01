@@ -52,34 +52,41 @@ would wrongly exclude legitimate early-second-wave names.
 Parse `` for `key=value` tokens. Any key not supplied uses its default. Forward
 them straight to the script — the script owns the defaults and all the math.
 
-| Key          | Default | Meaning |
-|--------------|---------|---------|
-| `dd_min`     | `45`    | Min correction depth `DDmax = (ATH − 52w_low)/ATH` (%) |
-| `below_min`  | `20`    | Min `belowATH = (ATH − close)/ATH` — still corrected / room left (%) |
-| `below_max`  | `80`    | Max `belowATH` — excludes still-wreckage names (%) |
-| `offlow`     | `35`    | Min `offLow = close/52w_low − 1` — first wave already advanced. Raised 30→35 on 2026-07-01 (%) |
-| `offlow_max` | `80`    | Max `offLow` — not over-extended off the low. Lowered 100→80 on 2026-07-01 (%) |
-| `ema_gap_min`| `-2`    | Min `EMA21/EMA60 − 1` — the coil: fast EMA may sit just below the mid EMA (%) |
-| `ema_gap_max`| `5`     | Max `EMA21/EMA60 − 1` — fast EMA not far above the mid EMA (still coiled) (%) |
+> **Canonical values live in [`research/spec/rules.yaml`](../../research/spec/rules.yaml)** (rule
+> `W2` → `params`), CI-locked to the script by `methodology_parity.py`; the **change history** is in
+> [`research/spec/decisions.md`](../../research/spec/decisions.md). This table documents parameter
+> **keys and meaning only — it restates no default values.** For any key the user does not override,
+> the script applies the canonical default.
 
-> **Removed 2026-06-30:** the `ext21_max` extension cap (max `close/EMA21 − 1`). W2 still requires the
-> **reclaim** (`close ≥ EMA21`); only the upper "not-extended" cap is gone — see the W1 note for the rationale.
-| `p1m_min`    | `0`     | Min `Perf.1M` — monthly momentum already turned up (>0) (%) |
-| `p1m_max`    | `15`    | Max `Perf.1M` — the recent month is not vertical/overheated (%) |
-| `p3m_min`    | `0`     | Min `Perf.3M` (%) |
-| `p3m_max`    | `40`    | Max `Perf.3M` — not overheated (%) |
-| `p6m_min`    | `-10`   | Min `Perf.6M`. Lowered 3→-10 on 2026-07-01 (%) |
-| `p6m_max`    | `80`    | Max `Perf.6M` — only orderly wave-1 advances (%) |
-| `py_min`     | `0`     | Min `Perf.1Y` — confirmed 1-year uptrend (>0) (%) |
-| `p3y_max`    | `130`   | Max `Perf.3Y` — keep to moderate recoveries. Raised 100→130 on 2026-07-01 (%) |
-| `p5y_max`    | `200`   | Max `Perf.5Y` — allow large recovery (wave 2 wants recovered names) (%) |
-| `p10y_max`   | `400`   | Max `Perf.10Y` (applied locally; null 10Y = <10y history, allowed) (%) |
-| `min_years`  | `5`     | Min years since listing — computed from `first_bar_time`. Younger IPOs excluded |
-| `value`      | `0`     | Min 30-day avg traded value (SAR). `0` = OFF |
-| `nrhi_min`   | `0`     | Optional min `nrHi = close/52w_high` gate (%). `0` = descriptor only |
-| `market`     | `ksa-main` | Fixed scope: Saudi Main Market only (do not change) |
+| Key          | Meaning |
+|--------------|---------|
+| `dd_min`     | Min correction depth `DDmax = (ATH − 52w_low)/ATH` (%) |
+| `below_min`  | Min `belowATH = (ATH − close)/ATH` — still corrected / room left (%) |
+| `below_max`  | Max `belowATH` — excludes still-wreckage names (%) |
+| `offlow`     | Min `offLow = close/52w_low − 1` — first wave already advanced (%) |
+| `offlow_max` | Max `offLow` — not over-extended off the low (%) |
+| `ema_gap_min`| Min `EMA21/EMA60 − 1` — the coil: fast EMA may sit just below the mid EMA (%) |
+| `ema_gap_max`| Max `EMA21/EMA60 − 1` — fast EMA not far above the mid EMA (still coiled) (%) |
+| `p1m_min`    | Min `Perf.1M` — monthly momentum already turned up (%) |
+| `p1m_max`    | Max `Perf.1M` — the recent month is not vertical/overheated (%) |
+| `p3m_min`    | Min `Perf.3M` (%) |
+| `p3m_max`    | Max `Perf.3M` — not overheated (%) |
+| `p6m_min`    | Min `Perf.6M` (%) |
+| `p6m_max`    | Max `Perf.6M` — only orderly wave-1 advances (%) |
+| `py_min`     | Min `Perf.1Y` — confirmed 1-year uptrend (%) |
+| `p3y_max`    | Max `Perf.3Y` — keep to moderate recoveries (%) |
+| `p5y_max`    | Max `Perf.5Y` — allow large recovery (wave 2 wants recovered names) (%) |
+| `p10y_max`   | Max `Perf.10Y` (applied locally; null 10Y = <10y history, allowed) (%) |
+| `min_years`  | Min years since listing — computed from `first_bar_time`. Younger IPOs excluded |
+| `value`      | Min 30-day avg traded value (SAR) liquidity floor; disabled unless set |
+| `nrhi_min`   | Optional min `nrHi = close/52w_high` gate (%); descriptor-only unless set |
+| `market`     | Fixed scope: Saudi Main Market only (do not change) |
 
-**Listing age (`min_years`, default 5):** enforced via the **direct** field `first_bar_time`
+> **`ext21_max` extension cap — removed** (W2 still requires the reclaim `close ≥ EMA21`; only the
+> upper "not-extended" cap is gone). Rationale and validation:
+> [`research/spec/decisions.md`](../../research/spec/decisions.md) D-2026-06-30-01.
+
+**Listing age (`min_years`):** enforced via the **direct** field `first_bar_time`
 (epoch seconds of the first traded bar ≈ listing date); the script computes
 `ageYears = (now − first_bar_time)/yr` and drops anything younger than `min_years`. Do **not**
 use `Perf.5Y` existence as the listing proxy — TradingView returns a `Perf.5Y` value even for

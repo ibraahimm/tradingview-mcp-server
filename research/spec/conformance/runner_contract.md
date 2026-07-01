@@ -4,6 +4,10 @@ Defines the interface both implementations expose so the **same** runner can val
 the **same** golden vectors. This is the bridge that keeps the TypeScript live screener and the
 Python research engine semantically identical without forcing one language.
 
+> This is the **golden-vector runner contract**, one of the repo's domain-scoped contracts. Rationale
+> umbrella: the three-truths model in [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md) §2. Contract map
+> and documentation architecture: [`../../../DOCUMENTATION.md`](../../../DOCUMENTATION.md) §5.
+
 ## The implementation adapter
 
 Each implementation provides a small adapter exposing its functions under stable ids:

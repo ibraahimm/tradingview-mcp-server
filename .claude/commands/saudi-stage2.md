@@ -43,30 +43,37 @@ notes at the bottom.
 Parse `$ARGUMENTS` for `key=value` tokens. Any key not supplied uses its default. Forward
 them straight to the script — the script owns the defaults and all the math.
 
-| Key         | Default   | Meaning |
-|-------------|-----------|---------|
-| `dd_min`    | `50`      | Min correction depth `DDmax = (ATH − 52w_low)/ATH` (%) |
-| `below_min` | `40`      | Min `belowATH = (ATH − close)/ATH` — still corrected / room left (%) |
-| `below_max` | `100`     | Max `belowATH` (%). Raised 95→100 on 2026-06-30 to admit the most-corrected names (deep-correction launches); set lower to re-exclude near-wreckage |
-| `offlow`    | `35`      | Min `offLow = close/52w_low − 1` — recovery underway. Raised 20→35 on 2026-07-01 (later, more-selective entry) (%) |
-| `offlow_max`| `80`      | Max `offLow` — not over-extended off the low. Raised 60→80 on 2026-07-01 (%) |
-| `p3m_min`   | `5`       | Min `Perf.3M` — a *meaningful* recent turn (%) |
-| `p3m_max`   | `40`      | Max `Perf.3M` — not overheated/unconsolidated (%) |
-| `p6m_min`   | `-30`     | Min `Perf.6M`. Lowered 0→-30 on 2026-07-01 to admit recent ignitions still negative on 6M (%) |
-| `p6m_max`   | `50`      | Max `Perf.6M` — not overextended (%) |
-| `p3y_max`   | `100`     | Max `Perf.3Y` — recency-of-correction guard (raised 50→100 on 2026-07-01). Lower to `≤20`/`≤0` to purge uptrends (%) |
-| `p5y_max`   | `100`     | Max `Perf.5Y` — 5-year recovery ceiling (raised 80→100 on 2026-07-01) (%) |
-| `p10y_max`  | `250`     | Max `Perf.10Y` — drop 10-year mega-winners (applied locally; null 10Y = <10y history, allowed) (%) |
-| `min_years` | `5`       | Min years since listing — computed in the script from `first_bar_time` (timestamp of the first price bar). Younger IPOs excluded |
-| `value`     | `0`       | Min 30-day avg traded value (SAR). `0` = OFF (apply liquidity in a later layer) |
-| `nrhi_min`  | `0`       | Optional min `nrHi = close/52w_high` strength gate (%). `0` = descriptor only |
-| `market`    | `ksa-main`| Fixed scope: Saudi Main Market only (do not change) |
+> **Canonical values live in [`research/spec/rules.yaml`](../../research/spec/rules.yaml)** (rule
+> `W1` → `params`), CI-locked to the script by `methodology_parity.py`; the **change history** (what
+> moved, when, why, validation status) is in
+> [`research/spec/decisions.md`](../../research/spec/decisions.md). This table documents parameter
+> **keys and meaning only — it restates no default values.** For any key the user does not override,
+> the script applies the canonical default.
 
-> **Removed 2026-06-30:** the `ext60_max` extension cap (max `close/EMA60 − 1`). A path-level review of the
-> last 3 months showed it cut as many early winners (e.g. +30%, +13%) as it dodged knives; `ext60` is now a
-> tracker descriptor only, not a gate.
+| Key         | Meaning |
+|-------------|---------|
+| `dd_min`    | Min correction depth `DDmax = (ATH − 52w_low)/ATH` (%) |
+| `below_min` | Min `belowATH = (ATH − close)/ATH` — still corrected / room left (%) |
+| `below_max` | Max `belowATH` — set lower to re-exclude near-wreckage (%) |
+| `offlow`    | Min `offLow = close/52w_low − 1` — recovery underway (a higher floor = later, more-selective entry) (%) |
+| `offlow_max`| Max `offLow` — drop names that have already rebounded far off the low (%) |
+| `p3m_min`   | Min `Perf.3M` — a *meaningful* recent turn (%) |
+| `p3m_max`   | Max `Perf.3M` — not overheated/unconsolidated (%) |
+| `p6m_min`   | Min `Perf.6M` — a lower floor admits recent ignitions still negative on 6M (%) |
+| `p6m_max`   | Max `Perf.6M` — not overextended (%) |
+| `p3y_max`   | Max `Perf.3Y` — recency-of-correction guard; lower it to purge uptrend-leaning names (%) |
+| `p5y_max`   | Max `Perf.5Y` — 5-year recovery ceiling (%) |
+| `p10y_max`  | Max `Perf.10Y` — drop 10-year mega-winners (applied locally; null 10Y = <10y history, allowed) (%) |
+| `min_years` | Min years since listing — computed in the script from `first_bar_time` (timestamp of the first price bar). Younger IPOs excluded |
+| `value`     | Min 30-day avg traded value (SAR) liquidity floor; disabled unless set (apply liquidity in a later layer) |
+| `nrhi_min`  | Optional min `nrHi = close/52w_high` strength gate (%); descriptor-only unless set |
+| `market`    | Fixed scope: Saudi Main Market only (do not change) |
 
-**Listing age (`min_years`, default 5):** enforced via the **direct** field `first_bar_time`
+> **`ext60_max` extension cap — removed** (was a W1/W2 gate; retained as a tracker descriptor only).
+> Rationale and validation: [`research/spec/decisions.md`](../../research/spec/decisions.md)
+> D-2026-06-30-01.
+
+**Listing age (`min_years`):** enforced via the **direct** field `first_bar_time`
 (epoch seconds of the first traded bar ≈ listing date); the script computes
 `ageYears = (now − first_bar_time)/yr` and drops anything younger than `min_years`. Do **not**
 use `Perf.5Y` existence as the listing proxy — TradingView returns a `Perf.5Y` value even for

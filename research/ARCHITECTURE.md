@@ -1,10 +1,20 @@
 # Tadawul Quant Research & Backtesting Platform — Architecture
 
 **Status:** Draft v0.1 · 2026-06-27
-**Scope:** High-fidelity historical backtesting + research platform for the Saudi Main
-Market (TADAWUL) wave-screening strategies (`/saudi-stage2` = W1, `/saudi-wave2` = W2,
-`/saudi-wave3` = W3), and a continuous conformance contract with the live TradingView
-screener that those strategies trade on.
+**Scope.** This is the home of **system-wide / cross-cutting rationale** for the whole
+repository — its three subsystems and how they fit together:
+1. the **TradingView MCP server + CLI** (`src/`) — the market-data screener the product trades on;
+2. the **live Saudi wave-screening product** (`.claude/commands/` + `.claude/scripts/`) —
+   `/saudi-stage2` (W1), `/saudi-wave2` (W2), `/saudi-wave3` (W3), `/saudi-track`;
+3. the **quant research & backtesting platform** (`research/`) — this document's most detailed
+   subject, plus the continuous conformance contract with the live screener those strategies trade on.
+
+**Rationale boundary (see [`/DOCUMENTATION.md`](../DOCUMENTATION.md) §5, and its D6 rule).**
+System and cross-subsystem rationale live *here*. Rationale **local** to one directory lives in
+that directory's `README.md`, which **links up** to this document rather than re-explaining the
+whole; a local README never restates a global decision. The rest of the document below details
+subsystem 3 (the research platform); subsystems 1–2 are documented operationally in their own
+directories and depend on the same canon and conformance contracts described here.
 
 This document records **what** we build, **why**, **what alternatives were considered**,
 and **what trade-off** each decision accepts. It is the foundation the implementation works

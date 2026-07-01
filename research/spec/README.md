@@ -4,6 +4,10 @@ The **single authoritative definition** of every derived feature and screen rule
 that two implementations — the live **TypeScript** screener (production) and the **Python/Polars**
 research engine (backtest) — compute *the same thing*, provably, forever.
 
+> **Repository documentation architecture** — how docs are organized across the whole repo
+> (fact types, the single-home rule, authority classes, the seam rule) lives in the top-level
+> [`DOCUMENTATION.md`](../../DOCUMENTATION.md). This README is the *local* index for `research/spec/`.
+
 ## Why a spec at all (and why executable)
 
 A prose definition drifts the day it is written. So the spec is **prose + an executable contract**:
@@ -44,13 +48,24 @@ corporate-action adjustment method, calendar/holiday handling, rolling-window ed
 
 ## Versioning & change control (semver)
 
-- **PATCH** — clarification with no numeric change to any output (docs, comments).
-- **MINOR** — a new feature/rule, or a backward-compatible addition; existing outputs unchanged.
-- **MAJOR** — any change to an existing feature/rule definition that can alter a historical value.
+`spec_version` versions the **feature spec only** (`features.yaml` algorithms + bindings — the
+computational identity of the panel), validated by `vectors/` and, on change, requiring a panel rebuild
+(`decisions.md` D-2026-07-02-01). Scope of a bump:
 
-Any MINOR/MAJOR change **must**: bump `VERSION`, add/adjust the relevant golden vector(s), and trigger
-a panel rebuild under the new `spec_version` (recorded in every run manifest, see `../ARCHITECTURE.md`
-§L8). Backtests are only comparable within the same `spec_version`.
+- **PATCH** — clarification with no numeric change to any feature output (docs, comments).
+- **MINOR** — a new feature, or a backward-compatible addition; existing feature outputs unchanged.
+- **MAJOR** — a change to an existing **feature** definition that can alter a historical feature value.
+
+Any MINOR/MAJOR **feature** change **must**: bump `VERSION`, add/adjust the relevant golden vector(s), and
+trigger a panel rebuild under the new `spec_version` (recorded in every run manifest, see
+`../ARCHITECTURE.md` §L8).
+
+**Rule (`rules.yaml`) changes are different.** A change to a rule **threshold or structure** does *not*
+alter any computed feature value or the panel, so it is **not** a `VERSION` bump — it is a **Methodology
+Decision** recorded in [`decisions.md`](./decisions.md) (plus a `rule_vectors/` case when a boundary
+moves). The `spec_version` carried in `rules.yaml` is a *feature-spec compatibility pointer* ("the
+feature-spec these rules bind to"), not a methodology version. Backtest comparability is therefore two
+coordinates — `(spec_version, latest-Methodology-decision-ID)` — see `../../DOCUMENTATION.md` §6.
 
 ## Units & null policy (read before implementing)
 
@@ -60,9 +75,14 @@ a panel rebuild under the new `spec_version` (recorded in every run manifest, se
 - Unmet preconditions emit **null** — never `0`, never a NaN sentinel. Ratios propagate null from any
   null input (e.g. `ext60` is null while `ema60` is in warmup).
 
-## Adding or changing a feature (checklist)
+## Changing a feature vs changing a rule (checklists)
 
-1. Edit `features.yaml` (and `rules.yaml` if a rule changes). 2. Add/adjust a golden vector under
-`vectors/`. 3. Bump `VERSION` per semver. 4. Implement in **both** engines. 5. CI golden-vector gate
-must pass (every feature must map to ≥1 vector — see `conformance/runner_contract.md`). 6. Rebuild the
-panel; note the new `spec_version` in affected runs.
+**A feature change** (`features.yaml`): 1. Edit `features.yaml`. 2. Add/adjust a golden vector under
+`vectors/`. 3. Bump `VERSION` per semver. 4. Implement in **both** engines. 5. CI golden-vector gate must
+pass (every feature must map to ≥1 vector — see `conformance/runner_contract.md`). 6. Rebuild the panel;
+note the new `spec_version` in affected runs.
+
+**A rule threshold/structural change** (`rules.yaml`): 1. Edit `rules.yaml` **and** the live JS together
+(`methodology_parity.py` enforces parity). 2. Add/adjust a `rule_vectors/` case if a boundary moves.
+3. Record a **Methodology Decision** in [`decisions.md`](./decisions.md) — choice + validation status,
+numbers by reference. 4. **No `VERSION` bump, no panel rebuild** (feature values are unchanged).

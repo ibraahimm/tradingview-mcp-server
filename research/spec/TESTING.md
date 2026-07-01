@@ -3,6 +3,10 @@
 This pins **how we keep the official methodology stable while leaving experimentation free**. The
 dividing line is simple: **runtime override vs. file edit.**
 
+> This is the **methodology-change contract**, one of the repo's domain-scoped contracts. Rationale
+> umbrella: the three-truths model in [`../ARCHITECTURE.md`](../ARCHITECTURE.md) §2. Contract map and
+> documentation architecture: [`../../DOCUMENTATION.md`](../../DOCUMENTATION.md) §5.
+
 ## The three categories
 
 | Category | Defines/asserts | Mechanism | CI-gated | Lives in |

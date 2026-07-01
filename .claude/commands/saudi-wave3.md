@@ -44,22 +44,27 @@ EMA 21 / 60 / 200 only (no SMA). Scanner fields: `EMA21`, `EMA60`, `EMA200`.
 
 Parse `` for `key=value` tokens. Any key not supplied uses its default. Forward to the script.
 
-| Key | Default | Meaning |
-|-----|---------|---------|
-| `vs200_min` | `0` | Min `close/EMA200 − 1` — **gate**: close above EMA200 (mature trend) (%) |
-| `ema_gap_min` / `ema_gap_max` | `-2` / `5` | The coil: `EMA21/EMA60 − 1` band (%) |
-| `ext21_max` | `10` | Max `close/EMA21 − 1` — reclaimed EMA21 but not extended (%) |
-| `nrhi_min` / `nrhi_max` | `78` / `98` | `close/52w_high` band — pulled back from a recent high (%) |
-| `p1m_min` / `p1m_max` | `0` / `15` | `Perf.1M` — turning up out of the coil, not vertical (%) |
-| `p3m_min` / `p3m_max` | `0` / `40` | `Perf.3M` — recent contraction = modest (%) |
-| `p6m_min` / `p6m_max` | `0` / `100` | `Perf.6M` (%) |
-| `py_min` / `py_max` | `0` / `200` | `Perf.1Y` (%) |
-| `p3y_min` / `p3y_max` | `50` / `300` | **`Perf.3Y` band — the min is the primary W3 discriminator** (%) |
-| `p5y_min` / `p5y_max` | `30` / `500` | `Perf.5Y` band — softer min (5Y less reliable when peak predates window) (%) |
-| `p10y_max` | `1000` | Max `Perf.10Y` (applied locally; null = <10y history, allowed) (%) |
-| `min_years` | `5` | Min years since listing (from `first_bar_time`) |
-| `value` | `0` | Min 30-day avg traded value (SAR). `0` = OFF |
-| `market` | `ksa-main` | Fixed scope (do not change) |
+> **Canonical values live in [`research/spec/rules.yaml`](../../research/spec/rules.yaml)** (rule
+> `W3` → `params`), CI-locked to the script by `methodology_parity.py`. This table documents
+> parameter **keys and meaning only — it restates no default values.** For any key the user does not
+> override, the script applies the canonical default.
+
+| Key | Meaning |
+|-----|---------|
+| `vs200_min` | Min `close/EMA200 − 1` — **gate**: close above EMA200 (mature trend) (%) |
+| `ema_gap_min` / `ema_gap_max` | The coil: `EMA21/EMA60 − 1` band (%) |
+| `ext21_max` | Max `close/EMA21 − 1` — reclaimed EMA21 but not extended (%) |
+| `nrhi_min` / `nrhi_max` | `close/52w_high` band — pulled back from a recent high (%) |
+| `p1m_min` / `p1m_max` | `Perf.1M` — turning up out of the coil, not vertical (%) |
+| `p3m_min` / `p3m_max` | `Perf.3M` — recent contraction = modest (%) |
+| `p6m_min` / `p6m_max` | `Perf.6M` (%) |
+| `py_min` / `py_max` | `Perf.1Y` (%) |
+| `p3y_min` / `p3y_max` | **`Perf.3Y` band — the min is the primary W3 discriminator** (%) |
+| `p5y_min` / `p5y_max` | `Perf.5Y` band — softer min (5Y less reliable when peak predates window) (%) |
+| `p10y_max` | Max `Perf.10Y` (applied locally; null = <10y history, allowed) (%) |
+| `min_years` | Min years since listing (from `first_bar_time`) |
+| `value` | Min 30-day avg traded value (SAR) liquidity floor; disabled unless set |
+| `market` | Fixed scope (do not change) |
 
 `DDmax` / `belowATH` / `offLow` have **no gate parameters** — computed and shown as descriptors only.
 

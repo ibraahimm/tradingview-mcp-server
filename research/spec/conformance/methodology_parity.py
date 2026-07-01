@@ -27,6 +27,11 @@ ROOT = Path(__file__).resolve().parents[3]
 RULES = yaml.safe_load((ROOT / "research/spec/rules.yaml").read_text())["rules"]
 JS = {"W1": ROOT / ".claude/scripts/saudi-stage2.js",
       "W2": ROOT / ".claude/scripts/saudi-wave2.js"}
+# Command docs: their Step-2 server-side `(default N)` annotations mirror rules.yaml defaults for the
+# coarse pre-filter. Tier-1 SSOT lint (decisions.md D-2026-07-02-03) guards them against drift.
+DOCS = {"W1": ROOT / ".claude/commands/saudi-stage2.md",
+        "W2": ROOT / ".claude/commands/saudi-wave2.md",
+        "W3": ROOT / ".claude/commands/saudi-wave3.md"}
 
 # JS object-key -> rules.yaml param name (only the few that differ)
 RENAME = {"offlow": "offlow_min", "value": "value_min"}
@@ -42,6 +47,15 @@ def js_params(path: Path) -> dict:
     for key, val in re.findall(r"(\w+):\s*num\(\"[\w]+\",\s*(-?\d+(?:\.\d+)?)\)", block.group(1)):
         out[RENAME.get(key, key)] = float(val)
     return out
+
+
+def doc_step2_params(path: Path) -> dict:
+    """Extract a command doc's Step-2 server-side `(default N)` annotations: {param: number}.
+    Matches lines like `... value:<p6m_min> } `  (default -30)`. Param placeholders use the
+    rules.yaml names directly. These mirror canon and were previously an UNGUARDED duplication."""
+    txt = path.read_text()
+    return {key: float(val) for key, val in
+            re.findall(r"value:<(\w+)>[^\n]*?\(default\s+(-?\d+(?:\.\d+)?)", txt)}
 
 
 def main() -> int:
@@ -62,12 +76,25 @@ def main() -> int:
             print(f"  {rule}: {len(spec)} params — live JS == rules.yaml "
                   f"({'MISMATCH' if any(f.startswith(rule + '.') for f in fails) else 'OK'})")
 
+    # Tier-1 SSOT lint: command-doc Step-2 (default N) annotations vs rules.yaml (D-2026-07-02-03).
+    for rule in ("W1", "W2", "W3"):
+        spec = {k: float(v) for k, v in RULES[rule]["params"].items()}
+        doc = doc_step2_params(DOCS[rule])
+        unknown = sorted(set(doc) - set(spec))
+        if unknown:
+            fails.append(f"{rule} doc: Step-2 (default) for param(s) not in rules.yaml: {unknown}")
+        mism = [k for k in sorted(set(doc) & set(spec)) if abs(doc[k] - spec[k]) > 1e-9]
+        for k in mism:
+            fails.append(f"{rule} doc.{k}: {DOCS[rule].name} (default {doc[k]}) != rules.yaml {spec[k]}")
+        print(f"  {rule}: {len(doc)} Step-2 default(s) in {DOCS[rule].name} — "
+              f"{'MISMATCH' if (unknown or mism) else 'OK'} vs rules.yaml")
+
     if fails:
         print(f"\nFAIL — live screener and rules.yaml have drifted ({len(fails)}):")
         for f in fails:
             print("  -", f)
         return 1
-    print("PASS: methodology parity — live saudi-stage2.js / saudi-wave2.js == rules.yaml on all W1/W2 gates.")
+    print("PASS: methodology parity — live JS (W1/W2) + command-doc Step-2 defaults (W1/W2/W3) == rules.yaml.")
     return 0
 
 
