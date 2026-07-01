@@ -32,6 +32,10 @@ JS = {"W1": ROOT / ".claude/scripts/saudi-stage2.js",
 DOCS = {"W1": ROOT / ".claude/commands/saudi-stage2.md",
         "W2": ROOT / ".claude/commands/saudi-wave2.md",
         "W3": ROOT / ".claude/commands/saudi-wave3.md"}
+# Per-rule minimum Step-2 (default N) annotation counts, locked to the verified 2026-07-02 state
+# (D-2026-07-02-03 addendum): a silently removed annotation must FAIL the gate, not shrink coverage.
+# W3 Step-2 uses only value:<param> placeholders (no canon literals) -> 0 is complete, not a gap.
+MIN_DOC_DEFAULTS = {"W1": 3, "W2": 9, "W3": 0}
 
 # JS object-key -> rules.yaml param name (only the few that differ)
 RENAME = {"offlow": "offlow_min", "value": "value_min"}
@@ -80,14 +84,18 @@ def main() -> int:
     for rule in ("W1", "W2", "W3"):
         spec = {k: float(v) for k, v in RULES[rule]["params"].items()}
         doc = doc_step2_params(DOCS[rule])
+        short = len(doc) < MIN_DOC_DEFAULTS[rule]
+        if short:
+            fails.append(f"{rule} doc: Step-2 (default) coverage shrank — {len(doc)} < min "
+                         f"{MIN_DOC_DEFAULTS[rule]} (annotation removed? see decisions.md D-2026-07-02-03)")
         unknown = sorted(set(doc) - set(spec))
         if unknown:
             fails.append(f"{rule} doc: Step-2 (default) for param(s) not in rules.yaml: {unknown}")
         mism = [k for k in sorted(set(doc) & set(spec)) if abs(doc[k] - spec[k]) > 1e-9]
         for k in mism:
             fails.append(f"{rule} doc.{k}: {DOCS[rule].name} (default {doc[k]}) != rules.yaml {spec[k]}")
-        print(f"  {rule}: {len(doc)} Step-2 default(s) in {DOCS[rule].name} — "
-              f"{'MISMATCH' if (unknown or mism) else 'OK'} vs rules.yaml")
+        print(f"  {rule}: {len(doc)} Step-2 default(s) in {DOCS[rule].name} (min {MIN_DOC_DEFAULTS[rule]}) — "
+              f"{'MISMATCH' if (unknown or mism or short) else 'OK'} vs rules.yaml")
 
     if fails:
         print(f"\nFAIL — live screener and rules.yaml have drifted ({len(fails)}):")

@@ -84,6 +84,10 @@ guarded).
 
 **Relations.** Enforces the anti-duplication invariant of D-2026-07-02-02 (the documentation architecture).
 
+**Addendum (2026-07-02).** Hardened with per-rule minimum annotation counts (`MIN_DOC_DEFAULTS`:
+W1≥3 / W2≥9 / W3≥0) so a silently removed annotation **fails** the gate rather than shrinking coverage.
+W3's Step-2 was verified to contain no canon-owned values (placeholders only) — its `0` is complete, not a gap.
+
 ---
 
 ## Backfilled entries
