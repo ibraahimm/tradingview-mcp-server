@@ -1,8 +1,9 @@
 
 # HANDOFF — TradingView MCP + Saudi Wave Screening + Research Platform
 
-**Updated:** 2026-07-02 · **Branch:** `feat/saudi-stage2-screen` · **HEAD:** see `git log --oneline -8`
-(this session adds the documentation-architecture + decision-log commits, plus the comments-only `rules.yaml` commit).
+**Updated:** 2026-07-03 · **Branch:** `feat/saudi-stage2-screen` · **HEAD:** see `git log --oneline -14`
+(this session: documentation architecture + decision log, the Tier-1 SSOT lint, the CI-YAML fix, and the
+**canonical rename `W1/W2/W3 → TASI-W1/TASI-W2/TASI-W3`**). All work committed and pushed to `mine`.
 
 > This file is a **map, not a substitute** for the repo. The repository is the source of truth. It is
 > **Session state** (disposable, per [`/DOCUMENTATION.md`](../DOCUMENTATION.md)) — it summarizes by
@@ -93,6 +94,14 @@ widening (D-2026-07-01-01), and the decision to **retain** it after forward test
 (D-2026-07-01-02). **Deltas are not restated here** — read choice + validation status in the log; numbers by
 reference to `rules.yaml`.
 
+**Governance decisions this session** (same log): `spec_version` scoping — rule changes are Decisions, not
+`VERSION` bumps (D-2026-07-02-01); adoption of the **documentation architecture** `DOCUMENTATION.md`
+(D-2026-07-02-02); the **Tier-1 SSOT lint** in `methodology_parity.py` (D-2026-07-02-03); the CI-outage
+record + workflow fix (D-2026-07-02-04); and the **canonical rename `W1/W2/W3 → TASI-W1/TASI-W2/TASI-W3`**
+(D-2026-07-02-05) — behavior-preserving, no `VERSION` bump, all gates green, live ledger migrated. Its
+execution report is [`research/reports/canonical-rename-2026-07-02.md`](../research/reports/canonical-rename-2026-07-02.md);
+the ledger rollback backup is `.claude/outputs/saudi-tracker.jsonl.bak-2026-07-02`.
+
 ## 7. Data
 
 - **`research/panel/tadawul_2026-06-28.parquet`** — the working panel. **GITIGNORED, never committed**
@@ -122,6 +131,11 @@ reference to `rules.yaml`.
 6. (Low priority, CI hygiene) Bump `actions/checkout` / `setup-python` / `setup-node` to versions that
    natively run on Node 24 — CI currently warns it is forcing Node 24 on the v4/v5 pins. Non-blocking;
    do before Node 20 is fully removed. (CI enforcement itself is restored — `decisions.md` D-2026-07-02-04.)
+
+**Working-tree note (intentional — do not "clean up"):** two items are deliberately uncommitted — a modified
+`package-lock.json` (not ours; never commit) and the untracked experiment
+`research/experiments/w1w2_param_forward_backtest.py` (kept local per an earlier call; the return-neutral
+finding it produced is recorded in D-2026-07-01-02). A fresh `git status` shows both; leave them.
 
 ## 10. How to run
 
