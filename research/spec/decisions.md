@@ -90,6 +90,26 @@ W3's Step-2 was verified to contain no canon-owned values (placeholders only) �
 
 ---
 
+## D-2026-07-02-04 · 2026-07-02 · Governance
+
+**Record (CI outage).** The `research-ci` workflow file carried an invalid YAML step name — line 96's
+`name:` was an unquoted plain scalar containing a colon-space (`… generation: schema/cadence/first-stamp`),
+which GitHub rejects as "Invalid workflow file" at parse time (no job executes). The invalid line was
+**introduced at `7908f7b`** (2026-06-29), but per the **GitHub Actions history the first failing run was
+#18, triggered by `e7bd6ef`**. So the **CI enforcement gap began at `e7bd6ef` (run #18, ~2026-07-01) —
+predating this session — and ran until this fix (2026-07-02).** (Both commits match the workflow's
+`research/**` paths filter; the earlier `7908f7b` change reached the remote in the same push batch, so #18
+is the first recorded failure.) During the gap the parity/conformance gates were enforced by **documented
+local runs** (cited in commit messages, e.g. `3070aa2`). This fix quotes the line-96 name; **CI enforcement
+resumes at this fix.** Recorded as its own entry (not an addendum to D-2026-07-02-03) because the outage
+predates the Tier-1 lint and concerns the whole CI.
+
+**Evidence.** GitHub Actions history (run #18 = first failure, commit `e7bd6ef`);
+`.github/workflows/research-ci.yml` line 96; `git blame` (introduced at `7908f7b`, 2026-06-29); local
+full-suite reproduction — every step PASS.
+
+---
+
 ## Backfilled entries
 
 *Recorded 2026-07-02 from commit history and reports; each keeps its original decision date.*
