@@ -20,7 +20,7 @@ def check(cond: bool, msg: str):
         FAILS.append(msg)
 
 
-# Baseline W1-passing price features (from the w1_defaults 'P' fixture).
+# Baseline TASI-W1-passing price features (from the w1_defaults 'P' fixture).
 BASE = dict(perf_3m=17.0, perf_6m=29.0, perf_3y=-20.0, perf_5y=-25.0, perf_10y=-8.0,
             ddmax=77.0, below_ath=68.0, off_low=39.0, ext60=7.6, nrhi=98.0)
 DATES = [date(2020, 1, d) for d in (1, 2, 3, 4, 5)]
@@ -46,8 +46,8 @@ def main() -> int:
         "list_date": [date(2014, 1, 1), date(2019, 12, 30)],
     }).with_columns(pl.col("list_date").cast(pl.Date))
 
-    # ---- Run 1: default W1 (value gate disabled: value_min=0) ----
-    surv, funnel, decided = run_screen(prices, sm, "W1", value_window=3)
+    # ---- Run 1: default TASI-W1 (value gate disabled: value_min=0) ----
+    surv, funnel, decided = run_screen(prices, sm, "TASI-W1", value_window=3)
     d = {(r["sec_id"], r["date"]): r for r in decided.iter_rows(named=True)}
 
     # age_years computation + gating
@@ -80,7 +80,7 @@ def main() -> int:
     check(all(counts[i] >= counts[i + 1] for i in range(len(counts) - 1)), "funnel not monotonic")
 
     # ---- Run 2: enable the value floor (value_min=1200) -> computed value participates ----
-    surv2, _, decided2 = run_screen(prices, sm, "W1", params_overrides={"value_min": 1200}, value_window=3)
+    surv2, _, decided2 = run_screen(prices, sm, "TASI-W1", params_overrides={"value_min": 1200}, value_window=3)
     d2 = {(r["sec_id"], r["date"]): r for r in decided2.iter_rows(named=True)}
     check(surv2.height == 2, f"with value_min=1200 AAA bars 3,4 survive (value>=1200), got {surv2.height}")
     check(d2[("AAA", DATES[4])]["passed"] is True, "AAA bar4 (value 1666.7) should pass value floor")

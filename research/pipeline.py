@@ -4,7 +4,7 @@
     python -m research.pipeline <companies_dir>
 
 Wires the whole platform on REAL data: load -> build_panel -> enrich (age_years, value) ->
-label forward returns -> evaluate W1 over every bar -> event-study (signals vs rest) -> governance
+label forward returns -> evaluate TASI-W1 over every bar -> event-study (signals vs rest) -> governance
 (out-of-sample split). Prints a report.
 
 IMPORTANT: this is ENGINE VALIDATION on RAW/UNADJUSTED prices — not strategy evaluation. Split/
@@ -95,16 +95,16 @@ def main():
     enriched = compute_value(compute_age_years(panel, sm))
     labeled = label_forward_returns(enriched, sm, horizons=[20, 60])
 
-    print(">> evaluate W1 over every bar ...")
+    print(">> evaluate TASI-W1 over every bar ...")
     rules = R.load_rules()
-    decided = R.evaluate_frame(rules["W1"], labeled)
+    decided = R.evaluate_frame(rules["TASI-W1"], labeled)
     nsig = decided.filter(pl.col("passed")).height
-    print(f"   W1 signals (passed bars): {nsig:,} of {decided.height:,}")
+    print(f"   TASI-W1 signals (passed bars): {nsig:,} of {decided.height:,}")
 
     latest = decided["date"].max()
     snap = enriched.filter(pl.col("date") == latest)
-    fn = R.funnel(rules["W1"], snap)
-    print(f">> W1 funnel @ latest {latest} ({snap.height} names): "
+    fn = R.funnel(rules["TASI-W1"], snap)
+    print(f">> TASI-W1 funnel @ latest {latest} ({snap.height} names): "
           + " -> ".join(f"{s}:{c}" for s, c in fn))
 
     print(">> event-study (signals vs rest), 60-trading-day forward return:")

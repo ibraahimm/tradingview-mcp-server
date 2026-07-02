@@ -1,4 +1,4 @@
-# Rule Vectors — golden fixtures for W1/W2/W3 decisions
+# Rule Vectors — golden fixtures for TASI-W1/TASI-W2/TASI-W3 decisions
 
 Frozen `feature-row → expected decision` fixtures for the screen rules (`../rules.yaml`), the
 rule-layer analogue of the feature golden vectors. They validate ordered predicate evaluation,
@@ -9,7 +9,7 @@ guards, and the **first failing gate** (not just pass/fail) — so evaluation *o
 
 ```
 rule_vectors/<case_id>/
-  case.json     # {case_id, spec_version, rule: "W1"|"W2"|"W3", params_overrides?, input_file, expected_file}
+  case.json     # {case_id, spec_version, rule: "TASI-W1"|"TASI-W2"|"TASI-W3", params_overrides?, input_file, expected_file}
   input.csv     # one row per candidate: a `label` column + the feature columns the rule reads
   expected.csv  # label, pass (true/false), first_fail (gate feature id, empty when pass)
 ```

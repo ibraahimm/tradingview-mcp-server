@@ -1,4 +1,4 @@
-"""Rule engine: evaluate the canonical W1/W2/W3 screen rules (../spec/rules.yaml).
+"""Rule engine: evaluate the canonical TASI-W1/TASI-W2/TASI-W3 screen rules (../spec/rules.yaml).
 
 Pure, ordered predicate evaluation over a feature row (a dict feature->value, None = null).
 Features come from the panel (price-derived) plus the reference/liquidity layer (age_years,
@@ -25,7 +25,7 @@ _GUARD_OPS = {">": "gt", "<": "lt", ">=": "ge", "<=": "le"}
 
 
 def load_rules(path: Path | None = None) -> dict:
-    """Load the W1/W2/W3 rule definitions from the canonical rules.yaml."""
+    """Load the TASI-W1/TASI-W2/TASI-W3 rule definitions from the canonical rules.yaml."""
     return yaml.safe_load((path or _RULES_PATH).read_text())["rules"]
 
 

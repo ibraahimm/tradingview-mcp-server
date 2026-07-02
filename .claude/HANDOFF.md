@@ -16,35 +16,35 @@
 
 1. **TS MCP server + CLI** (`src/`) — the TradingView screener wrapper (unchanged core).
 2. **Saudi wave screening — the live product** (`.claude/commands/` + `.claude/scripts/`) — on-demand
-   slash commands `/saudi-stage2` (W1), `/saudi-wave2` (W2), `/saudi-wave3` (W3), `/saudi-track` (tracker),
+   slash commands `/saudi-stage2` (TASI-W1), `/saudi-wave2` (TASI-W2), `/saudi-wave3` (TASI-W3), `/saudi-track` (tracker),
    each = MCP screen → node helper → print. Persistent CSVs in `.claude/outputs/`.
 3. **Research / backtesting platform** (`research/`, Python + polars) — answers, with rigor, whether the
    wave methodology has a real edge, and keeps the live screens honest.
 
 ## 2. The documented methodology (lifecycle)
 
-`collapse → W1 (deep-correction first-wave ENTRY) → W2 (re-coil continuation of W1 names) → W3 (mature
+`collapse → TASI-W1 (deep-correction first-wave ENTRY) → TASI-W2 (re-coil continuation of TASI-W1 names) → TASI-W3 (mature
 re-coil in a normal trend)`. The **tracker** = one journey per symbol across waves.
 
 **Current OFFICIAL gate values** — canonical in [`research/spec/rules.yaml`](../research/spec/rules.yaml)
-(`W1`/`W2`/`W3` → `params`), mirrored in the live JS and parity-locked by `methodology_parity.py`; change
+(`TASI-W1`/`TASI-W2`/`TASI-W3` → `params`), mirrored in the live JS and parity-locked by `methodology_parity.py`; change
 history in [`research/spec/decisions.md`](../research/spec/decisions.md). **Read the numbers from
 `rules.yaml`; this Session doc does not restate them.**
 
-- **W1** (`/saudi-stage2`) — deep-correction first-wave entry: listing-age, `DDmax`, `belowATH`, `offLow`,
+- **TASI-W1** (`/saudi-stage2`) — deep-correction first-wave entry: listing-age, `DDmax`, `belowATH`, `offLow`,
   and `Perf.3M/6M/3Y/5Y/10Y` gates. ext60 extension cap removed (`decisions.md` D-2026-06-30-01).
-- **W2** (`/saudi-wave2`) — re-coil continuation of W1 names: `close>EMA60`, the `EMA21/EMA60` coil, reclaim
+- **TASI-W2** (`/saudi-wave2`) — re-coil continuation of TASI-W1 names: `close>EMA60`, the `EMA21/EMA60` coil, reclaim
   `close≥EMA21` (ext21 upper cap removed), plus the deep-correction DNA (`DDmax`/`belowATH`/`offLow`) and Perf gates.
-- **W3** (`/saudi-wave3`) — mature re-coil near highs: `close>EMA200`, coil, `nrHi` band, `Perf.3Y` minimum
+- **TASI-W3** (`/saudi-wave3`) — mature re-coil near highs: `close>EMA200`, coil, `nrHi` band, `Perf.3Y` minimum
   (the discriminator). Not changed this session.
-- **Tracker** (`/saudi-track`): committed methodology is **W1/W2 only**. States `ACTIVE-W1/W2`, `GRAD★`,
+- **Tracker** (`/saudi-track`): committed methodology is **TASI-W1/TASI-W2 only**. States `ACTIVE-TASI-W1/TASI-W2`, `GRAD★`,
   `FAILED`, `STALE`, `EXPIRED`; badges `NEW/PROMOTED/nearATH`; metric `gainSinceSignal`. Its lifecycle
-  thresholds are owned by `.claude/scripts/saudi-tracker.js` (not `rules.yaml`). W3-in-tracker proposed
+  thresholds are owned by `.claude/scripts/saudi-tracker.js` (not `rules.yaml`). TASI-W3-in-tracker proposed
   earlier, never committed (see Open items).
 
 ## 3. Research platform (`research/`)
 
-- **`spec/rules.yaml`** — canonical W1/W2/W3 rule definitions (funnels + params). **Single source of truth**;
+- **`spec/rules.yaml`** — canonical TASI-W1/TASI-W2/TASI-W3 rule definitions (funnels + params). **Single source of truth**;
   the live JS is kept in parity with it (parity gate).
 - **`engine/`** — polars feature engine (`panel.py`) + `rules.py` (`evaluate_frame(rule, df, params_overrides)`).
 - **`backtest/`** — `event_study`, `governance` (time-split / walk-forward / Bonferroni), `rigor` (dedup +
@@ -74,13 +74,13 @@ history in [`research/spec/decisions.md`](../research/spec/decisions.md). **Read
 ## 5. Key findings (so you don't re-derive them)
 
 - **`ext60_max` cap: statistically INERT** over 20 years → removed.
-- **W1: no cross-sectional (selection) edge** — a **TIMING/beta** expression, crisis-concentrated. Good as a
+- **TASI-W1: no cross-sectional (selection) edge** — a **TIMING/beta** expression, crisis-concentrated. Good as a
   *recall* screen; most misses are *correct exclusions*.
-- **W2: real SELECTION edge — but only in NORMAL regimes**, and it does **NOT** cleanly survive ~31 bps cost.
-- **W3 @120d: the one candidate that survives the FULL gauntlet** (market-neutral, deflated, block-bootstrap,
+- **TASI-W2: real SELECTION edge — but only in NORMAL regimes**, and it does **NOT** cleanly survive ~31 bps cost.
+- **TASI-W3 @120d: the one candidate that survives the FULL gauntlet** (market-neutral, deflated, block-bootstrap,
   net-of-cost, ≈ +2.3% net). Still needs a **120-day walk-forward** + true OOS.
-- **Lifecycle:** `W1→W2` is the tradeable refinement; **W3 marks completion (buy-late), not an entry.**
-- **Forward-backtest of the adopted W1/W2 band-widening: RETURN-NEUTRAL** — no per-signal improvement vs the
+- **Lifecycle:** `TASI-W1→TASI-W2` is the tradeable refinement; **TASI-W3 marks completion (buy-late), not an entry.**
+- **Forward-backtest of the adopted TASI-W1/TASI-W2 band-widening: RETURN-NEUTRAL** — no per-signal improvement vs the
   prior params across horizons. Retained as a *selective-entry* choice, **not** an edge claim
   (`decisions.md` D-2026-07-01-02).
 
@@ -88,7 +88,7 @@ history in [`research/spec/decisions.md`](../research/spec/decisions.md). **Read
 
 All OFFICIAL methodology changes are recorded, with rationale + validation status, in the **decision log**
 [`research/spec/decisions.md`](../research/spec/decisions.md) — the single home of that fact. This session:
-ext60 removal (D-2026-06-30-01), W1 `below_max` (D-2026-06-30-02), the formal W1/W2 `offLow`/`Perf` band
+ext60 removal (D-2026-06-30-01), TASI-W1 `below_max` (D-2026-06-30-02), the formal TASI-W1/TASI-W2 `offLow`/`Perf` band
 widening (D-2026-07-01-01), and the decision to **retain** it after forward testing found it return-neutral
 (D-2026-07-01-02). **Deltas are not restated here** — read choice + validation status in the log; numbers by
 reference to `rules.yaml`.
@@ -112,9 +112,9 @@ reference to `rules.yaml`.
 
 ## 9. Open items / next steps
 
-1. **W3 @120d walk-forward** (confirm it holds pre-2020, not just recency) + true OOS on a future vintage.
+1. **TASI-W3 @120d walk-forward** (confirm it holds pre-2020, not just recency) + true OOS on a future vintage.
 2. (Optional) **Boundary golden vectors** for the current thresholds (e.g. `offLow` / `Perf.6M` edges) under CI.
-3. (Optional) **W3-in-tracker** integration (source=W3, ACTIVE-W3) — proposed earlier, never committed.
+3. (Optional) **TASI-W3-in-tracker** integration (source=TASI-W3, ACTIVE-TASI-W3) — proposed earlier, never committed.
 4. (Deferred, needs own review) **Command Step-2 → read defaults from `rules.yaml` at run time** — removes the
    last runtime canon duplication; a live-product behavioral change (currently guarded, not eliminated).
 5. (Deferred, not rejected) **Tier-2 SSOT lint** (general canon-number-outside-canon scanner + marker

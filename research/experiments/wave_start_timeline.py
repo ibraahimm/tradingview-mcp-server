@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 # ------------------------------------------------------------------------------
 # EXPERIMENTAL — methodology-improvement exploration (NOT official methodology).
-# Uses only OBSERVABLE candidate pre-filters; the W1 pass/fail decision comes solely from
+# Uses only OBSERVABLE candidate pre-filters; the TASI-W1 pass/fail decision comes solely from
 # evaluate_frame on the official rule (no params_overrides). It never edits rules.yaml or the live JS.
 # Outputs are HYPOTHESES, not the documented methodology. See research/spec/TESTING.md.
 # ------------------------------------------------------------------------------
-"""W1 wave-start timeline (faithful): for deep-correction names now launching that the OFFICIAL W1 misses,
-trace the daily gate sequence to see whether the launch skipped W1's measured window.
+"""TASI-W1 wave-start timeline (faithful): for deep-correction names now launching that the OFFICIAL TASI-W1 misses,
+trace the daily gate sequence to see whether the launch skipped TASI-W1's measured window.
 
     python -m research.experiments.wave_start_timeline research/panel/tadawul_<vintage>.parquet
 
 Candidate set = OBSERVABLE launch criteria only: non-9xxx (Nomu/parallel — not targets, per the docs),
 Perf.1M>10, offLow>20, DDmax>=50 (the deep-correction criterion). NO perf_3y<=0 filter (that was a prior
-error: perf_3y<=0 is the W1 ★ TAG, not a gate; the actual W1 gate is perf_3y<50). Misses are decided by
-W1's ACTUAL gates via evaluate_frame with NO overrides, so this uses the official below_max=100 now in
+error: perf_3y<=0 is the TASI-W1 ★ TAG, not a gate; the actual TASI-W1 gate is perf_3y<50). Misses are decided by
+TASI-W1's ACTUAL gates via evaluate_frame with NO overrides, so this uses the official below_max=100 now in
 rules.yaml. For each miss we trace when each gate threshold is first crossed.
 """
 from __future__ import annotations
@@ -47,17 +47,17 @@ def main():
     feat = with_td_idx(compute_value(compute_age_years(build_panel(prices), sm)))
     end = feat.get_column("date").max()
     snap = feat.filter(pl.col("date") == end)
-    W1 = R.load_rules()["W1"]   # OFFICIAL rule, no overrides
+    TASI_W1 = R.load_rules()["TASI-W1"]   # OFFICIAL rule, no overrides
 
     # OBSERVABLE candidate pre-filters only (non-9xxx, launching, deeply corrected)
     cand = snap.filter((~pl.col("sec_id").str.starts_with("9")) & (pl.col("perf_1m") > 10) &
                        (pl.col("off_low") > 20) & (pl.col("ddmax") >= 50))
-    decided = R.evaluate_frame(W1, cand, None)          # official gates, no overrides
+    decided = R.evaluate_frame(TASI_W1, cand, None)          # official gates, no overrides
     npass = decided.filter(pl.col("passed")).height
     miss = decided.filter(~pl.col("passed"))
     print(f"as-of {end}: deep-correction launchers (non-9xxx, P1M>10, offLow>20, DDmax>=50): {cand.height}")
-    print(f"  official W1 PASSES {npass}, MISSES {miss.height}\n")
-    print("why the misses are rejected (W1 first-failing gate):")
+    print(f"  official TASI-W1 PASSES {npass}, MISSES {miss.height}\n")
+    print("why the misses are rejected (TASI-W1 first-failing gate):")
     for g, c in Counter(miss.get_column("first_fail").to_list()).most_common():
         print(f"    {g:12} {c}")
 
@@ -69,15 +69,15 @@ def main():
         d_off60 = first_day(rows, lambda r: r["off_low"] is not None and r["off_low"] >= 60)
         d_p3m40 = first_day(rows, lambda r: r["perf_3m"] is not None and r["perf_3m"] >= 40)
         d_p6m0 = first_day(rows, lambda r: r["perf_6m"] is not None and r["perf_6m"] > 0)
-        w1days = sum(1 for r in rows if R.evaluate(W1, r, None)[0])
+        w1days = sum(1 for r in rows if R.evaluate(TASI_W1, r, None)[0])
 
         def dd(x):
             return str(x["date"]) if x else "—never—"
         print(f"{sid:6}{r0['perf_1m']:>5.0f}{r0['perf_3m']:>5.0f}{r0['perf_6m']:>5.0f}"
               f"{r0['off_low']:>6.0f}{r0['below_ath']:>5.0f}{str(r0['first_fail']):>9}   "
-              f"P6M>0:{dd(d_p6m0)}  offLo≥60:{dd(d_off60)}  P3M≥40:{dd(d_p3m40)}  W1-window:{w1days}d")
+              f"P6M>0:{dd(d_p6m0)}  offLo≥60:{dd(d_off60)}  P3M≥40:{dd(d_p3m40)}  TASI-W1-window:{w1days}d")
 
-    print("\n(Experimental — hypotheses only. Official W1 = rules.yaml + saudi-stage2.js.)")
+    print("\n(Experimental — hypotheses only. Official TASI_W1 = rules.yaml + saudi-stage2.js.)")
 
 
 if __name__ == "__main__":

@@ -24,7 +24,7 @@ def _frame(rows):
 
 
 def main() -> int:
-    # X: W1 on two days (close 10 then 11), then W2 later (close 12, vs200>0) -> promoted, journey W1->W2
+    # X: TASI-W1 on two days (close 10 then 11), then TASI-W2 later (close 12, vs200>0) -> promoted, journey TASI-W1->TASI-W2
     w1 = _frame([
         {"sec_id": "X", "date": date(2020, 1, 1), "close": 10.0, "below_ath": 60.0, "off_low": 30.0, "vs200": -1.0, "perf_5y": 50.0, "passed": True},
         {"sec_id": "X", "date": date(2020, 2, 1), "close": 11.0, "below_ath": 55.0, "off_low": 40.0, "vs200": 1.0, "perf_5y": 50.0, "passed": True},
@@ -33,24 +33,24 @@ def main() -> int:
     w2 = _frame([
         {"sec_id": "X", "date": date(2020, 6, 1), "close": 12.0, "below_ath": 40.0, "off_low": 60.0, "vs200": 5.0, "perf_5y": 50.0, "passed": True},
     ])
-    events = generate_ledger({"W1": w1, "W2": w2})
+    events = generate_ledger({"TASI-W1": w1, "TASI-W2": w2})
 
     check(len(events) == 3, f"expected 3 events (Z not-passed excluded), got {len(events)}")
     check(all("first_close" in e and "ts" in e and "Perf.5Y" in e for e in events), "event schema incomplete")
     # first_close/first_seen stamped from earliest (close 10 on 2020-01-01)
     check(all(e["first_close"] == 10.0 and e["first_seen"] == "2020-01-01" for e in events),
           "first_close/first_seen must be the earliest event's")
-    # daily cadence: two W1 days -> two W1 events
-    check(sum(e["source"] == "W1" for e in events) == 2, "expected 2 W1 events (one per passing day)")
+    # daily cadence: two TASI-W1 days -> two TASI-W1 events
+    check(sum(e["source"] == "TASI-W1" for e in events) == 2, "expected 2 TASI-W1 events (one per passing day)")
 
     jr = journey_outcomes(events)
     check(len(jr) == 1, "one journey (X)")
     j = jr[0]
-    check(j["entered_w1"] and j["promoted"], "X entered W1 and promoted to W2")
-    check(j["journey"] == "W1→W2", f"journey should be W1→W2, got {j['journey']}")
-    # max gain = (12/10-1)*100 = 20 ; final gain = 20 (last event is the W2 at 12)
+    check(j["entered_w1"] and j["promoted"], "X entered TASI-W1 and promoted to TASI-W2")
+    check(j["journey"] == "TASI-W1→TASI-W2", f"journey should be TASI-W1→TASI-W2, got {j['journey']}")
+    # max gain = (12/10-1)*100 = 20 ; final gain = 20 (last event is the TASI-W2 at 12)
     check(abs(j["max_gain"] - 20.0) < 1e-9, f"max_gain should be 20, got {j['max_gain']}")
-    check(j["terminal"] in ("ACTIVE-W2", "EXPIRED"), f"terminal should be ACTIVE-W2/EXPIRED, got {j['terminal']}")
+    check(j["terminal"] in ("ACTIVE-TASI-W2", "EXPIRED"), f"terminal should be ACTIVE-TASI-W2/EXPIRED, got {j['terminal']}")
 
     if FAILS:
         print(f"FAIL ({len(FAILS)}):")

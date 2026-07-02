@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Conditional regime test: does the W1/W2 edge live specifically in market crisis / deep-drawdown
+"""Conditional regime test: does the TASI-W1/TASI-W2 edge live specifically in market crisis / deep-drawdown
 environments, and is it stock-SELECTION skill or market-TIMING/recovery (beta) exposure?
 
     python -m research.regime_run research/panel/tadawul_<vintage>.parquet
@@ -83,7 +83,7 @@ def main():
           ", ".join(f"{n} {c}/{nday} ({100*c/nday:.0f}%)" for (n, _), c in zip(BUCKETS, cov.values())))
 
     rules = R.load_rules()
-    for rule in ("W1", "W2"):
+    for rule in ("TASI-W1", "TASI-W2"):
         decided = R.evaluate_frame(rules[rule], labeled, None)
         print(f"\n{'='*94}\n{rule}: conditional regime test "
               f"(B=absolute fwd%, A=selection xs%, mkt=market's own fwd%; boot p in parens)\n{'='*94}")

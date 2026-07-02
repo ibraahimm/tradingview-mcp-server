@@ -1,12 +1,15 @@
 # /saudi-wave3 — Saudi Main Market Third-Wave (Mature Re-Coil) Screen
 
+**Canonical rule:** `TASI-W3` (defined in `research/spec/rules.yaml`). The command name `/saudi-wave3`
+is kept for continuity; the canonical methodology identifier is `TASI-W3` (rename: `decisions.md` D-2026-07-02-05).
+
 Find **Saudi Main Market (TADAWUL) only** stocks **one leg beyond `/saudi-wave2`**: a **mature
-uptrend** that already ran its W1 (first turn off the deep low) and W2 (first coil + advance),
+uptrend** that already ran its TASI-W1 (first turn off the deep low) and TASI-W2 (first coil + advance),
 has climbed back to / near (or made) **new highs**, and is now forming the **NEXT contraction**
 — a fresh EMA coil higher up — that sets up the following leg.
 
-Unlike W1/W2 this is **not** a "deeply corrected" screen. `DDmax` / `belowATH` / `offLow` are
-**descriptors here, not gates** — a W3 name may be at or near its all-time high. The structure is:
+Unlike TASI-W1/TASI-W2 this is **not** a "deeply corrected" screen. `DDmax` / `belowATH` / `offLow` are
+**descriptors here, not gates** — a TASI-W3 name may be at or near its all-time high. The structure is:
 **mature trend (close > EMA200) + the coil again (EMA21≈EMA60, reclaim EMA21) + a pull-back from
 a recent high (nrHi band) + a genuine multi-year advance (Perf.3Y/5Y minimums).**
 
@@ -29,12 +32,12 @@ to `.claude/outputs/saudi-wave3.csv`.
 
 ## Why this differs from /saudi-wave2
 
-W2 catches the **first coil** while still deeply corrected (EMA200 only a descriptor, `belowATH`
-20–80). W3 catches the **next contraction in a mature trend**: it **requires** `close > EMA200`,
+TASI-W2 catches the **first coil** while still deeply corrected (EMA200 only a descriptor, `belowATH`
+20–80). TASI-W3 catches the **next contraction in a mature trend**: it **requires** `close > EMA200`,
 demotes the deep-correction metrics to descriptors, adds a **pull-back-from-high** gate (`nrHi`),
 and — critically — adds **Perf.3Y / Perf.5Y minimums** so only names that delivered a real
-multi-year advance qualify (the W3 discriminator). The coil mechanics (`EMA21/EMA60 ∈ [−2,+5]`,
-reclaim `EMA21`, `Perf.1M > 0`) are the same as W2.
+multi-year advance qualify (the TASI-W3 discriminator). The coil mechanics (`EMA21/EMA60 ∈ [−2,+5]`,
+reclaim `EMA21`, `Perf.1M > 0`) are the same as TASI-W2.
 
 ## Moving averages — EMA only
 
@@ -45,7 +48,7 @@ EMA 21 / 60 / 200 only (no SMA). Scanner fields: `EMA21`, `EMA60`, `EMA200`.
 Parse `` for `key=value` tokens. Any key not supplied uses its default. Forward to the script.
 
 > **Canonical values live in [`research/spec/rules.yaml`](../../research/spec/rules.yaml)** (rule
-> `W3` → `params`), CI-locked to the script by `methodology_parity.py`. This table documents
+> `TASI-W3` → `params`), CI-locked to the script by `methodology_parity.py`. This table documents
 > parameter **keys and meaning only — it restates no default values.** For any key the user does not
 > override, the script applies the canonical default.
 
@@ -59,7 +62,7 @@ Parse `` for `key=value` tokens. Any key not supplied uses its default. Forward 
 | `p3m_min` / `p3m_max` | `Perf.3M` — recent contraction = modest (%) |
 | `p6m_min` / `p6m_max` | `Perf.6M` (%) |
 | `py_min` / `py_max` | `Perf.1Y` (%) |
-| `p3y_min` / `p3y_max` | **`Perf.3Y` band — the min is the primary W3 discriminator** (%) |
+| `p3y_min` / `p3y_max` | **`Perf.3Y` band — the min is the primary TASI-W3 discriminator** (%) |
 | `p5y_min` / `p5y_max` | `Perf.5Y` band — softer min (5Y less reliable when peak predates window) (%) |
 | `p10y_max` | Max `Perf.10Y` (applied locally; null = <10y history, allowed) (%) |
 | `min_years` | Min years since listing (from `first_bar_time`) |
@@ -127,7 +130,7 @@ Example calls:
 
 6. **(Optional) Ingest into the unified tracker** — record this run's survivors BEFORE cleanup:
    ```
-   node .claude/scripts/saudi-tracker.js stage=ingest filtered=.claude/scripts/.tmp/filtered.json source=W3
+   node .claude/scripts/saudi-tracker.js stage=ingest filtered=.claude/scripts/.tmp/filtered.json source=TASI-W3
    ```
    Non-fatal: if it errors, surface the message but still finish. View the cohort with `/saudi-track`.
    Skip only if the user asked not to track this run.
@@ -138,11 +141,11 @@ Example calls:
 ## Metric notes & limitations
 
 - **Not a corrected screen.** `belowATH ≈ 0` ⇒ at/near new highs (allowed). The deep-correction
-  metrics are descriptors; W3 is a *mature re-coil*.
-- **`Perf.3Y` minimum is the discriminator.** It separates W3 (genuine multi-year winner re-coiling)
+  metrics are descriptors; TASI-W3 is a *mature re-coil*.
+- **`Perf.3Y` minimum is the discriminator.** It separates TASI-W3 (genuine multi-year winner re-coiling)
   from a name that merely sits above EMA200. `Perf.5Y` min is softer — 5Y is unreliable when the peak
-  predates its window (same caveat as W1/W2 depth).
+  predates its window (same caveat as TASI-W1/TASI-W2 depth).
 - **The coil is the binding gate.** `EMA21/EMA60 ∈ [−2,+5]` plus the `nrHi` pull-back band is tight;
   expect few hits per run. Widen `ema_gap_max` / `nrhi_min` for a larger pool.
-- **Market cap USD→SAR** via the 3.75 peg (as in W1/W2).
+- **Market cap USD→SAR** via the 3.75 peg (as in TASI-W1/TASI-W2).
 - Relies only on existing MCP tools plus the persistent helper; does not modify the server source.

@@ -16,7 +16,7 @@ A prose definition drifts the day it is written. So the spec is **prose + an exe
 |---|---|
 | `VERSION` | Current spec version (semver). Every result records the version it ran under. |
 | `features.yaml` | Machine-readable registry: algorithms (`functions`) + named bindings (`features`) + as-of rules. |
-| `rules.yaml` | W1/W2/W3 screen rules as ordered predicates over features, with threshold params + defaults. |
+| `rules.yaml` | TASI-W1/TASI-W2/TASI-W3 screen rules as ordered predicates over features, with threshold params + defaults. |
 | `features.md` | Human narrative & rationale (this README links the concepts; the YAML is canonical). |
 | `vectors/` | **Golden vectors** — input→expected fixtures both implementations must reproduce in CI. |
 | `conformance/` | The CI runner contract + a runnable reference runner. |
@@ -27,8 +27,8 @@ The YAML files are **canonical**; if prose and YAML ever disagree, the YAML wins
 
 ```
 functions   →  features        →  rules
-(algorithms)   (named bindings)    (W1/W2/W3 predicate sets)
-ema(length)    ema21 = ema(21)     W1 = age≥5 ∧ perf_3m∈[5,40) ∧ … ∧ ext60≤10
+(algorithms)   (named bindings)    (TASI-W1/TASI-W2/TASI-W3 predicate sets)
+ema(length)    ema21 = ema(21)     TASI-W1 = age≥5 ∧ perf_3m∈[5,40) ∧ … ∧ ext60≤10
 perf(months)   perf_3m = perf(3)   …
 ```
 

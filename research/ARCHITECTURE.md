@@ -5,7 +5,7 @@
 repository — its three subsystems and how they fit together:
 1. the **TradingView MCP server + CLI** (`src/`) — the market-data screener the product trades on;
 2. the **live Saudi wave-screening product** (`.claude/commands/` + `.claude/scripts/`) —
-   `/saudi-stage2` (W1), `/saudi-wave2` (W2), `/saudi-wave3` (W3), `/saudi-track`;
+   `/saudi-stage2` (TASI-W1), `/saudi-wave2` (TASI-W2), `/saudi-wave3` (TASI-W3), `/saudi-track`;
 3. the **quant research & backtesting platform** (`research/`) — this document's most detailed
    subject, plus the continuous conformance contract with the live screener those strategies trade on.
 
@@ -21,7 +21,6 @@ and **what trade-off** each decision accepts. It is the foundation the implement
 from; when code and this document disagree, this document is wrong and should be fixed.
 
 ---
-
 ## System at a glance — the end-to-end workflow
 
 The repository is **two runtime paths bound by one canon**, wrapped in governance, CI, session, and
@@ -47,7 +46,7 @@ Python research engine are two implementations of it, kept honest by conformance
 | Stage | Files (why they exist) | In → Out |
 |---|---|---|
 | A. Ingest | `research/ingest/ingest_tadawul.py` — turn raw vendor data into a clean, survivorship-correct panel | `ingest/raw/*` + `reference/*` → `panel/*.parquet` + manifest |
-| B. Features + rules | `research/engine/panel.py` (features per `features.yaml`), `rules.py` (`evaluate_frame` over `rules.yaml`) | panel → feature columns + per-bar W1/W2/W3 pass/fail |
+| B. Features + rules | `research/engine/panel.py` (features per `features.yaml`), `rules.py` (`evaluate_frame` over `rules.yaml`) | panel → feature columns + per-bar TASI-W1/TASI-W2/TASI-W3 pass/fail |
 | C. Backtest | `research/backtest/*` (event_study → rigor → robust → governance → regime → lifecycle) | signals → deflated, cost-aware forward-return evidence → `RIGOR_RESULT.md` |
 | D. Experiment | `research/experiments/*` — challenge the methodology via **runtime overrides only** | panel + overrides → hypotheses (never edits canon) |
 | E. Promote | edit `features.yaml`/`rules.yaml` + live JS + docs + vectors **together**, add a `decisions.md` entry | approved evidence → new official methodology |
@@ -309,7 +308,7 @@ scales smoothly to ~100× this size before any rethink is needed.
 **Why build, not adopt a framework.** Off-the-shelf backtesters were considered and rejected: Zipline
 (effectively unmaintained, US-calendar-centric), backtrader (event-loop, slow for cross-sectional
 sweeps), QuantConnect/LEAN (heavyweight, cloud lock-in). Our needs are a *cross-sectional daily screen*
-with full control over the as-of feature semantics and the exact W1/W2/W3 gates — a thin vectorized
+with full control over the as-of feature semantics and the exact TASI-W1/TASI-W2/TASI-W3 gates — a thin vectorized
 layer over the panel is simpler, faster, and auditable. vectorbt is adopted only for the portfolio P&L
 mode where reinventing sizing/cost accounting adds no value.
 
@@ -327,7 +326,7 @@ sufficient.
 
 **L6a — Forward conformance oracle (continuous).** Once per trading day after close, an **automated
 headless capture** records TV's live values per eligible symbol — EMA21/60/200, Perf windows, ATH /
-52w H/L, DDmax, belowATH, offLow, ext60, nrHi, and the **W1/W2/W3 pass/fail decisions** — each row
+52w H/L, DDmax, belowATH, offLow, ext60, nrHi, and the **TASI-W1/TASI-W2/TASI-W3 pass/fail decisions** — each row
 stamped with a `capture_ts`. The engine reproduces the same date from the panel; we monitor the
 **per-field delta** for *stability* (§9).
 - *What it validates:* that the **method**, on **recent** data, tracks TV — and, going forward, that
@@ -437,7 +436,7 @@ series (dividends reinvested). The two are kept explicitly separate and never bl
 
 ### 6.6 Forward oracle record (one row per `(capture_ts, sec_id)`)
 
-TV-captured features + W1/W2/W3 decisions, per §L6a. This supersedes the ad-hoc `saudi-tracker.jsonl`
+TV-captured features + TASI-W1/TASI-W2/TASI-W3 decisions, per §L6a. This supersedes the ad-hoc `saudi-tracker.jsonl`
 role: the journey-tracker remains a *product* view; the oracle is a *validation* artifact. (They may
 share a capture but serve different consumers.)
 

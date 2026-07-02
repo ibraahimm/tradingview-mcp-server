@@ -5,11 +5,11 @@
 # rules.yaml or the live JS. Outputs are HYPOTHESES, not the documented methodology.
 # See research/spec/TESTING.md.
 # ------------------------------------------------------------------------------
-"""Focused A/B: does the 10% extension cap help in the EARLY WAVES (W1 & W2), over the LAST 3 MONTHS?
+"""Focused A/B: does the 10% extension cap help in the EARLY WAVES (TASI-W1 & TASI-W2), over the LAST 3 MONTHS?
 
     python -m research.ext_cap_recent research/panel/tadawul_<vintage>.parquet
 
-Population = W1 entries (cap = close/EMA60 <= 10%) UNION W2 entries (cap = close/EMA21 <= 10%), restricted
+Population = TASI-W1 entries (cap = close/EMA60 <= 10%) UNION TASI-W2 entries (cap = close/EMA21 <= 10%), restricted
 to entries in the last ~3 months. We evaluate both screens with the cap DISABLED (ext60_max/ext21_max =
 999), then split each entry by its extension value:
     WITH cap     = ext <= 10%   (what the live screen admits)
@@ -65,7 +65,7 @@ def main():
 
     rules = R.load_rules()
     rows = []
-    for wave, ov, extcol in (("W1", {"ext60_max": 999}, "ext60"), ("W2", {"ext21_max": 999}, "ema21gap")):
+    for wave, ov, extcol in (("TASI-W1", {"ext60_max": 999}, "ext60"), ("TASI-W2", {"ext21_max": 999}, "ema21gap")):
         decided = R.evaluate_frame(rules[wave], win, ov)
         kept = dedup_signals(decided, 20)
         for r in kept.iter_rows(named=True):
@@ -77,7 +77,7 @@ def main():
     capped = [r for r in rows if r["ext"] <= CAP]
     rejected = [r for r in rows if r["ext"] > CAP]
 
-    print(f"EARLY-WAVE (W1∪W2) entries in window: {len(rows)}  "
+    print(f"EARLY-WAVE (TASI-W1∪TASI-W2) entries in window: {len(rows)}  "
           f"(WITH cap ext<=10%: {len(capped)} | rejected ext>10%: {len(rejected)})\n")
 
     print("fwd 20-trading-day return (entries old enough to have it):")

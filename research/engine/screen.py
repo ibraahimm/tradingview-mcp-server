@@ -1,4 +1,4 @@
-"""Screen run: turn the feature panel + rules into a reproducible W1/W2/W3 run.
+"""Screen run: turn the feature panel + rules into a reproducible TASI-W1/TASI-W2/TASI-W3 run.
 
 Enriches the price-feature panel with the two non-price inputs the rules need, then evaluates a
 rule over it (funnel + survivors):

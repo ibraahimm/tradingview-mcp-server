@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # ------------------------------------------------------------------------------
 # EXPERIMENTAL — methodology-improvement exploration (NOT official methodology).
-# Sweeps W1 p6m_min via runtime overrides ONLY; never edits rules.yaml or the live JS.
+# Sweeps TASI-W1 p6m_min via runtime overrides ONLY; never edits rules.yaml or the live JS.
 # Outputs are HYPOTHESES. See research/spec/TESTING.md.
 # ------------------------------------------------------------------------------
-"""W1 Perf.6M_min sweep: 60-day rolling replay over the fixed structural cohort, official W1 with ONLY
+"""TASI-W1 Perf.6M_min sweep: 60-day rolling replay over the fixed structural cohort, official TASI-W1 with ONLY
 p6m_min relaxed (0 -> -5/-10/-15/-20). Reports recall vs the official, the newly-detected names, and a
 quality proxy (Perf.6M depth, Perf.3M momentum, and return from detection to window end).
 
@@ -36,7 +36,7 @@ def main():
     dates = sorted(feat.get_column("date").unique().to_list())
     eval_dates = dates[-EVAL_DAYS:]
     end = eval_dates[-1]
-    W1 = R.load_rules()["W1"]
+    TASI_W1 = R.load_rules()["TASI-W1"]
     uni = feat.filter(
         pl.col("date").is_in(eval_dates) & (~pl.col("sec_id").str.starts_with("9"))
         & (pl.col("age_years") >= 5) & (pl.col("ddmax") >= 50)
@@ -44,14 +44,14 @@ def main():
     cohort = sorted(uni.get_column("sec_id").unique().to_list())
     print(f"evaluation: last {EVAL_DAYS} td, {eval_dates[0]}..{end};  fixed structural cohort: {len(cohort)}\n")
 
-    rows = {(r["sec_id"], r["date"]): r for r in R.evaluate_frame(W1, uni, None).iter_rows(named=True)}
+    rows = {(r["sec_id"], r["date"]): r for r in R.evaluate_frame(TASI_W1, uni, None).iter_rows(named=True)}
     # close on the window-end day from the FULL panel (a name may have left the cohort by then)
     end_close = {r["sec_id"]: r["close"] for r in feat.filter(pl.col("date") == end).iter_rows(named=True)}
 
     results, official_det = {}, None
     for c in CANDS:
         ov = {} if c == 0 else {"p6m_min": c}
-        rws, ff = run_variant(uni, W1, ov)
+        rws, ff = run_variant(uni, TASI_W1, ov)
         det = {s for s in cohort if s in ff}
         if c == 0:
             official_det = det
@@ -60,7 +60,7 @@ def main():
             srows = sorted([rws[(s, d)] for d in eval_dates if (s, d) in rws], key=lambda r: r["date"])
             bl = Counter()
             for r in srows:
-                for g in diagnose(W1, r, ov):
+                for g in diagnose(TASI_W1, r, ov):
                     bl[g] += 1
             if bl:
                 miss_block[bl.most_common(1)[0][0]] += 1
@@ -96,7 +96,7 @@ def main():
             print(f"  {c:>7} {s:6}{p6:>5}{r['perf_3m']:>5.0f}{r['below_ath']:>5.0f}{r['off_low']:>6.0f}"
                   f"{str(d):>12}{rr:>8}{held:>5}")
 
-    print("\n(Experimental — hypotheses only. Official W1 unchanged. ret→end is a within-window quality "
+    print("\n(Experimental — hypotheses only. Official TASI-W1 unchanged. ret→end is a within-window quality "
           "proxy; names detected near the end have few days held.)")
 
 

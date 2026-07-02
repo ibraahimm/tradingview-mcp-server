@@ -63,7 +63,7 @@ jobs:
       - name: Engine — panel builder self-test (isolation / warmup / null-propagation / consistency)
         run: python -m research.engine.selftest_panel
 
-      - name: Engine — rule-vector conformance (W1/W2/W3 decisions + funnel order)
+      - name: Engine — rule-vector conformance (TASI-W1/TASI-W2/TASI-W3 decisions + funnel order)
         run: python research/spec/conformance/rule_runner.py
 
       - name: Methodology parity — live saudi-stage2.js / saudi-wave2.js == rules.yaml gates

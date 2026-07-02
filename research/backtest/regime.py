@@ -1,8 +1,8 @@
-"""Market-regime layer — conditions the W1/W2 evaluation on the *systemic* environment.
+"""Market-regime layer — conditions the TASI-W1/TASI-W2 evaluation on the *systemic* environment.
 
 WHY: the rigor/robust passes conditioned only on each NAME's own deep correction (per-name DDmax/
 belowATH/offLow) and pooled signals across all of 2001-2026. That answers "do idiosyncratically
-corrected names earn an edge on average?" It does NOT answer the original W1 thesis — "deep-correction
+corrected names earn an edge on average?" It does NOT answer the original TASI-W1 thesis — "deep-correction
 names bought when the *whole market* is in crisis / deep drawdown outperform as it recovers." This
 layer builds a point-in-time market regime and lets the driver partition signals by it.
 
@@ -16,7 +16,7 @@ PRE-REGISTERED CHOICES (fixed BEFORE looking at any conditional result — no th
     result-driven): the 2006 TASI bubble left the market below its all-time peak for ~a decade, so an
     ATH-anchored drawdown would label almost all of 2006-2021 as "deep drawdown" and the regime would
     be a near-constant. A rolling 1y high captures ACUTE drawdowns (the crises) and resets on recovery,
-    which is exactly the "crisis then recovery" notion the W1 thesis is about.
+    which is exactly the "crisis then recovery" notion the TASI-W1 thesis is about.
 
   * Regime cuts (the small fixed set, as agreed): dd >= 20%, dd >= 35%, and below-EMA200 (level <
     its 200-span EMA). "normal" = dd < 20%. These are declared here, not swept.

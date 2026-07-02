@@ -1,8 +1,8 @@
 {
   "case_id": "w1_defaults",
   "spec_version": "1.0.0",
-  "rule": "W1",
-  "description": "W1 at default params: a clean pass, an in_co fail (perf_3m), a high-ext60 PASS (extension cap removed 2026-06-30), a null-skip (perf_5y/10y), a null-drop (ddmax), and a below_ath=98 PASS (below_max raised 95->100 on 2026-06-30). Pins ordered evaluation + null handling + the below_ath ceiling.",
+  "rule": "TASI-W1",
+  "description": "TASI-W1 at default params: a clean pass, an in_co fail (perf_3m), a high-ext60 PASS (extension cap removed 2026-06-30), a null-skip (perf_5y/10y), a null-drop (ddmax), and a below_ath=98 PASS (below_max raised 95->100 on 2026-06-30). Pins ordered evaluation + null handling + the below_ath ceiling.",
   "input_file": "input.csv",
   "expected_file": "expected.csv"
 }

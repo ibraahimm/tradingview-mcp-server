@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Rigor pass on real data for W1/W2/W3: market-neutral excess, non-overlapping signals,
-walk-forward, Bonferroni deflation. Includes the ext60_max A/B for W1.
+"""Rigor pass on real data for TASI-W1/TASI-W2/TASI-W3: market-neutral excess, non-overlapping signals,
+walk-forward, Bonferroni deflation. Includes the ext60_max A/B for TASI-W1.
 
     python -m research.rigor_run <companies_dir>
 
@@ -24,8 +24,8 @@ from research.backtest.governance import summary_stats, bonferroni  # noqa: E402
 
 HORIZONS = [20, 60, 120]
 # (rule, config label, params_override)
-SPECS = [("W1", "default", None), ("W1", "ext60 OFF", {"ext60_max": 999}),
-         ("W2", "default", None), ("W3", "default", None)]
+SPECS = [("TASI-W1", "default", None), ("TASI-W1", "ext60 OFF", {"ext60_max": 999}),
+         ("TASI-W2", "default", None), ("TASI-W3", "default", None)]
 WF_CUTS = [datetime.date(2010, 1, 1), datetime.date(2015, 1, 1),
            datetime.date(2020, 1, 1), datetime.date(2026, 7, 1)]
 
@@ -77,12 +77,12 @@ def main():
             wf[rule] = walkforward(dedup_signals(decided, 60), 60)
         del decided
 
-    print("\next60_max A/B for W1 @ 60d (the original question):")
-    g, o = a60[("W1", "default")], a60[("W1", "ext60 OFF")]
+    print("\next60_max A/B for TASI-W1 @ 60d (the original question):")
+    g, o = a60[("TASI-W1", "default")], a60[("TASI-W1", "ext60 OFF")]
     print(f"   gate on  +{g['mean']:.2f}% (n={g['independent']})  |  gate off +{o['mean']:.2f}% (n={o['independent']})"
           f"  |  delta {f((g['mean'] or 0) - (o['mean'] or 0))} pp")
 
-    for rule in ("W1", "W2", "W3"):
+    for rule in ("TASI-W1", "TASI-W2", "TASI-W3"):
         print(f"\nWalk-forward {rule} (default, 60d market-neutral excess):")
         for c, st in wf[rule]:
             print(f"   <= {c}:  n={st['n']:>4}  mean_xs {f(st['mean'])}%  t {f(st['t'])}")

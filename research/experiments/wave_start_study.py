@@ -5,13 +5,13 @@
 # rules.yaml or the live JS. Outputs are HYPOTHESES, not the documented methodology.
 # See research/spec/TESTING.md.
 # ------------------------------------------------------------------------------
-"""Case study: why do strongly-launching names (Perf.1M>10% & offLow>20%) get missed by W1 and W2?
+"""Case study: why do strongly-launching names (Perf.1M>10% & offLow>20%) get missed by TASI-W1 and TASI-W2?
 
     python -m research.wave_start_study research/panel/tadawul_<vintage>.parquet [asof_back_td]
 
 Goal context (user): catch names where a LONG, DEEP multi-year correction has ended and a NEW cycle
 has just started. The complaint: 40+ names are up >10% (most >30%) on the month and well off their low,
-yet neither W1 nor W2 picks them. This prints the candidate set and the EXACT first-failing gate per
+yet neither TASI-W1 nor TASI-W2 picks them. This prints the candidate set and the EXACT first-failing gate per
 name for both screens, so we can see which conditions block the new-cycle launches.
 """
 from __future__ import annotations
@@ -59,15 +59,15 @@ def main():
     print(f"  deeply-corrected DNA (DDmax>=50 OR belowATH>=40): {deep}/{cand.height}")
 
     rules = R.load_rules()
-    hist(R.evaluate_frame(rules["W1"], cand, None), "W1 (/saudi-stage2)")
-    hist(R.evaluate_frame(rules["W2"], cand, None), "W2 (/saudi-wave2)")
+    hist(R.evaluate_frame(rules["TASI-W1"], cand, None), "TASI-W1 (/saudi-stage2)")
+    hist(R.evaluate_frame(rules["TASI-W2"], cand, None), "TASI-W2 (/saudi-wave2)")
 
     # which candidates pass NEITHER, and the headline blocking values
-    dW1 = R.evaluate_frame(rules["W1"], cand, None)
-    dW2 = R.evaluate_frame(rules["W2"], cand, None)
+    dW1 = R.evaluate_frame(rules["TASI-W1"], cand, None)
+    dW2 = R.evaluate_frame(rules["TASI-W2"], cand, None)
     miss = dW1.filter(~pl.col("passed")).join(dW2.filter(~pl.col("passed")).select("sec_id"), on="sec_id")
-    print(f"\nMissed by BOTH W1 and W2: {miss.height}/{cand.height}")
-    print(f"  {'sym':6}{'p1m':>6}{'p3m':>6}{'p6m':>6}{'offLo':>6}{'DDmx':>6}{'bATH':>6}{'W1 fail':>10}{'W2 fail':>10}")
+    print(f"\nMissed by BOTH TASI-W1 and TASI-W2: {miss.height}/{cand.height}")
+    print(f"  {'sym':6}{'p1m':>6}{'p3m':>6}{'p6m':>6}{'offLo':>6}{'DDmx':>6}{'bATH':>6}{'TASI-W1 fail':>10}{'TASI-W2 fail':>10}")
     show = dW1.join(dW2.select(["sec_id", pl.col("first_fail").alias("w2_fail"), pl.col("passed").alias("w2_pass")]),
                     on="sec_id").sort("perf_1m", descending=True)
     for r in show.iter_rows(named=True):

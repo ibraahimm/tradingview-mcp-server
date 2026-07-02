@@ -1,6 +1,6 @@
 """Polars implementations of the canonical spec's algorithms (../spec/features.yaml).
 
-Scope (minimal, W1/stage2): the three algorithm families the golden vectors gate —
+Scope (minimal, TASI-W1/stage2): the three algorithm families the golden vectors gate —
 `ema`, `perf_calendar`, and the structural `ratios`. Window anchors (ath / 52-week
 extremes) and the full panel assembly are a separate, later increment and MUST arrive
 with their own golden vectors before they are added here (see README).

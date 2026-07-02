@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sequential-lifecycle test: evaluate W1 -> W1->W2 -> W1->W2->W3 as successive filters of ONE
+"""Sequential-lifecycle test: evaluate TASI-W1 -> TASI-W1->TASI-W2 -> TASI-W1->TASI-W2->TASI-W3 as successive filters of ONE
 recovery lifecycle, and measure the INCREMENTAL value of each stage.
 
     python -m research.lifecycle_run research/panel/tadawul_<vintage>.parquet
@@ -13,7 +13,7 @@ PRE-REGISTERED (fixed before looking at any result):
 
 Two views (see research/backtest/lifecycle.py):
   TRADEABLE  — enter at each stage's own trigger, prior stage required in the PAST (no look-ahead).
-  DIAGNOSTIC — split the W1 entries by whether they LATER progress to W2/W3 (uses the future on
+  DIAGNOSTIC — split the TASI-W1 entries by whether they LATER progress to TASI-W2/TASI-W3 (uses the future on
                purpose; answers "does the transition separate failed from successful recoveries").
 """
 from __future__ import annotations
@@ -69,19 +69,19 @@ def main():
     labeled = with_td_idx(add_excess(
         label_forward_returns(compute_value(compute_age_years(panel, sm)), sm, horizons=HORIZONS), HORIZONS))
     rules = R.load_rules()
-    dW1 = R.evaluate_frame(rules["W1"], labeled, None)
-    dW2 = R.evaluate_frame(rules["W2"], labeled, None)
-    dW3 = R.evaluate_frame(rules["W3"], labeled, None)
+    dW1 = R.evaluate_frame(rules["TASI-W1"], labeled, None)
+    dW2 = R.evaluate_frame(rules["TASI-W2"], labeled, None)
+    dW3 = R.evaluate_frame(rules["TASI-W3"], labeled, None)
     marked = mark_stages(labeled, dW1, dW2, dW3, LINK_K)
 
     raw = {c: marked.get_column(c).sum() for c in ("stg_w1", "stg_w2", "stg_w3", "w1_conf2", "w1_conf3")}
-    print(f"\nraw triggers (pre-dedup): W1={raw['stg_w1']}  W1->W2(linked)={raw['stg_w2']}  "
-          f"W1->W2->W3(linked)={raw['stg_w3']}")
-    print(f"of {raw['stg_w1']} W1 bars: {raw['w1_conf2']} later reach W2, {raw['w1_conf3']} reach W3 "
+    print(f"\nraw triggers (pre-dedup): TASI-W1={raw['stg_w1']}  TASI-W1->TASI-W2(linked)={raw['stg_w2']}  "
+          f"TASI-W1->TASI-W2->TASI-W3(linked)={raw['stg_w3']}")
+    print(f"of {raw['stg_w1']} TASI-W1 bars: {raw['w1_conf2']} later reach TASI-W2, {raw['w1_conf3']} reach TASI-W3 "
           f"(diagnostic; within {LINK_K} td)")
 
     # ---------------- TRADEABLE funnel: enter at each stage's own trigger (look-ahead-free) ----------------
-    stages = [("W1", "stg_w1"), ("W1->W2", "stg_w2"), ("W1->W2->W3", "stg_w3")]
+    stages = [("TASI-W1", "stg_w1"), ("TASI-W1->TASI-W2", "stg_w2"), ("TASI-W1->TASI-W2->TASI-W3", "stg_w3")]
     print(f"\n{'='*92}\nTRADEABLE — forward return entered at each stage's trigger; "
           f"step-up P = P(this stage's absolute > previous stage's)\n{'='*92}")
     print(f"{'H':>4} {'stage':12} {'n':>5}  {'abs%(p)':>15} {'hit%':>5}  {'sel%(p)':>15}  {'step-up P(abs>prev)':>20}")
@@ -107,21 +107,21 @@ def main():
             prev = kept
         print()
 
-    # ---------------- DIAGNOSTIC: do W1 entries that LATER progress fare better? (uses future) ----------------
+    # ---------------- DIAGNOSTIC: do TASI-W1 entries that LATER progress fare better? (uses future) ----------------
     marked = marked.with_columns(
         g_fail=(pl.col("stg_w1") & ~pl.col("w1_conf2")),
         g_w2only=(pl.col("stg_w1") & pl.col("w1_conf2") & ~pl.col("w1_conf3")),
         g_w3=(pl.col("stg_w1") & pl.col("w1_conf3")),
         g_conf2=(pl.col("stg_w1") & pl.col("w1_conf2")),
     )
-    print(f"{'='*92}\nDIAGNOSTIC — W1 entries split by whether the lifecycle LATER progresses (uses future, "
-          f"NOT tradeable)\n  does confirming W2/W3 separate successful recoveries from failed ones?\n{'='*92}")
-    print(f"{'H':>4} {'W1 group':12} {'n':>5}  {'abs%(p)':>15} {'hit%':>5}     "
-          f"conf-W2 vs fail: P(better), d-abs")
+    print(f"{'='*92}\nDIAGNOSTIC — TASI-W1 entries split by whether the lifecycle LATER progresses (uses future, "
+          f"NOT tradeable)\n  does confirming TASI-W2/TASI-W3 separate successful recoveries from failed ones?\n{'='*92}")
+    print(f"{'H':>4} {'TASI-W1 group':12} {'n':>5}  {'abs%(p)':>15} {'hit%':>5}     "
+          f"conf-TASI-W2 vs fail: P(better), d-abs")
     for h in (120, 252, 504):
         sub = {}
-        for name, col in (("fail-W2", "g_fail"), ("conf-W2only", "g_w2only"), ("conf-W3", "g_w3"),
-                          ("[conf-W2 all]", "g_conf2")):
+        for name, col in (("fail-TASI-W2", "g_fail"), ("conf-W2only", "g_w2only"), ("conf-TASI-W3", "g_w3"),
+                          ("[conf-TASI-W2 all]", "g_conf2")):
             kept = kept_for(marked, col, h)
             sub[col] = kept
             if kept.height == 0:
@@ -140,7 +140,7 @@ def main():
         print()
 
     print("Reading: TRADEABLE step-up P>~0.6 => entering at the later stage is genuinely better timing. "
-          "DIAGNOSTIC conf-W2>fail (P>~0.6) => the W2 transition really does pick the W1 entries that worked.")
+          "DIAGNOSTIC conf-TASI-W2>fail (P>~0.6) => the TASI-W2 transition really does pick the TASI-W1 entries that worked.")
     print("DONE.")
 
 

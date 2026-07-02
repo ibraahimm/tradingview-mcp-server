@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 # ------------------------------------------------------------------------------
 # EXPERIMENTAL — methodology-improvement exploration (NOT official methodology).
-# Replays the OFFICIAL W1 rule via the engine (no overrides); never edits rules.yaml or the live JS.
+# Replays the OFFICIAL TASI-W1 rule via the engine (no overrides); never edits rules.yaml or the live JS.
 # Per-gate thresholds come FROM the rule spec; the "realistic band" is a declared judgement (below).
 # Outputs are HYPOTHESES, not the documented methodology. See research/spec/TESTING.md.
 # ------------------------------------------------------------------------------
-"""W1 60-day ROLLING replay over W1's INTENDED structural universe, with a full auditable trail.
+"""TASI-W1 60-day ROLLING replay over TASI-W1's INTENDED structural universe, with a full auditable trail.
 
     python -m research.experiments.w1_replay_60d research/panel/tadawul_<vintage>.parquet
 
-Cohort_d (the intended W1 universe, recomputed each day) = non-9xxx AND
+Cohort_d (the intended TASI-W1 universe, recomputed each day) = non-9xxx AND
     age_years>=5  AND  DDmax>=50  AND  belowATH in [40,100]  AND  offLow>=20.
-Because the cohort already satisfies those structural gates, the ONLY W1 gates that can still block a
+Because the cohort already satisfies those structural gates, the ONLY TASI-W1 gates that can still block a
 cohort member are the momentum/perf gates (perf_3m, perf_6m, perf_3y, perf_5y, perf_10y, offlow upper).
 
-Evaluation = last 60 trading days only (PIT, official W1). For each cohort stock-day we record whether
-W1 fired, every remaining failing gate, the minimum mathematical change to pass, AND whether that change
+Evaluation = last 60 trading days only (PIT, official TASI_W1). For each cohort stock-day we record whether
+TASI-W1 fired, every remaining failing gate, the minimum mathematical change to pass, AND whether that change
 is a *realistic* methodology tweak vs an *extreme* one. Plus a symbol-level summary with the milestone
 chronology that tests the 'violent skip' hypothesis directly.
 
@@ -56,7 +56,7 @@ def _pname(raw):
 
 
 def diagnose(rule, row):
-    """(passed, [ (gate_desc, min_change_desc, realistic_bool) ]) for ALL failing W1 gates."""
+    """(passed, [ (gate_desc, min_change_desc, realistic_bool) ]) for ALL failing TASI-W1 gates."""
     params = rule["params"]
     fails = []
     for pred in rule["funnel"]:
@@ -107,14 +107,14 @@ def main():
     feat = compute_value(compute_age_years(build_panel(prices), sm))
     dates = sorted(feat.get_column("date").unique().to_list())
     eval_dates = dates[-EVAL_DAYS:]
-    W1 = R.load_rules()["W1"]
+    TASI_W1 = R.load_rules()["TASI-W1"]
 
     # structural cohort universe (non-9xxx + the 5 structural conditions), over the 60 days
     uni = feat.filter(
         pl.col("date").is_in(eval_dates) & (~pl.col("sec_id").str.starts_with("9"))
         & (pl.col("age_years") >= 5) & (pl.col("ddmax") >= 50)
         & (pl.col("below_ath") >= 40) & (pl.col("below_ath") <= 100) & (pl.col("off_low") >= 20))
-    dec = R.evaluate_frame(W1, uni, None)
+    dec = R.evaluate_frame(TASI_W1, uni, None)
     rows = {(r["sec_id"], r["date"]): r for r in dec.iter_rows(named=True)}
     cohort_by_day, sym_rows, first_fire = {}, {}, {}
     for (sid, d), r in rows.items():
@@ -143,7 +143,7 @@ def main():
         print(f"{str(d):12}{len(cohort):>7}{len(det):>5}{len(undet):>6}")
         for s in sorted(cohort):                       # ALL cohort stock-days (detected AND not)
             r = rows[(s, d)]
-            _, fails = diagnose(W1, r)
+            _, fails = diagnose(TASI_W1, r)
             mc = " | ".join(f"{c} [{'realistic' if ok else 'extreme'}]" for _, c, ok in fails)
             evw.writerow([d, s, f"{r['off_low']:.0f}",
                           f"{r['perf_3m']:.0f}" if r['perf_3m'] is not None else "",
@@ -168,7 +168,7 @@ def main():
         undet_rows = [r for r in rs if not (sid in first_fire and r["date"] >= fp)] if fp else rs
         blocks, realistic_any = Counter(), False
         for r in undet_rows:
-            _, fails = diagnose(W1, r)
+            _, fails = diagnose(TASI_W1, r)
             for _, c, ok in fails:
                 blocks[c.split()[0]] += 1
                 realistic_any = realistic_any or ok
@@ -195,7 +195,7 @@ def main():
     print(f"\nfiles: {OUT}/w1_replay_daily.csv · w1_replay_evidence.csv (incl. detected) · w1_replay_symbols.csv")
     print("realistic band (declared, challengeable): p6m_min>=-15, p3m_min>=0, p3m_max<=60, offlow_max<=100;")
     print("  p3y_max/p5y_max/p10y_max relaxations are 'extreme' (they redefine deep-recent-correction).")
-    print("(Experimental — hypotheses only. Official W1 = rules.yaml + saudi-stage2.js.)")
+    print("(Experimental — hypotheses only. Official TASI_W1 = rules.yaml + saudi-stage2.js.)")
 
 
 if __name__ == "__main__":

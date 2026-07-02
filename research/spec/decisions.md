@@ -116,6 +116,48 @@ HANDOFF §9; no change made.
 
 ---
 
+## D-2026-07-02-05 · 2026-07-02 · Governance
+
+**Choice (Canonical Rename).** The methodology waves are renamed to canonical identifiers
+**`TASI-W1` / `TASI-W2` / `TASI-W3`** (formerly `W1/W2/W3`) everywhere they are the *identity*:
+`rules.yaml` keys, engine/backtest/parity string keys, rule + lifecycle golden vectors, the live tracker
+source tags, states (`ACTIVE-TASI-W1`), and journeys (`TASI-W1→TASI-W2`). **Behavior-preserving** — no
+value/threshold/structural change, identical gates and outcomes; `spec_version` stays `1.0.0`, **no
+`VERSION` bump** (a rule-identity relabel is Governance, not a feature change; the D-2026-07-02-01 test —
+"could this change which names pass?" — is **No**).
+
+**Sub-decisions recorded (so they don't live only in the conversation):**
+1. **Fully-canonical labels** — `TASI-Wn` is used in source tags, states, and journeys (not a display
+   label). Any later display truncation is a render-only decision, not a canon change.
+2. **Command names kept** — `/saudi-stage2` `/saudi-wave2` `/saudi-wave3` `/saudi-track` are unchanged
+   (user-facing Operational tokens); each command doc **and** the `docs/saudi-commands.md` index carry a
+   `Canonical rule: TASI-Wn` mapping. Renaming commands is a separate future UX decision.
+3. **Lowercase internal tokens** (`w1_pass` schema field, `entered_w1`/`has_w1` variables, `w1_defaults`
+   fixture-dir names) are implementation, not the canonical surface, and are left unchanged.
+
+**Report-annotation clause (governance).** A dated **Report** (e.g. `RIGOR_RESULT.md`) may carry a
+clearly-labelled **editorial annotation that is a provenance pointer only** (e.g. "W1 was renamed
+TASI-W1; see D-2026-07-02-05") without breaching its point-in-time immutability, provided it adds no new
+finding and changes no recorded result. This legalises the one-line note added to `RIGOR_RESULT.md`.
+
+**Historically unchanged (point-in-time):** the `RIGOR_RESULT.md` body and all prior decision entries
+(D-2026-06-30-01 … D-2026-07-02-04) keep `W1/W2/W3` as true-when-written; only a provenance annotation
+was added to the Report.
+
+**Validation status.** All 17 CI/conformance gates green on the exact committed tree (itemised in the
+commit message), incl. `rule_runner`, `methodology_parity` (JS + command-doc defaults == rules.yaml on the
+new keys), and `selftest_tracker` (Py == golden == live JS). The live tracker ledger was migrated with a
+proven before/after `/saudi-track` continuity diff (same symbols, same journeys relabelled, same states),
+the migration script is idempotent (second run a no-op), and a renamed experiment smoke-run confirmed
+`rules["TASI-W1"]` resolves against the panel.
+
+**Canon authorization.** Executed under the scoped, single-commit `rules.yaml` **key-rename** approval
+(now spent). `features.yaml` and `VERSION` untouched.
+
+**Rollback.** `git revert <commit>`; restore the live ledger from `saudi-tracker.jsonl.bak-2026-07-02`.
+
+---
+
 ## Backfilled entries
 
 *Recorded 2026-07-02 from commit history and reports; each keeps its original decision date.*

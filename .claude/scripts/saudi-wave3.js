@@ -3,9 +3,9 @@
  * Persistent computed-filter + report renderer for the /saudi-wave3 slash command.
  *
  * Strategy: Saudi Main Market (TADAWUL) names ONE leg beyond /saudi-wave2 — a MATURE uptrend
- * that already ran its W1 (first turn off the deep low) and W2 (first coil + advance), has
+ * that already ran its TASI-W1 (first turn off the deep low) and TASI-W2 (first coil + advance), has
  * climbed back to / near (or made) new highs, and is now forming the NEXT contraction (a fresh
- * EMA coil higher up) that sets up the following leg. Unlike W1/W2 this is NOT a "deeply
+ * EMA coil higher up) that sets up the following leg. Unlike TASI-W1/TASI-W2 this is NOT a "deeply
  * corrected" screen — DDmax/belowATH/offLow are descriptors here, not gates. The structure is:
  *   mature trend (close > EMA200) + the coil again (EMA21≈EMA60, reclaim EMA21) +
  *   a pull-back from a recent high (nrHi band) + a genuine multi-year advance (Perf.3Y/5Y mins).
@@ -23,10 +23,10 @@
  *   ema21gap = (close/EMA21-1)*100   emaComp = (EMA21/EMA60-1)*100   // the coil
  *   ext60 = (close/EMA60-1)*100      vs200 = (close/EMA200-1)*100    // trend / maturity
  *
- * W3 gate logic (all defaults below):
+ * TASI-W3 gate logic (all defaults below):
  *   mature trend     : close > EMA60 AND vs200 > vs200_min (close > EMA200)
  *   the coil again   : emaComp in [ema_gap_min, ema_gap_max],  close >= EMA21 AND ema21gap <= ext21_max
- *   pulled back high : nrHi in [nrhi_min, nrhi_max]   (eased off a recent high — the post-W2-peak contraction)
+ *   pulled back high : nrHi in [nrhi_min, nrhi_max]   (eased off a recent high — the post-TASI-W2-peak contraction)
  *   genuine winner   : Perf.3Y in [p3y_min, p3y_max), Perf.5Y in [p5y_min, p5y_max)  (multi-year advance)
  *   not overheated   : Perf.1M in (p1m_min,p1m_max), Perf.3M in [p3m_min,p3m_max), Perf.6M in (p6m_min,p6m_max),
  *                      Perf.1Y in (py_min,py_max), Perf.10Y < p10y_max
@@ -178,7 +178,7 @@ function stageFilter() {
     if (p3m < params.p3m_min || p3m >= params.p3m_max) continue;
     if (p6m <= params.p6m_min || p6m >= params.p6m_max) continue;
     if (pY <= params.py_min || pY >= params.py_max) continue;
-    if (p3y < params.p3y_min || p3y >= params.p3y_max) continue; // floor = the W3 discriminator
+    if (p3y < params.p3y_min || p3y >= params.p3y_max) continue; // floor = the TASI-W3 discriminator
     if (p5y < params.p5y_min || p5y >= params.p5y_max) continue;
     const p10y = s["Perf.10Y"];
     if (p10y != null && p10y >= params.p10y_max) continue; // null = <10y history, allowed

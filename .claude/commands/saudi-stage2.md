@@ -4,6 +4,9 @@ description: Saudi Main Market (TADAWUL) Stage-2 screen — deep multi-year corr
 
 # /saudi-stage2 — Saudi Main Market Deep-Correction + First-Wave Screen
 
+**Canonical rule:** `TASI-W1` (defined in `research/spec/rules.yaml`). The command name `/saudi-stage2`
+is kept for continuity; the canonical methodology identifier is `TASI-W1` (rename: `decisions.md` D-2026-07-02-05).
+
 Find **Saudi Main Market (TADAWUL) only** stocks that suffered a **deep multi-year
 correction** (depth anchored to the **all-time high**, not to a fixed 5-year point) and
 whose **first recovery wave is underway but not yet overheated**.
@@ -44,7 +47,7 @@ Parse `$ARGUMENTS` for `key=value` tokens. Any key not supplied uses its default
 them straight to the script — the script owns the defaults and all the math.
 
 > **Canonical values live in [`research/spec/rules.yaml`](../../research/spec/rules.yaml)** (rule
-> `W1` → `params`), CI-locked to the script by `methodology_parity.py`; the **change history** (what
+> `TASI-W1` → `params`), CI-locked to the script by `methodology_parity.py`; the **change history** (what
 > moved, when, why, validation status) is in
 > [`research/spec/decisions.md`](../../research/spec/decisions.md). This table documents parameter
 > **keys and meaning only — it restates no default values.** For any key the user does not override,
@@ -69,7 +72,7 @@ them straight to the script — the script owns the defaults and all the math.
 | `nrhi_min`  | Optional min `nrHi = close/52w_high` strength gate (%); descriptor-only unless set |
 | `market`    | Fixed scope: Saudi Main Market only (do not change) |
 
-> **`ext60_max` extension cap — removed** (was a W1/W2 gate; retained as a tracker descriptor only).
+> **`ext60_max` extension cap — removed** (was a TASI-W1/TASI-W2 gate; retained as a tracker descriptor only).
 > Rationale and validation: [`research/spec/decisions.md`](../../research/spec/decisions.md)
 > D-2026-06-30-01.
 
@@ -113,7 +116,7 @@ Non-negotiable. **Never substitute symbols from any other market.**
        5–10-year names (null `Perf.10Y`) are kept; a server `less` filter would drop them. Same for
        the `offLow` band (a ratio).
    - `columns`: `["description","close","all_time_high","price_52_week_high","price_52_week_low","EMA21","EMA60","EMA200","Perf.3M","Perf.6M","Perf.Y","Perf.3Y","Perf.5Y","Perf.10Y","first_bar_time","average_volume_30d_calc","market_cap_basic","sector"]`
-   - `EMA21`/`EMA60`/`EMA200` are **descriptor-only** for the tracker (so W1-only names carry an
+   - `EMA21`/`EMA60`/`EMA200` are **descriptor-only** for the tracker (so TASI-W1-only names carry an
      EMA200 reading for its FAILED rule, plus `ext60`/`ema21gap`/`vs200` columns). They are **not**
      pushed to `filters` server-side, **not** shown in the table or CSV, and **no longer gate** entry
      (the `ext60_max` extension cap was removed 2026-06-30) — do **not** add EMA conditions to `filters`.
@@ -160,7 +163,7 @@ Non-negotiable. **Never substitute symbols from any other market.**
 6. **(Optional) Ingest into the unified tracker** — record this run's survivors into the
    append-only journey ledger BEFORE cleanup deletes the temp file:
    ```
-   node .claude/scripts/saudi-tracker.js stage=ingest filtered=.claude/scripts/.tmp/filtered.json source=W1
+   node .claude/scripts/saudi-tracker.js stage=ingest filtered=.claude/scripts/.tmp/filtered.json source=TASI-W1
    ```
    Non-fatal: if it errors, surface the message but still finish the run. View the cohort
    anytime with `/saudi-track`. Skip only if the user asked not to track this run.
@@ -190,7 +193,7 @@ Non-negotiable. **Never substitute symbols from any other market.**
   SAR/USD peg (3.75) so the `Cap` column is in SAR, consistent with `close`/`Val`. (`Val` =
   `avg_volume × close` is already SAR.)
 - **`ext60` extension cap — REMOVED 2026-06-30 (was: reject `close/EMA60 − 1 > 10%`).** The cap was
-  originally backtest-derived (the most-stretched W1-origin entries appeared to mean-revert), but a
+  originally backtest-derived (the most-stretched TASI-W1-origin entries appeared to mean-revert), but a
   pooled 20-year rigor re-test found it statistically **inert**, and a day-by-day review of the last
   3 months showed it **cut as many early winners as knives** — it would have rejected `2380` (+30%),
   `5110` (+13%) and `2050` (+12%) to avoid a few −15% names, and the single most-extended name was a

@@ -20,33 +20,33 @@ def main() -> int:
     K = 100
 
     # --- linkage causality + window ---
-    # name A: W1 at 10; W2 at 50 (within K of W1 -> linked); W3 at 120 (within K of the W2 at 50 -> chain)
-    # name B: W2 at 30 with NO prior W1 -> must NOT link (causality); W1 only at 200 (after) doesn't count
-    # name C: W1 at 0; W2 at 500 (gap 500 > K -> NOT linked); so its W3 at 510 also cannot chain
+    # name A: TASI-W1 at 10; TASI-W2 at 50 (within K of TASI-W1 -> linked); TASI-W3 at 120 (within K of the TASI-W2 at 50 -> chain)
+    # name B: TASI-W2 at 30 with NO prior TASI-W1 -> must NOT link (causality); TASI-W1 only at 200 (after) doesn't count
+    # name C: TASI-W1 at 0; TASI-W2 at 500 (gap 500 > K -> NOT linked); so its TASI-W3 at 510 also cannot chain
     p1 = {"A": [10], "B": [200], "C": [0]}
     p2 = {"A": [50], "B": [30], "C": [500]}
     p3 = {"A": [120], "B": [], "C": [510]}
     L = link_stages(p1, p2, p3, K)
 
     check(L["w1"] == {("A", 10), ("B", 200), ("C", 0)}, f"w1 set wrong: {L['w1']}")
-    check(("A", 50) in L["w2"], "A's W2@50 should link to W1@10")
-    check(("B", 30) not in L["w2"], "B's W2@30 must NOT link (no prior W1 — causality)")
-    check(("C", 500) not in L["w2"], "C's W2@500 must NOT link (gap > K)")
+    check(("A", 50) in L["w2"], "A's TASI-W2@50 should link to TASI-W1@10")
+    check(("B", 30) not in L["w2"], "B's TASI-W2@30 must NOT link (no prior TASI-W1 — causality)")
+    check(("C", 500) not in L["w2"], "C's TASI-W2@500 must NOT link (gap > K)")
     check(L["w2"] == {("A", 50)}, f"w2 set should be exactly A@50: {L['w2']}")
-    check(("A", 120) in L["w3"], "A's W3@120 should chain off the linked W2@50")
-    check(("C", 510) not in L["w3"], "C's W3 cannot chain (its W2 never linked)")
+    check(("A", 120) in L["w3"], "A's TASI-W3@120 should chain off the linked TASI-W2@50")
+    check(("C", 510) not in L["w3"], "C's TASI-W3 cannot chain (its TASI-W2 never linked)")
     check(L["w3"] == {("A", 120)}, f"w3 set should be exactly A@120: {L['w3']}")
 
     # --- diagnostic confirmation (uses future) ---
-    check(("A", 10) in L["w1_conf2"], "A's W1@10 confirms W2 (W2@50 within K ahead)")
-    check(("A", 10) in L["w1_conf3"], "A's W1@10 confirms W3 (chain reaches W3@120)")
-    check(("C", 0) not in L["w1_conf2"], "C's W1@0 does NOT confirm W2 (W2 is 500 away > K)")
-    check(("B", 200) not in L["w1_conf2"], "B's W1@200 has no later W2 -> not confirmed")
+    check(("A", 10) in L["w1_conf2"], "A's TASI-W1@10 confirms TASI-W2 (TASI-W2@50 within K ahead)")
+    check(("A", 10) in L["w1_conf3"], "A's TASI-W1@10 confirms TASI-W3 (chain reaches TASI-W3@120)")
+    check(("C", 0) not in L["w1_conf2"], "C's TASI-W1@0 does NOT confirm TASI-W2 (TASI-W2 is 500 away > K)")
+    check(("B", 200) not in L["w1_conf2"], "B's TASI-W1@200 has no later TASI-W2 -> not confirmed")
 
     # --- window edge: exactly K apart links; K+1 does not ---
     e = link_stages({"X": [0]}, {"X": [K, K + 1]}, {"X": []}, K)
-    check(("X", K) in e["w2"], "W2 exactly K after W1 should link (inclusive)")
-    check(("X", K + 1) not in e["w2"], "W2 at K+1 after W1 must not link")
+    check(("X", K) in e["w2"], "TASI-W2 exactly K after TASI-W1 should link (inclusive)")
+    check(("X", K + 1) not in e["w2"], "TASI-W2 at K+1 after TASI-W1 must not link")
 
     # --- determinism ---
     check(link_stages(p1, p2, p3, K) == L, "link_stages must be deterministic")

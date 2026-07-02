@@ -1,7 +1,7 @@
 {
   "TADAWUL:A": {
-    "state": "ACTIVE-W2",
-    "journey": "W1→W2",
+    "state": "ACTIVE-TASI-W2",
+    "journey": "TASI-W1→TASI-W2",
     "runs": 2,
     "gain": 20,
     "first_close": 10,
@@ -15,8 +15,8 @@
     "nearATH": false
   },
   "TADAWUL:B": {
-    "state": "ACTIVE-W1",
-    "journey": "W1",
+    "state": "ACTIVE-TASI-W1",
+    "journey": "TASI-W1",
     "runs": 1,
     "gain": 0,
     "first_close": 5,
@@ -31,7 +31,7 @@
   },
   "TADAWUL:C": {
     "state": "FAILED",
-    "journey": "W1→W2",
+    "journey": "TASI-W1→TASI-W2",
     "runs": 2,
     "gain": -25,
     "first_close": 20,
@@ -46,7 +46,7 @@
   },
   "TADAWUL:D": {
     "state": "GRAD★",
-    "journey": "W2",
+    "journey": "TASI-W2",
     "runs": 1,
     "gain": 10,
     "first_close": 50,
@@ -61,7 +61,7 @@
   },
   "TADAWUL:E": {
     "state": "STALE",
-    "journey": "W1",
+    "journey": "TASI-W1",
     "runs": 1,
     "gain": 0,
     "first_close": 8,
@@ -76,7 +76,7 @@
   },
   "TADAWUL:F": {
     "state": "EXPIRED",
-    "journey": "W1→W2",
+    "journey": "TASI-W1→TASI-W2",
     "runs": 2,
     "gain": 10,
     "first_close": 30,
@@ -91,7 +91,7 @@
   },
   "TADAWUL:G": {
     "state": "FAILED",
-    "journey": "W1→W2",
+    "journey": "TASI-W1→TASI-W2",
     "runs": 2,
     "gain": -28,
     "first_close": 25,
@@ -105,8 +105,8 @@
     "nearATH": false
   },
   "TADAWUL:H": {
-    "state": "ACTIVE-W2",
-    "journey": "W2",
+    "state": "ACTIVE-TASI-W2",
+    "journey": "TASI-W2",
     "runs": 1,
     "gain": 0,
     "first_close": 100,

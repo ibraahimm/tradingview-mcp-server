@@ -1,5 +1,10 @@
 # Rigor Pass — Result (2026-06-28)
 
+> **Editorial annotation (2026-07-02 — provenance pointer only).** The waves referenced below as
+> `W1/W2/W3` were renamed to the canonical `TASI-W1/TASI-W2/TASI-W3` on 2026-07-02
+> (`decisions.md` D-2026-07-02-05). This is a point-in-time **Report** and is *not* rewritten — read
+> `W1 ≡ TASI-W1`, etc. (D-2026-07-02-05 permits provenance annotations of this kind on Reports.)
+
 ## UPDATE — W1/W2/W3 jointly (deflated by n_trials = 12). W2 & W3 show a real signal; W1 does not.
 
 *Data provenance: vintage **2026-06-28** (manifest `ingest/manifests/tadawul_2026-06-28.json`;

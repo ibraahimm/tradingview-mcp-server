@@ -139,7 +139,7 @@ affect comparability. **Type test:** *could this entry change which names pass o
 - **Contract root (Step 2, verified):** no single root; the three methodology contracts are
   domain-parallel and single-homed, all under the `ARCHITECTURE.md` rationale umbrella (now cited by
   all three — the optional item below is done).
-- **SSOT offenders — fixed:** the W1/W2/W3 param tables in `.claude/commands/saudi-stage2.md`,
+- **SSOT offenders — fixed:** the TASI-W1/TASI-W2/TASI-W3 param tables in `.claude/commands/saudi-stage2.md`,
   `saudi-wave2.md`, `saudi-wave3.md` and the gate-values list in `HANDOFF.md §2` now reference
   `rules.yaml` and restate no thresholds. **Correction to the earlier draft:** `saudi-momentum` is
   **not** an offender — it is not in `rules.yaml`; its params are owned by its own command file. And

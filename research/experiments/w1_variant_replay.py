@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # ------------------------------------------------------------------------------
 # EXPERIMENTAL — methodology-improvement exploration (NOT official methodology).
-# Compares OFFICIAL W1 against parameter VARIANTS using runtime overrides ONLY (params_overrides).
+# Compares OFFICIAL TASI-W1 against parameter VARIANTS using runtime overrides ONLY (params_overrides).
 # Never edits rules.yaml or the live JS. Outputs are HYPOTHESES. See research/spec/TESTING.md.
 # ------------------------------------------------------------------------------
-"""W1 variant 60-day rolling replay: compare official W1 vs Variant A (later offLow entry zone) over the
+"""TASI-W1 variant 60-day rolling replay: compare official TASI-W1 vs Variant A (later offLow entry zone) over the
 SAME fixed structural cohort, with the same audit outputs as w1_replay_60d.
 
     python -m research.experiments.w1_variant_replay research/panel/tadawul_<vintage>.parquet
 
-Structural cohort_d (fixed; the intended W1 universe) = non-9xxx & age>=5 & DDmax>=50 &
-    belowATH in [40,100] & offLow>=20.  Only the W1 OFFLOW gate is changed, via override.
+Structural cohort_d (fixed; the intended TASI-W1 universe) = non-9xxx & age>=5 & DDmax>=50 &
+    belowATH in [40,100] & offLow>=20.  Only the TASI-W1 OFFLOW gate is changed, via override.
 
 Variant A override: {offlow_min:40, offlow_max:80}.  (Variant B is run only if A's evidence warrants it.)
 """
@@ -38,7 +38,7 @@ def _pname(raw):
 
 
 def diagnose(rule, row, ov):
-    """All failing W1 gates under params + override; returns the dominant param to change."""
+    """All failing TASI-W1 gates under params + override; returns the dominant param to change."""
     params = {**rule["params"], **ov}
     fails = []
     for pred in rule["funnel"]:
@@ -62,8 +62,8 @@ def diagnose(rule, row, ov):
     return fails
 
 
-def run_variant(uni, W1, ov):
-    dec = R.evaluate_frame(W1, uni, ov)
+def run_variant(uni, TASI_W1, ov):
+    dec = R.evaluate_frame(TASI_W1, uni, ov)
     rows = {(r["sec_id"], r["date"]): r for r in dec.iter_rows(named=True)}
     first_fire = {}
     for (sid, d), r in rows.items():
@@ -79,7 +79,7 @@ def main():
     feat = compute_value(compute_age_years(build_panel(prices), sm))
     dates = sorted(feat.get_column("date").unique().to_list())
     eval_dates = dates[-EVAL_DAYS:]
-    W1 = R.load_rules()["W1"]
+    TASI_W1 = R.load_rules()["TASI-W1"]
     uni = feat.filter(
         pl.col("date").is_in(eval_dates) & (~pl.col("sec_id").str.starts_with("9"))
         & (pl.col("age_years") >= 5) & (pl.col("ddmax") >= 50)
@@ -90,7 +90,7 @@ def main():
 
     per = {}   # variant -> {sid: (detected, first_pass, dominant_block)}
     for name, ov in VARIANTS:
-        rows, ff = run_variant(uni, W1, ov)
+        rows, ff = run_variant(uni, TASI_W1, ov)
         res = {}
         miss_block = Counter()
         for sid in cohort:
@@ -100,7 +100,7 @@ def main():
             if not det:
                 bl = Counter()
                 for r in srows:
-                    for g in diagnose(W1, r, ov):
+                    for g in diagnose(TASI_W1, r, ov):
                         bl[g] += 1
                 dom = bl.most_common(1)[0][0] if bl else "—"
                 miss_block[dom] += 1
@@ -131,7 +131,7 @@ def main():
              "lost" if (off[s][0] and not A[s][0]) else "")
         w.writerow([s, off[s][0], off[s][1], off[s][2], A[s][0], A[s][1], A[s][2], d])
     print(f"\nwrote {OUT}/w1_variantA_compare.csv")
-    print("(Experimental — hypotheses only. Official W1 unchanged: rules.yaml + saudi-stage2.js.)")
+    print("(Experimental — hypotheses only. Official TASI-W1 unchanged: rules.yaml + saudi-stage2.js.)")
 
 
 if __name__ == "__main__":

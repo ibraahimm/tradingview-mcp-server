@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /**
- * Persistent cohort tracker for the /saudi-stage2 (W1, "first wave") and /saudi-wave2 (W2,
+ * Persistent cohort tracker for the /saudi-stage2 (TASI-W1, "first wave") and /saudi-wave2 (TASI-W2,
  * "second wave / continuation") slash commands.
  *
- * One UNIFIED journey per symbol across both waves: a name can first appear in W1, later in
- * W2, and that is treated as a single continuous journey. The ledger is an append-only JSONL
+ * One UNIFIED journey per symbol across both waves: a name can first appear in TASI-W1, later in
+ * TASI-W2, and that is treated as a single continuous journey. The ledger is an append-only JSONL
  * event log (one line per symbol-per-run) at .claude/outputs/saudi-tracker.jsonl. CSV is an
  * optional export only — JSONL is the source of truth.
  *
  * Two stages:
  *   1) ingest — input: a wave's stage=filter JSON ({ params, matches:[...] }). Stamps today's
- *               date + source (W1|W2) + each match's metrics into the ledger. Each event is made
+ *               date + source (TASI-W1|TASI-W2) + each match's metrics into the ledger. Each event is made
  *               self-contained by carrying first_close / first_seen / first_source, derived from
  *               the EARLIEST prior event for that symbol (so the journey origin is stable).
  *   2) report — reads the whole ledger, rolls every symbol's events into one journey, classifies
@@ -22,21 +22,21 @@
  *   GRADUATED  : Perf.5Y > grad_p5y (default 2000) — the long-run big-winner flag (name kept).
  *   EXPIRED    : age since first_seen > horizon_days (default 1826 ≈ 5y) and not graduated.
  *   STALE      : not seen on either screen for > stale_days (default 120) — dropped off the radar.
- *   ACTIVE-W2  : still appearing, most recent appearance was W2.
- *   ACTIVE-W1  : still appearing, most recent appearance was W1 (never reached W2).
+ *   ACTIVE-TASI-W2  : still appearing, most recent appearance was TASI-W2.
+ *   ACTIVE-TASI-W1  : still appearing, most recent appearance was TASI-W1 (never reached TASI-W2).
  * Badges (orthogonal, shown in the summary): NEW (first appeared in the latest run),
- *   PROMOTED (appeared in BOTH W1 and W2 — the W1→W2 progression), nearATH (belowATH < 10).
+ *   PROMOTED (appeared in BOTH TASI-W1 and TASI-W2 — the TASI-W1→TASI-W2 progression), nearATH (belowATH < 10).
  *
  * Progress metrics:
  *   gainSinceSignal = (close / first_close - 1) * 100   // main progress: P&L from first signal
  *   belowATH                                            // structural recovery toward the ATH
  *
- * Note: the W1 (/saudi-stage2) screen does not fetch EMAs, so W1-only names carry no EMA200 /
+ * Note: the TASI-W1 (/saudi-stage2) screen does not fetch EMAs, so TASI-W1-only names carry no EMA200 /
  * vs200. The FAILED rule needs that reading, so it is evaluated from the most recent EMA-bearing
- * (i.e. W2) event; a name that has only ever appeared in W1 cannot be marked FAILED yet.
+ * (i.e. TASI-W2) event; a name that has only ever appeared in TASI-W1 cannot be marked FAILED yet.
  *
  * Usage:
- *   node saudi-tracker.js stage=ingest filtered=<wave_filter.json> source=W1|W2 [date=YYYY-MM-DD] [ledger=path]
+ *   node saudi-tracker.js stage=ingest filtered=<wave_filter.json> source=TASI-W1|TASI-W2 [date=YYYY-MM-DD] [ledger=path]
  *   node saudi-tracker.js stage=report [ledger=path] [grad_p5y=2000] [stale_days=120] [horizon_days=1826] [csv=path]
  */
 
@@ -114,7 +114,7 @@ function renderGrid(headers, rows, aligns) {
 function stageIngest() {
   if (!args.filtered) throw new Error("stage=ingest requires filtered=<wave_filter.json|->");
   const source = String(args.source || "").toUpperCase();
-  if (source !== "W1" && source !== "W2") throw new Error("stage=ingest requires source=W1|W2");
+  if (source !== "TASI-W1" && source !== "TASI-W2") throw new Error("stage=ingest requires source=TASI-W1|TASI-W2");
   const date = args.date || today();
   const ledgerPath = args.ledger || DEFAULT_LEDGER;
   const data = readJson(args.filtered);
@@ -144,7 +144,7 @@ function stageIngest() {
     const f = first.get(sym);
     if (!f) nNew++;
     const seen = priorSources.get(sym) || new Set();
-    if (source === "W2" && seen.has("W1") && !seen.has("W2")) nPromoted++;
+    if (source === "TASI-W2" && seen.has("TASI-W1") && !seen.has("TASI-W2")) nPromoted++;
     events.push({
       date,
       ts,
@@ -176,7 +176,7 @@ function stageIngest() {
   if (events.length) appendFileSync(ledgerPath, events.map((e) => JSON.stringify(e)).join("\n") + "\n");
   process.stdout.write(
     `Ingested ${events.length} ${source} match(es) dated ${date} → ${ledgerPath} ` +
-      `(${nNew} new symbol(s), ${nPromoted} promoted W1→W2).\n`,
+      `(${nNew} new symbol(s), ${nPromoted} promoted TASI-W1→TASI-W2).\n`,
   );
 }
 
@@ -211,9 +211,9 @@ function buildItems(ledger, now, { grad_p5y, stale_days, horizon_days }) {
     const first_close = first.first_close ?? first.close;
     const first_seen = first.first_seen ?? first.date;
     const gain = first_close ? (last.close / first_close - 1) * 100 : null;
-    const hasW1 = evs.some((e) => e.source === "W1");
-    const hasW2 = evs.some((e) => e.source === "W2");
-    // latest EMA-bearing reading (W2 events carry vs200)
+    const hasW1 = evs.some((e) => e.source === "TASI-W1");
+    const hasW2 = evs.some((e) => e.source === "TASI-W2");
+    // latest EMA-bearing reading (TASI-W2 events carry vs200)
     let vs200 = null;
     for (let i = evs.length - 1; i >= 0; i--)
       if (evs[i].vs200 != null) {
@@ -233,7 +233,7 @@ function buildItems(ledger, now, { grad_p5y, stale_days, horizon_days }) {
     else if (gradFlag) state = "GRAD★";
     else if (expired) state = "EXPIRED";
     else if (stale) state = "STALE";
-    else state = last.source === "W2" ? "ACTIVE-W2" : "ACTIVE-W1";
+    else state = last.source === "TASI-W2" ? "ACTIVE-TASI-W2" : "ACTIVE-TASI-W1";
 
     items.push({
       symbol: sym,
@@ -321,7 +321,7 @@ function stageReport() {
     "",
     grid.text,
     "",
-    `States: ACTIVE-W1 ${count("ACTIVE-W1")} · ACTIVE-W2 ${count("ACTIVE-W2")} · GRAD★ ${count("GRAD★")} · FAILED ${count("FAILED")} · STALE ${count("STALE")} · EXPIRED ${count("EXPIRED")}.`,
+    `States: ACTIVE-TASI-W1 ${count("ACTIVE-TASI-W1")} · ACTIVE-TASI-W2 ${count("ACTIVE-TASI-W2")} · GRAD★ ${count("GRAD★")} · FAILED ${count("FAILED")} · STALE ${count("STALE")} · EXPIRED ${count("EXPIRED")}.`,
     `New this run (${latestDate}): ${list(items.filter((r) => r.isNew))}.`,
     `Near ATH (belowATH < 10%, descriptor): ${list(items.filter((r) => r.nearATH))}.`,
     `Graduation flag: Perf.5Y > ${grad_p5y}. Failure: close < first signal AND close < EMA200. Horizon: ${horizon_days}d (~${(horizon_days / 365.25).toFixed(1)}y). Stale: ${stale_days}d.`,
@@ -331,17 +331,17 @@ function stageReport() {
   // Grouped sections (presentation only — derived from already-computed states/fields).
   const nm = (r, n) => `${r.symbol.split(":")[1]} ${trunc(r.name, n)}`;
   const promoted = items.filter((r) => r.promoted);
-  const w2 = items.filter((r) => r.state === "ACTIVE-W2");
-  const w1 = items.filter((r) => r.state === "ACTIVE-W1");
+  const w2 = items.filter((r) => r.state === "ACTIVE-TASI-W2");
+  const w1 = items.filter((r) => r.state === "ACTIVE-TASI-W1");
   const below200 = items.filter((r) => r.vs200 != null && r.vs200 < 0).sort((a, b) => a.vs200 - b.vs200);
   const grad = items.filter((r) => r.state === "GRAD★");
   const failed = items.filter((r) => r.state === "FAILED");
   const stale = items.filter((r) => r.state === "STALE");
   out.push("");
   out.push("── Groups ──");
-  out.push(`▸ Promoted W1→W2 (${promoted.length}): ${promoted.length ? promoted.map((r) => nm(r, 22)).join("; ") : "none"}`);
-  out.push(`▸ Active-W2 (${w2.length}): ${w2.length ? w2.map((r) => `${nm(r, 16)} (${sgn(r.gain)}%)`).join("; ") : "none"}`);
-  out.push(`▸ Active-W1 (${w1.length}): ${w1.length ? w1.map((r) => r.symbol.split(":")[1]).join(", ") : "none"}`);
+  out.push(`▸ Promoted TASI-W1→TASI-W2 (${promoted.length}): ${promoted.length ? promoted.map((r) => nm(r, 22)).join("; ") : "none"}`);
+  out.push(`▸ Active-TASI-W2 (${w2.length}): ${w2.length ? w2.map((r) => `${nm(r, 16)} (${sgn(r.gain)}%)`).join("; ") : "none"}`);
+  out.push(`▸ Active-TASI-W1 (${w1.length}): ${w1.length ? w1.map((r) => r.symbol.split(":")[1]).join(", ") : "none"}`);
   out.push(
     `▸ Below EMA200 watchlist (${below200.length}): ${below200.length ? below200.map((r) => `${r.symbol.split(":")[1]} (${sgn(r.vs200)})`).join(", ") : "none"}`,
   );

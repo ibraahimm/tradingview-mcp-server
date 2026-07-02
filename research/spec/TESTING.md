@@ -11,7 +11,7 @@ dividing line is simple: **runtime override vs. file edit.**
 
 | Category | Defines/asserts | Mechanism | CI-gated | Lives in |
 |---|---|---|---|---|
-| **Official methodology** | *Defines* the W1/W2/W3 screens | the **files**: `research/spec/rules.yaml` + `.claude/scripts/saudi-stage2.js` / `saudi-wave2.js` (+ `.claude/commands/*.md`) | — (it is the source of truth) | spec + `.claude/` |
+| **Official methodology** | *Defines* the TASI-W1/TASI-W2/TASI-W3 screens | the **files**: `research/spec/rules.yaml` + `.claude/scripts/saudi-stage2.js` / `saudi-wave2.js` (+ `.claude/commands/*.md`) | — (it is the source of truth) | spec + `.claude/` |
 | **Conformance / parity** | *Asserts* the official definitions are internally consistent and the live JS matches the spec, **at default params** | golden vectors (`rule_runner`), `methodology_parity.py`, engine self-tests — **no overrides** | **Yes** | `research/spec/conformance/`, engine self-tests |
 | **Experimental improvement** | *Explores* alternative thresholds / extra conditions | `evaluate_frame(rule, df, params_overrides={…})` and/or clearly-labelled **observable** candidate pre-filters — **never edits the official files** | **No** (on-demand) | `research/experiments/` |
 
@@ -28,7 +28,7 @@ dividing line is simple: **runtime override vs. file edit.**
 ## What `methodology_parity.py` enforces (and its current limitation)
 
 - It compares the **parameter default values** parsed from the two live JS scripts against
-  `rules.yaml`'s W1/W2 `params`, and FAILS CI on any mismatch. This prevents *silent drift* between the
+  `rules.yaml`'s TASI-W1/TASI-W2 `params`, and FAILS CI on any mismatch. This prevents *silent drift* between the
   live screener and the research spec.
 - It has **zero awareness** of `research/` analysis or experiment scripts, so it cannot block
   experimentation (experiments use overrides, which don't touch the compared files).

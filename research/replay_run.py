@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Replay the documented W1/W2 tracker methodology across the full historical panel.
+"""Replay the documented TASI-W1/TASI-W2 tracker methodology across the full historical panel.
 
     python -m research.replay_run research/panel/tadawul_<vintage>.parquet
 
-Faithful replay (not a new strategy): generate ledger events from the engine's W1/W2 pass-rows under
+Faithful replay (not a new strategy): generate ledger events from the engine's TASI-W1/TASI-W2 pass-rows under
 the documented daily-cadence adaptation, then classify each symbol's journey with the PROVEN tracker
 state machine. Reports the historical base rates today's live tracker can be read against.
 """
@@ -33,9 +33,9 @@ def main():
     print(f"loaded {prices.height:,} rows / {prices['sec_id'].n_unique()} secs; building panel ...")
     feat = compute_value(compute_age_years(build_panel(prices), sm))
     rules = R.load_rules()
-    dW1 = R.evaluate_frame(rules["W1"], feat, None)
-    dW2 = R.evaluate_frame(rules["W2"], feat, None)
-    events = generate_ledger({"W1": dW1, "W2": dW2})
+    dW1 = R.evaluate_frame(rules["TASI-W1"], feat, None)
+    dW2 = R.evaluate_frame(rules["TASI-W2"], feat, None)
+    events = generate_ledger({"TASI-W1": dW1, "TASI-W2": dW2})
     jr = journey_outcomes(events)
     print(f"generated {len(events):,} historical events; {len(jr)} symbol journeys "
           f"(daily-cadence replay; date range {events[0]['date']}..{max(e['date'] for e in events)})\n")
@@ -49,12 +49,12 @@ def main():
         return [j["max_gain"] for j in js if j["max_gain"] is not None]
 
     print("HISTORICAL BASE RATES (documented methodology replayed through history)")
-    print(f"  W1-entry journeys ............ {len(w1)}")
-    print(f"  promoted W1->W2 .............. {len(promoted)} ({pct(len(promoted)/len(w1))})")
+    print(f"  TASI-W1-entry journeys ............ {len(w1)}")
+    print(f"  promoted TASI-W1->TASI-W2 .............. {len(promoted)} ({pct(len(promoted)/len(w1))})")
     print(f"  terminal FAILED ............. {len(failed)} ({pct(len(failed)/len(w1))})")
     print(f"  terminal-state mix .......... " +
           ", ".join(f"{s}:{sum(1 for j in w1 if j['terminal']==s)}"
-                    for s in ("ACTIVE-W1", "ACTIVE-W2", "FAILED", "EXPIRED", "GRAD★")))
+                    for s in ("ACTIVE-TASI-W1", "ACTIVE-TASI-W2", "FAILED", "EXPIRED", "GRAD★")))
 
     def line(label, js):
         g = gains(js)
@@ -66,13 +66,13 @@ def main():
               f">+100%: {pct(sum(x>100 for x in g)/len(g))}")
 
     print("\nPeak gainSinceSignal achieved while the journey was ACTIVE (tracker's own metric, no forward look):")
-    line("all W1 entries", w1)
-    line("  promoted (W1->W2)", promoted)
-    line("  W1-only (never promoted)", w1only)
+    line("all TASI-W1 entries", w1)
+    line("  promoted (TASI-W1->TASI-W2)", promoted)
+    line("  TASI-W1-only (never promoted)", w1only)
     line("  terminal FAILED", failed)
 
-    print("\nINTERPRETATION: promotion (reaching W2) is the documented progression signal — compare the "
-          "promoted vs W1-only peak-gain rows. FAILED journeys are the falling-knife outcome.")
+    print("\nINTERPRETATION: promotion (reaching TASI-W2) is the documented progression signal — compare the "
+          "promoted vs TASI-W1-only peak-gain rows. FAILED journeys are the falling-knife outcome.")
     print("Connect to today's live tracker (Part 4) using these base rates.")
 
 

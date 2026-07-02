@@ -23,7 +23,7 @@
       {"name": "nrhi", "type": "number"}, {"name": "ext60", "type": "number"}, {"name": "ema21gap", "type": "number"},
       {"name": "ema_comp", "type": "number"}, {"name": "vs200", "type": "number"},
 
-      {"name": "w1_pass", "type": "boolean", "description": "TV-evaluated W1 decision (null if not evaluable)."},
+      {"name": "w1_pass", "type": "boolean", "description": "TV-evaluated TASI-W1 decision (null if not evaluable)."},
       {"name": "w2_pass", "type": "boolean"},
       {"name": "w3_pass", "type": "boolean"},
 

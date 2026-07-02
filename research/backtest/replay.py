@@ -1,4 +1,4 @@
-"""Historical event-GENERATION + replay of the documented W1/W2 tracker methodology.
+"""Historical event-GENERATION + replay of the documented TASI-W1/TASI-W2 tracker methodology.
 
 Faithfulness split (see research/spec/lifecycle.md §4):
   * The tracker STATE MACHINE is unchanged — we reuse research.backtest.tracker (proven == live JS).
@@ -7,8 +7,8 @@ Faithfulness split (see research/spec/lifecycle.md §4):
                    ledger is a sparse human-driven sample of this.
       A3 STALE   : becomes gate-driven (the setup stopped qualifying) not usage-driven.
       A4 first_seen: first trading day the gate passes (deterministic), matching the live ingest stamping.
-      vs200      : stamped on W1 events too — faithful to the CURRENT committed saudi-stage2 (which fetches
-                   EMA200 as a descriptor so W1-only names can be FAILED). Not a research change.
+      vs200      : stamped on TASI-W1 events too — faithful to the CURRENT committed saudi-stage2 (which fetches
+                   EMA200 as a descriptor so TASI-W1-only names can be FAILED). Not a research change.
   * `name` = sec_id (the panel carries no company name) — cosmetic only.
 
 This replays the documented methodology through history; it is NOT a new research strategy. Any
@@ -29,8 +29,8 @@ def _ms(d) -> int:
 
 
 def generate_ledger(decided_by_source: dict) -> list:
-    """Turn engine pass-rows into ledger events (live schema). `decided_by_source` = {"W1": frame,
-    "W2": frame} where each frame has `passed` + the feature columns. Daily cadence (A2): one event per
+    """Turn engine pass-rows into ledger events (live schema). `decided_by_source` = {"TASI-W1": frame,
+    "TASI-W2": frame} where each frame has `passed` + the feature columns. Daily cadence (A2): one event per
     passing bar. first_close/first_seen stamped from the earliest event per symbol (A4)."""
     frames = []
     for source, d in decided_by_source.items():
@@ -76,7 +76,7 @@ def journey_outcomes(events: list, grad_p5y=GRAD_P5Y, stale_days=STALE_DAYS, hor
         it = items[0]
         rows.append({
             "symbol": sym, "n_events": len(evs),
-            "entered_w1": any(e["source"] == "W1" for e in evs),
+            "entered_w1": any(e["source"] == "TASI-W1" for e in evs),
             "promoted": it["promoted"], "journey": it["journey"], "terminal": it["state"],
             "first_seen": evs[0]["first_seen"], "last_seen": last_date,
             "max_gain": max(gains) if gains else None, "final_gain": gains[-1] if gains else None,

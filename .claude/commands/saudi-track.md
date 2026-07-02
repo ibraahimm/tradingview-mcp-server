@@ -1,8 +1,8 @@
 # /saudi-track — Saudi Wave Cohort Tracker (read-only report)
 
-Show the **unified journey** of every name surfaced by `/saudi-stage2` (W1, "first wave") and
-`/saudi-wave2` (W2, "second wave / continuation"), accumulated in a persistent append-only
-ledger. One journey per symbol across both waves: a name can first appear in W1, later in W2,
+Show the **unified journey** of every name surfaced by `/saudi-stage2` (TASI-W1, "first wave") and
+`/saudi-wave2` (TASI-W2, "second wave / continuation"), accumulated in a persistent append-only
+ledger. One journey per symbol across both waves: a name can first appear in TASI-W1, later in TASI-W2,
 and the tracker treats that as one continuous journey.
 
 This command is **read-only** — it only renders the current ledger. The ledger itself is written
@@ -52,8 +52,8 @@ Example calls:
    - **Before the sentinel** — the tracker header, the **box-grid journey table** (sorted by
      `gainSinceSignal` descending), and the **state/badge summary**. **Print this whole part as-is
      inside a fenced ```text code block.** Columns (fixed order): `Sym Name First Jrny Rns Entry
-     Now Gain% bATH offL 5Y v200 State`. `Jrny` is the W1/W2 path (e.g. `W1→W2`); `Gain%` is
-     `close/first_close − 1`; `State` ∈ `ACTIVE-W1 | ACTIVE-W2 | GRAD★ | FAILED | STALE | EXPIRED`.
+     Now Gain% bATH offL 5Y v200 State`. `Jrny` is the TASI-W1/TASI-W2 path (e.g. `TASI-W1→TASI-W2`); `Gain%` is
+     `close/first_close − 1`; `State` ∈ `ACTIVE-TASI-W1 | ACTIVE-TASI-W2 | GRAD★ | FAILED | STALE | EXPIRED`.
      Do NOT convert to a Markdown/ASCII table and do NOT split it.
    - **After the sentinel** — a markdown "**Open chart (click a symbol)**" list. **Print as normal
      markdown OUTSIDE the code block.** Do not print the `===CHART_LINKS===` line itself.
@@ -66,11 +66,11 @@ Example calls:
 ## Lifecycle reference
 
 - **FAILED** — latest EMA reading shows `close < first_close` AND `close < EMA200` (underwater from
-  the original signal AND long trend broken). W1-only names (no EMA data) can't be FAILED yet.
+  the original signal AND long trend broken). TASI-W1-only names (no EMA data) can't be FAILED yet.
 - **GRAD★** — `Perf.5Y > grad_p5y` (default 2000). The name is kept and tracked.
 - **EXPIRED** — older than `horizon_days` since first seen and not graduated.
 - **STALE** — not seen on either screen for `> stale_days`.
-- **ACTIVE-W1 / ACTIVE-W2** — still appearing; suffix is the most recent wave.
+- **ACTIVE-TASI-W1 / ACTIVE-TASI-W2** — still appearing; suffix is the most recent wave.
 - Badges (in summary): **NEW** (first appeared in the latest run), **PROMOTED** (appeared in both
-  W1 and W2 — the W1→W2 progression), **near-ATH** (belowATH < 10%, descriptor).
+  TASI-W1 and TASI-W2 — the TASI-W1→TASI-W2 progression), **near-ATH** (belowATH < 10%, descriptor).
 - Progress metrics: `gainSinceSignal = close/first_close − 1` (main), `belowATH` (structural recovery).

@@ -24,7 +24,7 @@ spec_version: "1.0.0"
 rules:
 
   # -------------------------------------------------------------------------
-  W1:  # /saudi-stage2 — deep multi-year correction + first recovery wave
+  TASI-W1:  # /saudi-stage2 — deep multi-year correction + first recovery wave
     title: "First wave (deep-correction turn off the multi-year low)"
     params:
       min_years: 5
@@ -60,7 +60,7 @@ rules:
       warn_up: "perf_3y > 0"      # uptrend-leaning
 
   # -------------------------------------------------------------------------
-  W2:  # /saudi-wave2 — first coil + continuation (keeps deep-correction DNA)
+  TASI-W2:  # /saudi-wave2 — first coil + continuation (keeps deep-correction DNA)
     title: "Second wave (first EMA coil, reclaim, resume)"
     params:
       min_years: 5
@@ -105,7 +105,7 @@ rules:
       warn_early: "vs200 <= 0"   # early — long downtrend not yet up
 
   # -------------------------------------------------------------------------
-  W3:  # /saudi-wave3 — mature re-coil near highs (NOT a corrected screen)
+  TASI-W3:  # /saudi-wave3 — mature re-coil near highs (NOT a corrected screen)
     title: "Third wave (mature trend, next contraction near new highs)"
     params:
       min_years: 5

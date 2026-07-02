@@ -4,7 +4,7 @@ The **Polars** implementation of the canonical feature spec (`../spec/features.y
 research-side half of the two-implementation design (the live TS screener is the other); the
 **golden vectors** (`../spec/vectors`) are the shared acceptance gate that keeps the two identical.
 
-## Scope (W1 / stage2 feature set)
+## Scope (TASI-W1 / stage2 feature set)
 
 | Implemented | Status |
 |---|---|
@@ -14,7 +14,7 @@ research-side half of the two-implementation design (the live TS screener is the
 | `rolling_extreme` → `high_52w`/`low_52w` | ✅ Polars time-rolling over `[date-weeks·7d, date]` |
 | `ratios` (8 structural features) | ✅ single-source `RATIO_EXPRS`; null-propagating |
 | **panel builder** (`panel.py`) | ✅ `(sec_id, date)` panel; per-security, as-of, reuses the gated functions |
-| **rule engine** (`rules.py`) | ✅ W1/W2/W3 pass/fail + first-failing-gate + funnel, driven by `../spec/rules.yaml` |
+| **rule engine** (`rules.py`) | ✅ TASI-W1/TASI-W2/TASI-W3 pass/fail + first-failing-gate + funnel, driven by `../spec/rules.yaml` |
 | **screen run** (`screen.py`) | ✅ joins `age_years` (reference) + `value`/ADV (liquidity), then funnel + survivors over the panel |
 
 Acceptance gates (all green; wired into CI):
@@ -28,9 +28,9 @@ python research/spec/conformance/reference_runner.py --adapter=research.engine.c
 python -m research.engine.selftest_panel
 # -> PASS: panel self-test OK
 
-# rule engine: W1/W2/W3 decisions + funnel order (row-wise == frame-wise)
+# rule engine: TASI-W1/TASI-W2/TASI-W3 decisions + funnel order (row-wise == frame-wise)
 python research/spec/conformance/rule_runner.py
-# -> PASS: 4 rule case(s) across ['W1', 'W2', 'W3'], coverage OK.
+# -> PASS: 4 rule case(s) across ['TASI-W1', 'TASI-W2', 'TASI-W3'], coverage OK.
 
 # screen run: age_years + value/ADV enrichment, funnel + survivors (2 runs)
 python -m research.engine.selftest_screen

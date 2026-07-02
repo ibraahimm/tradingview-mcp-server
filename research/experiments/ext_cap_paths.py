@@ -45,7 +45,7 @@ def main():
 
     rules = R.load_rules()
     rejected = []
-    for wave, ov, extcol in (("W1", {"ext60_max": 999}, "ext60"), ("W2", {"ext21_max": 999}, "ema21gap")):
+    for wave, ov, extcol in (("TASI-W1", {"ext60_max": 999}, "ext60"), ("TASI-W2", {"ext21_max": 999}, "ema21gap")):
         kept = dedup_signals(R.evaluate_frame(rules[wave], win, ov), 20)
         for r in kept.iter_rows(named=True):
             if r[extcol] is not None and r[extcol] > CAP:

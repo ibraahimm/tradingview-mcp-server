@@ -4,8 +4,8 @@ This is a CONFORMANT port, not a re-derivation: it mirrors `buildItems` in
 .claude/scripts/saudi-tracker.js line-for-line and is proven against that JS via shared golden
 vectors (research/spec/lifecycle_vectors/) + a JS<->Python differential test (selftest_tracker.py).
 
-Scope = the COMMITTED methodology only: W1/W2 journeys (ACTIVE-W1/ACTIVE-W2/GRAD*/FAILED/STALE/
-EXPIRED + NEW/PROMOTED/nearATH badges). W3-as-a-journey-stage was proposed in the Operational
+Scope = the COMMITTED methodology only: TASI-W1/TASI-W2 journeys (ACTIVE-TASI-W1/ACTIVE-TASI-W2/GRAD*/FAILED/STALE/
+EXPIRED + NEW/PROMOTED/nearATH badges). TASI-W3-as-a-journey-stage was proposed in the Operational
 Handoff but never committed to the tracker, so it is intentionally OUT of scope here (see
 research/spec/lifecycle.md "Scope & adaptations").
 
@@ -62,8 +62,8 @@ def build_items(ledger, now_ms: int, grad_p5y=GRAD_P5Y, stale_days=STALE_DAYS, h
             first_close = first["close"]
         first_seen = first.get("first_seen") or first["date"]
         gain = ((last["close"] / first_close - 1) * 100) if first_close else None
-        has_w1 = any(e["source"] == "W1" for e in evs)
-        has_w2 = any(e["source"] == "W2" for e in evs)
+        has_w1 = any(e["source"] == "TASI-W1" for e in evs)
+        has_w2 = any(e["source"] == "TASI-W2" for e in evs)
         vs200 = None
         for e in reversed(evs):
             if e.get("vs200") is not None:
@@ -86,7 +86,7 @@ def build_items(ledger, now_ms: int, grad_p5y=GRAD_P5Y, stale_days=STALE_DAYS, h
         elif stale:
             state = "STALE"
         else:
-            state = "ACTIVE-W2" if last["source"] == "W2" else "ACTIVE-W1"
+            state = "ACTIVE-TASI-W2" if last["source"] == "TASI-W2" else "ACTIVE-TASI-W1"
 
         items.append({
             "symbol": sym, "name": last.get("name"), "first_seen": first_seen,

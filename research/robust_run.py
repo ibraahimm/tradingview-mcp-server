@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Robustness pass: net-of-cost excess + block-bootstrap (cluster-robust) inference for W1/W2/W3.
+"""Robustness pass: net-of-cost excess + block-bootstrap (cluster-robust) inference for TASI-W1/TASI-W2/TASI-W3.
 
     python -m research.robust_run research/panel/tadawul_<vintage>.parquet
 
-The honest last gate before "tradeable": does the W2/W3 excess survive (a) transaction costs and
+The honest last gate before "tradeable": does the TASI-W2/TASI-W3 excess survive (a) transaction costs and
 (b) inference that respects time/cross-sectional clustering (block bootstrap), not the optimistic
 i.i.d. t-stat?
 """
@@ -48,7 +48,7 @@ def main():
     print(f"{'rule':4} {'H':>4} {'n':>5} {'gross%':>7} {'net%':>6} {'boot_p':>7} "
           f"{'95% CI (gross)':>18}  net>0 @95%?")
     rules = R.load_rules()
-    for rule in ("W2", "W3", "W1"):
+    for rule in ("TASI-W2", "TASI-W3", "TASI-W1"):
         decided = R.evaluate_frame(rules[rule], labeled, None)
         for h in HORIZONS:
             kept = dedup_signals(decided, h)

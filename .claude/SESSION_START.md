@@ -6,7 +6,7 @@
 
 ```
 You are resuming work on this repository (TradingView MCP server + the Saudi Main Market wave-screening
-system W1/W2/W3 + tracker + a Python research/backtesting platform). Before doing ANYTHING else, read
+system TASI-W1/TASI-W2/TASI-W3 + tracker + a Python research/backtesting platform). Before doing ANYTHING else, read
 these files in full (repo-relative paths) and run the git commands, to reconstruct context:
 
 1. .claude/HANDOFF.md                          — START HERE: current state, findings, open items
@@ -14,12 +14,12 @@ these files in full (repo-relative paths) and run the git commands, to reconstru
                                                  lives (fact-type × lifetime, single-home rule, seam rule, §7 placement)
 3. research/spec/TESTING.md                    — the official / conformance / experimental conventions (MUST follow)
 4. research/ARCHITECTURE.md                    — system design + cross-subsystem rationale
-5. research/spec/rules.yaml                    — canonical W1/W2/W3 rule definitions (single source of truth)
+5. research/spec/rules.yaml                    — canonical TASI-W1/TASI-W2/TASI-W3 rule definitions (single source of truth)
 6. research/spec/decisions.md                  — append-only methodology/governance DECISION LOG (why each change,
                                                  and whether it was validated); read before proposing any change
-7. .claude/commands/saudi-stage2.md            — W1 live command spec
-8. .claude/commands/saudi-wave2.md             — W2 live command spec
-9. .claude/commands/saudi-wave3.md             — W3 live command spec
+7. .claude/commands/saudi-stage2.md            — TASI-W1 live command spec
+8. .claude/commands/saudi-wave2.md             — TASI-W2 live command spec
+9. .claude/commands/saudi-wave3.md             — TASI-W3 live command spec
 10. .claude/commands/saudi-track.md            — tracker command spec
 11. run: git status --short  AND  git log --oneline -15
                                               — reconstruct working-tree + commit context: uncommitted/untracked

@@ -1,5 +1,8 @@
 # /saudi-wave2 — Saudi Main Market Second-Wave (Continuation) Screen
 
+**Canonical rule:** `TASI-W2` (defined in `research/spec/rules.yaml`). The command name `/saudi-wave2`
+is kept for continuity; the canonical methodology identifier is `TASI-W2` (rename: `decisions.md` D-2026-07-02-05).
+
 Find **Saudi Main Market (TADAWUL) only** stocks that keep the `/saudi-stage2` **deep
 multi-year correction DNA** (still well below the all-time high) but are **one leg further
 along**: the **first wave already advanced and held**, the stock **pulled back into a tight
@@ -53,7 +56,7 @@ Parse `` for `key=value` tokens. Any key not supplied uses its default. Forward
 them straight to the script — the script owns the defaults and all the math.
 
 > **Canonical values live in [`research/spec/rules.yaml`](../../research/spec/rules.yaml)** (rule
-> `W2` → `params`), CI-locked to the script by `methodology_parity.py`; the **change history** is in
+> `TASI-W2` → `params`), CI-locked to the script by `methodology_parity.py`; the **change history** is in
 > [`research/spec/decisions.md`](../../research/spec/decisions.md). This table documents parameter
 > **keys and meaning only — it restates no default values.** For any key the user does not override,
 > the script applies the canonical default.
@@ -82,7 +85,7 @@ them straight to the script — the script owns the defaults and all the math.
 | `nrhi_min`   | Optional min `nrHi = close/52w_high` gate (%); descriptor-only unless set |
 | `market`     | Fixed scope: Saudi Main Market only (do not change) |
 
-> **`ext21_max` extension cap — removed** (W2 still requires the reclaim `close ≥ EMA21`; only the
+> **`ext21_max` extension cap — removed** (TASI-W2 still requires the reclaim `close ≥ EMA21`; only the
 > upper "not-extended" cap is gone). Rationale and validation:
 > [`research/spec/decisions.md`](../../research/spec/decisions.md) D-2026-06-30-01.
 
@@ -173,7 +176,7 @@ Non-negotiable. **Never substitute symbols from any other market.**
 6. **(Optional) Ingest into the unified tracker** — record this run's survivors into the
    append-only journey ledger BEFORE cleanup deletes the temp file:
    ```
-   node .claude/scripts/saudi-tracker.js stage=ingest filtered=.claude/scripts/.tmp/filtered.json source=W2
+   node .claude/scripts/saudi-tracker.js stage=ingest filtered=.claude/scripts/.tmp/filtered.json source=TASI-W2
    ```
    Non-fatal: if it errors, surface the message but still finish the run. View the cohort
    anytime with `/saudi-track`. Skip only if the user asked not to track this run.

@@ -5,7 +5,7 @@ correct by construction — every column is produced by the same code the vector
 As-of discipline is enforced structurally: each security's series is computed in isolation
 (group_by sec_id), so no value ever references another security or a future bar.
 
-Minimal W1/stage2 feature set. Inputs are assumed adjusted (split/dividend) per the spec's
+Minimal TASI-W1/stage2 feature set. Inputs are assumed adjusted (split/dividend) per the spec's
 price_basis; survivorship/eligibility live in the reference layer, not here.
 """
 from __future__ import annotations

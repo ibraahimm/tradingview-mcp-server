@@ -63,21 +63,21 @@ def main() -> int:
     deep_equal(py, expected, path="py-vs-expected")
 
     # 2. hand-checked meaning of each vector
-    want = {"TADAWUL:A": ("ACTIVE-W2", True, False, False),   # state, promoted, isNew, nearATH
-            "TADAWUL:B": ("ACTIVE-W1", False, False, False),
+    want = {"TADAWUL:A": ("ACTIVE-TASI-W2", True, False, False),   # state, promoted, isNew, nearATH
+            "TADAWUL:B": ("ACTIVE-TASI-W1", False, False, False),
             "TADAWUL:C": ("FAILED", True, False, False),
             "TADAWUL:D": ("GRAD★", False, False, False),
             "TADAWUL:E": ("STALE", False, False, False),
             "TADAWUL:F": ("EXPIRED", True, False, False),
             "TADAWUL:G": ("FAILED", True, False, False),      # FAILED wins over GRAD (precedence)
-            "TADAWUL:H": ("ACTIVE-W2", False, True, True)}
+            "TADAWUL:H": ("ACTIVE-TASI-W2", False, True, True)}
     for sym, (st, pr, nw, na) in want.items():
         r = py.get(sym, {})
         check(r.get("state") == st, f"{sym} state {r.get('state')} != {st}")
         check(r.get("promoted") == pr, f"{sym} promoted {r.get('promoted')} != {pr}")
         check(r.get("isNew") == nw, f"{sym} isNew {r.get('isNew')} != {nw}")
         check(r.get("nearATH") == na, f"{sym} nearATH {r.get('nearATH')} != {na}")
-    check(py["TADAWUL:A"]["journey"] == "W1→W2", "A journey should be W1→W2")
+    check(py["TADAWUL:A"]["journey"] == "TASI-W1→TASI-W2", "A journey should be TASI-W1→TASI-W2")
     check(abs(py["TADAWUL:C"]["gain"] - (-25.0)) < 1e-9, "C gain should be -25")
 
     # 3. DIFFERENTIAL vs the live JS (skips cleanly if node / JS unavailable)
