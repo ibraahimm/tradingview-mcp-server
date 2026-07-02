@@ -22,6 +22,56 @@ from; when code and this document disagree, this document is wrong and should be
 
 ---
 
+## System at a glance — the end-to-end workflow
+
+The repository is **two runtime paths bound by one canon**, wrapped in governance, CI, session, and
+documentation layers:
+
+- **Live product** (on-demand) — a user runs a `/saudi-*` slash command and gets a screen for *today*.
+- **Research pipeline** (offline) — a historical panel is backtested to decide *whether a rule has an edge*.
+
+Both compute the **same feature/rule definitions** (the CANON); the TypeScript live screener and the
+Python research engine are two implementations of it, kept honest by conformance gates.
+
+**Live product path** — produces a screen and updates the journey ledger:
+
+| Stage | Files (why they exist) | In → Out |
+|---|---|---|
+| 1. Orchestrate | `.claude/commands/saudi-*.md` — the command spec; fetch → pipe → print, no inline math | user args → a screen request |
+| 2. Fetch market data | `src/` MCP server (`screen_stocks`) — the TradingView wrapper | filter spec → today's rows (EMA/Perf/…) |
+| 3. Compute + gate | `.claude/scripts/saudi-*.js` — owns all metrics/exclusions/thresholds (mirrors `rules.yaml`) | rows → printed table + `.claude/outputs/*.csv` + append `saudi-tracker.jsonl` |
+| 4. Track journeys | `saudi-tracker.js` (report) — lifecycle math over the ledger | ledger → `/saudi-track` journey view |
+
+**Research pipeline** — produces evidence, then possibly a canon change:
+
+| Stage | Files (why they exist) | In → Out |
+|---|---|---|
+| A. Ingest | `research/ingest/ingest_tadawul.py` — turn raw vendor data into a clean, survivorship-correct panel | `ingest/raw/*` + `reference/*` → `panel/*.parquet` + manifest |
+| B. Features + rules | `research/engine/panel.py` (features per `features.yaml`), `rules.py` (`evaluate_frame` over `rules.yaml`) | panel → feature columns + per-bar W1/W2/W3 pass/fail |
+| C. Backtest | `research/backtest/*` (event_study → rigor → robust → governance → regime → lifecycle) | signals → deflated, cost-aware forward-return evidence → `RIGOR_RESULT.md` |
+| D. Experiment | `research/experiments/*` — challenge the methodology via **runtime overrides only** | panel + overrides → hypotheses (never edits canon) |
+| E. Promote | edit `features.yaml`/`rules.yaml` + live JS + docs + vectors **together**, add a `decisions.md` entry | approved evidence → new official methodology |
+
+**How the seven layers interact:**
+
+- **Canon** (`spec/features.yaml`, `spec/rules.yaml`, `VERSION`, `vectors/`) — the single definition both
+  paths obey; wins all semantic conflicts. Feature changes bump `VERSION`; rule changes are Decisions.
+- **Research** — measures whether a rule earns its place; its output is *evidence*, promoted only via Governance.
+- **Governance** (`spec/TESTING.md`, `spec/decisions.md`, `spec/conformance/*`, `validation/CONFORMANCE.md`) —
+  the rules of change: parity-lock JS≡canon, the experiment→promotion path, and the append-only decision log.
+- **Operational** (`.claude/commands/*`, `.claude/scripts/*`, `CLAUDE.md`, `docs/*`) — how to *run* it;
+  reference-only for canon values (never restated).
+- **CI** (`.github/workflows/research-ci.yml`) — runs every Governance gate on each `research/**` change; a red gate blocks.
+- **Session** (`HANDOFF.md`, `SESSION_START.md`) — carries current state + the resume bootstrap across chats; state, not truth.
+- **Documentation** (`DOCUMENTATION.md`) — governs *where every fact lives* (one home; reference, never restate),
+  so the layers above cannot drift into contradiction.
+
+**One-line flow:**
+`raw data → panel → features + rules → backtest → (experiment ⇄ promote) → CANON ← implemented by → live JS + MCP → screen + ledger`
+— with **Governance/CI** enforcing canon, **Documentation** placing every fact, and **Session** carrying state.
+
+---
+
 ## 0. Why this platform exists (the problem statement)
 
 The live system is a **snapshot** screener: the TradingView scanner returns today's `close`,
