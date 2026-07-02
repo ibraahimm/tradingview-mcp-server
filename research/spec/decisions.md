@@ -156,6 +156,9 @@ the migration script is idempotent (second run a no-op), and a renamed experimen
 
 **Rollback.** `git revert <commit>`; restore the live ledger from `saudi-tracker.jsonl.bak-2026-07-02`.
 
+**Evidence (addendum 2026-07-02).** Execution report (dated Report, per the seam rule):
+[`research/reports/canonical-rename-2026-07-02.md`](../reports/canonical-rename-2026-07-02.md). Commit `a1915b0`.
+
 ---
 
 ## Backfilled entries
