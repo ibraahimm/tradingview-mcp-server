@@ -108,6 +108,12 @@ predates the Tier-1 lint and concerns the whole CI.
 `.github/workflows/research-ci.yml` line 96; `git blame` (introduced at `7908f7b`, 2026-06-29); local
 full-suite reproduction — every step PASS.
 
+**Restored (2026-07-02).** CI verified **green on `c565c96`**: the workflow parses and both jobs
+(`foundation-gates`, `engine-conformance`) run, including the parity gate. **CI enforcement is restored;
+the gap this entry records is closed.** Two non-blocking warnings remain — GitHub forcing Node 24 on
+`actions/checkout@v4` / `setup-python@v5` / `setup-node@v4` — tracked as low-priority CI hygiene in
+HANDOFF §9; no change made.
+
 ---
 
 ## Backfilled entries

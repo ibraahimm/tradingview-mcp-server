@@ -119,6 +119,9 @@ reference to `rules.yaml`.
    last runtime canon duplication; a live-product behavioral change (currently guarded, not eliminated).
 5. (Deferred, not rejected) **Tier-2 SSOT lint** (general canon-number-outside-canon scanner + marker
    allowlist) — revisit only if reference-only doc drift recurs.
+6. (Low priority, CI hygiene) Bump `actions/checkout` / `setup-python` / `setup-node` to versions that
+   natively run on Node 24 — CI currently warns it is forcing Node 24 on the v4/v5 pins. Non-blocking;
+   do before Node 20 is fully removed. (CI enforcement itself is restored — `decisions.md` D-2026-07-02-04.)
 
 ## 10. How to run
 
