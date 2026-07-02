@@ -93,5 +93,5 @@ jobs:
       - name: Backtest — tracker conformance (Python == golden == live saudi-tracker.js)
         run: python -m research.backtest.selftest_tracker
 
-      - name: Backtest — replay self-test (historical event generation: schema/cadence/first-stamp)
+      - name: "Backtest — replay self-test (historical event generation: schema/cadence/first-stamp)"
         run: python -m research.backtest.selftest_replay
