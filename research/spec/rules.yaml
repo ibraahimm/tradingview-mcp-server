@@ -1,4 +1,4 @@
-# Canonical screen-rule specification — W1 / W2 / W3.
+# Canonical screen-rule specification — TASI-W1 / TASI-W2 / TASI-W3.
 #
 # Rules are ordered predicate sets over features (features.yaml) with named threshold
 # parameters and defaults. They are the executable definition of each screen's pass/fail
@@ -88,7 +88,7 @@ rules:
       - {feature: perf_1m, op: in_oo, value: ["@p1m_min", "@p1m_max"], null_action: drop}
       - {feature: perf_3m, op: in_co, value: ["@p3m_min", "@p3m_max"], null_action: drop}
       - {feature: perf_6m, op: in_oo, value: ["@p6m_min", "@p6m_max"], null_action: drop}
-      - {feature: perf_1y, op: gt, value: "@py_min", null_action: drop}     # confirmed uptrend (W2 inverts W1)
+      - {feature: perf_1y, op: gt, value: "@py_min", null_action: drop}     # confirmed uptrend (TASI-W2 inverts TASI-W1)
       - {feature: perf_3y, op: lt, value: "@p3y_max", null_action: drop}
       - {feature: perf_5y, op: lt, value: "@p5y_max", null_action: skip}
       - {feature: perf_10y, op: lt, value: "@p10y_max", null_action: skip}
@@ -113,7 +113,7 @@ rules:
       ema_gap_min: -2      # the coil
       ema_gap_max: 5
       ext21_max: 10
-      nrhi_min: 78         # pulled back from a recent high (active gate in W3)
+      nrhi_min: 78         # pulled back from a recent high (active gate in TASI-W3)
       nrhi_max: 98
       p1m_min: 0
       p1m_max: 15
@@ -123,7 +123,7 @@ rules:
       p6m_max: 100
       py_min: 0
       py_max: 200
-      p3y_min: 50          # Perf.3Y MIN is the primary W3 discriminator
+      p3y_min: 50          # Perf.3Y MIN is the primary TASI-W3 discriminator
       p3y_max: 300
       p5y_min: 30
       p5y_max: 500
