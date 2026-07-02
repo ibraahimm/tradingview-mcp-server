@@ -147,4 +147,4 @@ rules:
     tag:
       star: "below_ath < 10"      # at/near new highs
       climbing: "below_ath >= 10"
-    notes: "DDmax/belowATH/offLow are DESCRIPTORS in W3 (shown, not gated)."
+    notes: "DDmax/belowATH/offLow are DESCRIPTORS in TASI-W3 (shown, not gated)."
