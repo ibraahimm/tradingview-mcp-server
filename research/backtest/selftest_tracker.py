@@ -3,9 +3,9 @@
     python -m research.backtest.selftest_tracker
 
 Proves faithfulness three ways:
-  1. Python conform == frozen golden expected.json (which was emitted by the LIVE saudi-tracker.js).
+  1. Python conform == frozen golden expected.json (which was emitted by the LIVE tasi-track.js).
   2. Hand-checked state assertions (so the vectors are independently meaningful, not just "JS says so").
-  3. DIFFERENTIAL: if node + the live JS are present, run saudi-tracker.js stage=conform on the SAME
+  3. DIFFERENTIAL: if node + the live JS are present, run tasi-track.js stage=conform on the SAME
      ledger and assert byte-for-value identical to the Python — same input -> same output.
 """
 from __future__ import annotations
@@ -18,7 +18,7 @@ from .tracker import conform
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 VEC = os.path.join(ROOT, "research", "spec", "lifecycle_vectors")
-JS = os.path.join(ROOT, ".claude", "scripts", "saudi-tracker.js")
+JS = os.path.join(ROOT, ".claude", "scripts", "tasi-track.js")
 FAILS = []
 
 
@@ -92,9 +92,9 @@ def main() -> int:
         else:
             js = json.loads(res.stdout)
             deep_equal(py, js, path="py-vs-JS")
-            print("  (differential: ran live saudi-tracker.js — Python matched JS)")
+            print("  (differential: ran live tasi-track.js — Python matched JS)")
     else:
-        print("  (differential: node or saudi-tracker.js unavailable — JS diff SKIPPED)")
+        print("  (differential: node or tasi-track.js unavailable — JS diff SKIPPED)")
 
     if FAILS:
         print(f"FAIL ({len(FAILS)}):")

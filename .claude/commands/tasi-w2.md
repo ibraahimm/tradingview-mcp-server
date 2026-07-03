@@ -1,9 +1,10 @@
-# /saudi-wave2 — Saudi Main Market Second-Wave (Continuation) Screen
+# /tasi-w2 — Saudi Main Market Second-Wave (Continuation) Screen
 
-**Canonical rule:** `TASI-W2` (defined in `research/spec/rules.yaml`). The command name `/saudi-wave2`
-is kept for continuity; the canonical methodology identifier is `TASI-W2` (rename: `decisions.md` D-2026-07-02-05).
+**Canonical rule:** `TASI-W2` (defined in `research/spec/rules.yaml`). The command name is the lowercase
+operational form of the canonical identifier (command rename: `decisions.md` D-2026-07-03-01; identifier
+rename: D-2026-07-02-05); the former name /saudi-wave2 is retired.
 
-Find **Saudi Main Market (TADAWUL) only** stocks that keep the `/saudi-stage2` **deep
+Find **Saudi Main Market (TADAWUL) only** stocks that keep the `/tasi-w1` **deep
 multi-year correction DNA** (still well below the all-time high) but are **one leg further
 along**: the **first wave already advanced and held**, the stock **pulled back into a tight
 EMA compression**, **reclaimed its short-term EMA**, and is **resuming**. This is the
@@ -18,23 +19,23 @@ This command is **orchestration only**. All exclusions, computed metrics, thresh
 table/summary formatting live in a persistent helper that is **not** rebuilt each run:
 
 ```
-.claude/scripts/saudi-wave2.js
+.claude/scripts/tasi-w2.js
 ```
 
 Each run only (a) fetches live data from the MCP server, (b) pipes it through the script,
 and (c) prints what the script returns. Do **not** re-implement the metric math or table
 formatting inline. The only files you create are the short-lived JSON under
 `.claude/scripts/.tmp/` (deleted at the end) — the script writes the persistent CSV to
-`.claude/outputs/saudi-wave2.csv`.
+`.claude/outputs/tasi-w2.csv`.
 
 > Tool prefix note: calls below use `mcp__tradingview-screener__`. If your MCP server is
 > registered under a different name, use that prefix for every tool call.
 > Script invocation: the project is ESM (`"type":"module"`), so run with `node …` as shown.
 
-## Why this differs from /saudi-stage2 (first wave)
+## Why this differs from /tasi-w1 (first wave)
 
-`/saudi-stage2` buys the **initial turn** off the multi-year low (offLow 20–60%, far below
-highs, no moving averages). `/saudi-wave2` buys the **continuation**: the first advance has
+`/tasi-w1` buys the **initial turn** off the multi-year low (offLow 20–60%, far below
+highs, no moving averages). `/tasi-w2` buys the **continuation**: the first advance has
 already happened and **held**, so it adds a **Stage-2 trend gate (`close > EMA60`)** and a
 **pullback/coil gate** (price reclaimed EMA21 without extending, EMA21 compressed near EMA60,
 monthly momentum already turned up). The deep-correction context (`DDmax`/`belowATH`) is
@@ -96,10 +97,10 @@ use `Perf.5Y` existence as the listing proxy — TradingView returns a `Perf.5Y`
 sub-5-year listings.
 
 Example calls:
-- `/saudi-wave2`
-- `/saudi-wave2 ema_gap_max=8` — widen the coil band for more candidates
-- `/saudi-wave2 offlow=40 value=5000000` — further along + a SAR 5M liquidity floor
-- `/saudi-wave2 below_max=95` — admit deeper still-corrected names
+- `/tasi-w2`
+- `/tasi-w2 ema_gap_max=8` — widen the coil band for more candidates
+- `/tasi-w2 offlow=40 value=5000000` — further along + a SAR 5M liquidity floor
+- `/tasi-w2 below_max=95` — admit deeper still-corrected names
 
 ## Universe restriction (Saudi Main Market only — MANDATORY)
 
@@ -144,7 +145,7 @@ Non-negotiable. **Never substitute symbols from any other market.**
 
 4. **Run the filter stage**, forwarding the parsed params (omit any the user didn't supply):
    ```
-   node .claude/scripts/saudi-wave2.js stage=filter input=.claude/scripts/.tmp/screen.json \
+   node .claude/scripts/tasi-w2.js stage=filter input=.claude/scripts/.tmp/screen.json \
      dd_min=<dd_min> below_min=<below_min> below_max=<below_max> offlow=<offlow> offlow_max=<offlow_max> \
      ema_gap_min=<ema_gap_min> ema_gap_max=<ema_gap_max> \
      p1m_min=<p1m_min> p1m_max=<p1m_max> p3m_min=<p3m_min> p3m_max=<p3m_max> p6m_min=<p6m_min> p6m_max=<p6m_max> \
@@ -156,7 +157,7 @@ Non-negotiable. **Never substitute symbols from any other market.**
 
 5. **Run the report stage** to produce the table + summary and write the CSV:
    ```
-   node .claude/scripts/saudi-wave2.js stage=report filtered=.claude/scripts/.tmp/filtered.json
+   node .claude/scripts/tasi-w2.js stage=report filtered=.claude/scripts/.tmp/filtered.json
    ```
    The script's stdout has **two parts separated by a line that is exactly `===CHART_LINKS===`**:
    - **Before the sentinel** — a **Funnel block** (base conditions → DDmax → belowATH → offLow →
@@ -176,10 +177,10 @@ Non-negotiable. **Never substitute symbols from any other market.**
 6. **(Optional) Ingest into the unified tracker** — record this run's survivors into the
    append-only journey ledger BEFORE cleanup deletes the temp file:
    ```
-   node .claude/scripts/saudi-tracker.js stage=ingest filtered=.claude/scripts/.tmp/filtered.json source=TASI-W2
+   node .claude/scripts/tasi-track.js stage=ingest filtered=.claude/scripts/.tmp/filtered.json source=TASI-W2
    ```
    Non-fatal: if it errors, surface the message but still finish the run. View the cohort
-   anytime with `/saudi-track`. Skip only if the user asked not to track this run.
+   anytime with `/tasi-track`. Skip only if the user asked not to track this run.
 
 7. **Clean up** the temp data files only: delete `.claude/scripts/.tmp/`. Do NOT delete the
    persistent script or the CSV in `.claude/outputs/` (the CSV is a deliverable).

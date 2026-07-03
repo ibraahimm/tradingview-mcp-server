@@ -161,6 +161,60 @@ the migration script is idempotent (second run a no-op), and a renamed experimen
 
 ---
 
+## D-2026-07-03-01 · 2026-07-03 · Governance
+
+**Choice (Command Rename).** The operational slash commands are renamed to lowercase forms of the
+canonical rule identifiers — `/saudi-stage2` → **`/tasi-w1`**, `/saudi-wave2` → **`/tasi-w2`**,
+`/saudi-wave3` → **`/tasi-w3`**, `/saudi-track` → **`/tasi-track`** — as a **clean replacement, no
+alias/transition period**. The rename covers the whole operational layer in one increment so the
+incoherence does not move down a level: command docs, the live scripts
+(`.claude/scripts/tasi-w1.js`, `tasi-w2.js`, `tasi-w3.js`, `tasi-track.js`), and the output CSV names
+(`.claude/outputs/tasi-w1.csv`, `tasi-w2.csv`, `tasi-w3.csv`). `/saudi-momentum` is **unchanged** (it
+predates the wave methodology and is not in `rules.yaml`). The tracker ledger
+`.claude/outputs/saudi-tracker.jsonl` keeps its name: it is a Data/State artifact (not a CSV
+deliverable), referenced by the D-2026-07-02-05 rollback backup; renaming data is out of this
+decision's scope.
+
+**Supersedes** sub-decision 2 of D-2026-07-02-05 ("Command names kept"), which explicitly deferred
+this as a separate future UX decision. Sub-decisions 1 and 3 of that entry stand: `TASI-Wn` remains
+the canonical identifier in source tags, states, and journeys; the lowercase command tokens are the
+operational surface, a case-normalization of the canonical ID, not a second vocabulary.
+
+**Rationale.** The old names were actively misleading, not merely inconsistent: `/saudi-stage2`
+(Weinstein "Stage 2") ran **TASI-W1** — the *first* wave — while `/saudi-wave2` ran TASI-W2, colliding
+two vocabularies exactly on the W1/W2 boundary where the methodology distinction matters most
+(TASI-W1 = timing entry, TASI-W2 = the tradeable refinement). Each command doc carried a
+"Canonical rule: TASI-Wn" mapping line purely to bridge that gap. With identity-bearing surfaces
+already canonical (D-2026-07-02-05), this rename is the cheap final step to one vocabulary from canon
+to keyboard. No alias period: single user, and an alias file would either duplicate command content
+(an SSOT violation) or add pure indirection.
+
+**Type test.** Governance — no threshold, structural, or feature change; identical gates and
+outcomes; "could this change which names pass on any date?" is **No**. `spec_version` and `VERSION`
+untouched.
+
+**Validation status.** Precondition verified before execution: a throwaway
+`.claude/commands/tasi-w1.md` resolved and executed in the harness under the lowercase name.
+Full local gate suite green on the main commit's tree (gates itemised in the commit message);
+`methodology_parity.py` `DOCS`/`JS` paths moved in the same commit, so the Tier-1 SSOT lint stays
+binding throughout. Reversible by reverting the two commits.
+
+**Canon authorization.** A scoped, comments-only follow-up commit updates the three `# /saudi-*`
+inline comments in `rules.yaml` (lines 27/63/108) to the new command names — no key, param, or
+structural change (verified by parse-equality of the YAML with comments stripped). That approval is
+spent on that commit; `features.yaml`, `rules.yaml`, and `VERSION` return to off-limits without
+separate explicit approval.
+
+**Historically unchanged (point-in-time):** prior decision entries, `RIGOR_RESULT.md`, and dated
+reports keep the old command names as true-when-written.
+
+**Evidence.** This entry; commit messages of the rename pair; the harness-resolution test above.
+
+**Relations.** Supersedes D-2026-07-02-05 sub-decision 2; completes the vocabulary unification begun
+by D-2026-07-02-05.
+
+---
+
 ## Backfilled entries
 
 *Recorded 2026-07-02 from commit history and reports; each keeps its original decision date.*

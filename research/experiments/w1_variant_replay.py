@@ -131,7 +131,7 @@ def main():
              "lost" if (off[s][0] and not A[s][0]) else "")
         w.writerow([s, off[s][0], off[s][1], off[s][2], A[s][0], A[s][1], A[s][2], d])
     print(f"\nwrote {OUT}/w1_variantA_compare.csv")
-    print("(Experimental — hypotheses only. Official TASI-W1 unchanged: rules.yaml + saudi-stage2.js.)")
+    print("(Experimental — hypotheses only. Official TASI-W1 unchanged: rules.yaml + tasi-w1.js.)")
 
 
 if __name__ == "__main__":

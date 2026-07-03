@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Persistent computed-filter + report renderer for the /saudi-wave3 slash command.
+ * Persistent computed-filter + report renderer for the /tasi-w3 slash command.
  *
- * Strategy: Saudi Main Market (TADAWUL) names ONE leg beyond /saudi-wave2 — a MATURE uptrend
+ * Strategy: Saudi Main Market (TADAWUL) names ONE leg beyond /tasi-w2 — a MATURE uptrend
  * that already ran its TASI-W1 (first turn off the deep low) and TASI-W2 (first coil + advance), has
  * climbed back to / near (or made) new highs, and is now forming the NEXT contraction (a fresh
  * EMA coil higher up) that sets up the following leg. Unlike TASI-W1/TASI-W2 this is NOT a "deeply
@@ -16,7 +16,7 @@
  * Two stages:
  *   1) filter  — input: raw screen_stocks JSON ({ total_count, stocks:[...] }).
  *   2) report  — input: stage-1 filter JSON; prints box-grid + summary, a "===CHART_LINKS===\"
- *                sentinel, then a markdown link list; writes CSV (default .claude/outputs/saudi-wave3.csv).
+ *                sentinel, then a markdown link list; writes CSV (default .claude/outputs/tasi-w3.csv).
  *
  * Computed metrics (percent unless noted):
  *   DDmax/belowATH/offLow/nrHi  — as in wave2 (here DDmax/belowATH/offLow are DESCRIPTORS)
@@ -37,8 +37,8 @@
  *   p3y_min(50) p3y_max(300) p5y_min(30) p5y_max(500) p10y_max(1000) min_years(5) value(0)
  *
  * Usage:
- *   node saudi-wave3.js stage=filter input=screen.json [p3y_min=80 ...]
- *   node saudi-wave3.js stage=report filtered=filtered.json [csv=path maxwidth=N]
+ *   node tasi-w3.js stage=filter input=screen.json [p3y_min=80 ...]
+ *   node tasi-w3.js stage=report filtered=filtered.json [csv=path maxwidth=N]
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
@@ -262,7 +262,7 @@ function stageReport() {
   if (!args.filtered) throw new Error("stage=report requires filtered=<filter.json|->");
   const filtered = readJson(args.filtered);
   const p = filtered.params || params;
-  const csvPath = args.csv || ".claude/outputs/saudi-wave3.csv";
+  const csvPath = args.csv || ".claude/outputs/tasi-w3.csv";
   const rows = filtered.matches || [];
 
   const csvRows = rows.map((r) => [
@@ -346,6 +346,6 @@ try {
   else if (stage === "report") stageReport();
   else throw new Error(`unknown stage='${stage}' (expected filter|report)`);
 } catch (err) {
-  process.stderr.write("saudi-wave3.js error: " + err.message + "\n");
+  process.stderr.write("tasi-w3.js error: " + err.message + "\n");
   process.exit(1);
 }

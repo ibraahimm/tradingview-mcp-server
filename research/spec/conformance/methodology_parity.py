@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Methodology parity gate: the live screener scripts (.claude/scripts/saudi-stage2.js, saudi-wave2.js)
+"""Methodology parity gate: the live screener scripts (.claude/scripts/tasi-w1.js, tasi-w2.js)
 and the canonical research spec (research/spec/rules.yaml) MUST agree on every gate parameter.
 
 These are two hand-maintained implementations of the same methodology; they have drifted before
@@ -25,13 +25,13 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 RULES = yaml.safe_load((ROOT / "research/spec/rules.yaml").read_text())["rules"]
-JS = {"TASI-W1": ROOT / ".claude/scripts/saudi-stage2.js",
-      "TASI-W2": ROOT / ".claude/scripts/saudi-wave2.js"}
+JS = {"TASI-W1": ROOT / ".claude/scripts/tasi-w1.js",
+      "TASI-W2": ROOT / ".claude/scripts/tasi-w2.js"}
 # Command docs: their Step-2 server-side `(default N)` annotations mirror rules.yaml defaults for the
 # coarse pre-filter. Tier-1 SSOT lint (decisions.md D-2026-07-02-03) guards them against drift.
-DOCS = {"TASI-W1": ROOT / ".claude/commands/saudi-stage2.md",
-        "TASI-W2": ROOT / ".claude/commands/saudi-wave2.md",
-        "TASI-W3": ROOT / ".claude/commands/saudi-wave3.md"}
+DOCS = {"TASI-W1": ROOT / ".claude/commands/tasi-w1.md",
+        "TASI-W2": ROOT / ".claude/commands/tasi-w2.md",
+        "TASI-W3": ROOT / ".claude/commands/tasi-w3.md"}
 # Per-rule minimum Step-2 (default N) annotation counts, locked to the verified 2026-07-02 state
 # (D-2026-07-02-03 addendum): a silently removed annotation must FAIL the gate, not shrink coverage.
 # TASI-W3 Step-2 uses only value:<param> placeholders (no canon literals) -> 0 is complete, not a gap.

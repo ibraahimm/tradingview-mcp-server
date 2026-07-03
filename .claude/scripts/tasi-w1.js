@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Persistent computed-filter + report renderer for the /saudi-stage2 slash command.
+ * Persistent computed-filter + report renderer for the /tasi-w1 slash command.
  *
  * Strategy: Saudi Main Market (TADAWUL) names that suffered a DEEP multi-year
  * correction (anchored to the all-time high, NOT to a fixed 5-year point) and whose
@@ -16,7 +16,7 @@
  *   2) report  — input: the stage-1 filter JSON (--filtered). Prints ONE box-drawing grid
  *                + summary to stdout, then a "===CHART_LINKS===" sentinel followed by a
  *                markdown "Open chart" list (printed OUTSIDE the code block by the command),
- *                and writes the full untruncated CSV (default .claude/outputs/saudi-stage2.csv).
+ *                and writes the full untruncated CSV (default .claude/outputs/tasi-w1.csv).
  *
  * Computed metrics (percent unless noted):
  *   DDmax    = (ATH - price_52_week_low)/ATH * 100   // peak->trough correction depth
@@ -33,8 +33,8 @@
  * locally so the result is correct regardless of how the screen was built.
  *
  * Usage:
- *   node saudi-stage2.js stage=filter input=screen.json [p3y_max=20 offlow=25 ...]
- *   node saudi-stage2.js stage=report filtered=filtered.json [csv=path maxwidth=N]
+ *   node tasi-w1.js stage=filter input=screen.json [p3y_max=20 offlow=25 ...]
+ *   node tasi-w1.js stage=report filtered=filtered.json [csv=path maxwidth=N]
  * Input paths accept "-" for stdin.
  */
 
@@ -189,7 +189,7 @@ function stageFilter() {
       tag: p3y <= 0 ? "★" : "⚠up", // ★ genuine recent correction; ⚠up uptrend-leaning
       sector: s.sector || "—",
       market_cap_basic: s.market_cap_basic,
-      // EMA-derived (same fields/formulae as /saudi-wave2). ext60/ema21gap/emaComp/vs200 are tracker
+      // EMA-derived (same fields/formulae as /tasi-w2). ext60/ema21gap/emaComp/vs200 are tracker
       // descriptors only (the ext60 extension cap was removed 2026-06-30). None are shown in the table/CSV.
       ema21gap: ema21 != null ? (close / ema21 - 1) * 100 : null, // 21g
       emaComp: ema21 != null && ema60 != null ? (ema21 / ema60 - 1) * 100 : null, // cmp
@@ -247,7 +247,7 @@ function stageReport() {
   if (!args.filtered) throw new Error("stage=report requires filtered=<filter.json|->");
   const filtered = readJson(args.filtered);
   const p = filtered.params || params;
-  const csvPath = args.csv || ".claude/outputs/saudi-stage2.csv";
+  const csvPath = args.csv || ".claude/outputs/tasi-w1.csv";
   const rows = filtered.matches || [];
 
   // CSV: full, untruncated values
@@ -335,6 +335,6 @@ try {
   else if (stage === "report") stageReport();
   else throw new Error(`unknown stage='${stage}' (expected filter|report)`);
 } catch (err) {
-  process.stderr.write("saudi-stage2.js error: " + err.message + "\n");
+  process.stderr.write("tasi-w1.js error: " + err.message + "\n");
   process.exit(1);
 }

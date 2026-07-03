@@ -66,7 +66,7 @@ jobs:
       - name: Engine — rule-vector conformance (TASI-W1/TASI-W2/TASI-W3 decisions + funnel order)
         run: python research/spec/conformance/rule_runner.py
 
-      - name: Methodology parity — live saudi-stage2.js / saudi-wave2.js == rules.yaml gates
+      - name: Methodology parity — live tasi-w1.js / tasi-w2.js == rules.yaml gates
         run: python research/spec/conformance/methodology_parity.py
 
       - name: Engine — screen-run self-test (age_years + value/ADV + funnel + survivors)
@@ -90,7 +90,7 @@ jobs:
       - name: Backtest — lifecycle self-test (stage linkage causality/window/chain + prob_greater)
         run: python -m research.backtest.selftest_lifecycle
 
-      - name: Backtest — tracker conformance (Python == golden == live saudi-tracker.js)
+      - name: Backtest — tracker conformance (Python == golden == live tasi-track.js)
         run: python -m research.backtest.selftest_tracker
 
       - name: "Backtest — replay self-test (historical event generation: schema/cadence/first-stamp)"

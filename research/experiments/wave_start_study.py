@@ -59,8 +59,8 @@ def main():
     print(f"  deeply-corrected DNA (DDmax>=50 OR belowATH>=40): {deep}/{cand.height}")
 
     rules = R.load_rules()
-    hist(R.evaluate_frame(rules["TASI-W1"], cand, None), "TASI-W1 (/saudi-stage2)")
-    hist(R.evaluate_frame(rules["TASI-W2"], cand, None), "TASI-W2 (/saudi-wave2)")
+    hist(R.evaluate_frame(rules["TASI-W1"], cand, None), "TASI-W1 (/tasi-w1)")
+    hist(R.evaluate_frame(rules["TASI-W2"], cand, None), "TASI-W2 (/tasi-w2)")
 
     # which candidates pass NEITHER, and the headline blocking values
     dW1 = R.evaluate_frame(rules["TASI-W1"], cand, None)

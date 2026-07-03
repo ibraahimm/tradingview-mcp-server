@@ -4,7 +4,7 @@
     python research/spec/lifecycle_vectors/_gen.py
 
 Writes ledger.jsonl + params.json. expected.json is then produced by the LIVE tracker (the source of
-truth) via:  node .claude/scripts/saudi-tracker.js stage=conform ledger=<ledger> asof=<asof> > expected.json
+truth) via:  node .claude/scripts/tasi-track.js stage=conform ledger=<ledger> asof=<asof> > expected.json
 so the research Python tracker is conformed against the JS, not the other way round.
 
 The ledger exercises every committed (TASI-W1/TASI-W2-only) lifecycle state + precedence + badge, as-of 2026-06-29:

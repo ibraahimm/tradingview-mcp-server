@@ -1,7 +1,7 @@
 # Lifecycle Spec — the Saudi wave **journey** (canonical, TASI-W1/TASI-W2 committed methodology)
 
-**Status:** canonical contract. **Source of truth:** `.claude/commands/saudi-track.md` (methodology) +
-`.claude/scripts/saudi-tracker.js` (`buildItems`) (behaviour). The research port
+**Status:** canonical contract. **Source of truth:** `.claude/commands/tasi-track.md` (methodology) +
+`.claude/scripts/tasi-track.js` (`buildItems`) (behaviour). The research port
 `research/backtest/tracker.py` is **conformed** to the JS via golden vectors
 (`research/spec/lifecycle_vectors/`) and a live JS↔Python differential test
 (`research.backtest.selftest_tracker`). This document is the human-readable record of *what* the
@@ -14,7 +14,7 @@ spec governs the journey/state layer; the per-wave gate logic lives in `research
 
 ## 1. Scope — what is and isn't "original methodology"
 
-The **committed** tracker is **TASI-W1/TASI-W2 only**. `saudi-track.md` and `saudi-tracker.js` (as committed)
+The **committed** tracker is **TASI-W1/TASI-W2 only**. `tasi-track.md` and `tasi-track.js` (as committed)
 ingest `source=TASI-W1|TASI-W2`, classify states `ACTIVE-TASI-W1 / ACTIVE-TASI-W2 / GRAD★ / FAILED / STALE / EXPIRED`, and
 carry badges `NEW / PROMOTED / nearATH`. **There is no `ACTIVE-TASI-W3` in the committed methodology.**
 
@@ -69,11 +69,11 @@ resolution elsewhere. The state machine never changes.
 ## 5. Conformance (how we prove faithful, not just lookalike)
 
 1. **Golden vectors** — `research/spec/lifecycle_vectors/{ledger.jsonl, params.json, expected.json}`.
-   `expected.json` is emitted by the **live** `saudi-tracker.js stage=conform` (the source of truth);
+   `expected.json` is emitted by the **live** `tasi-track.js stage=conform` (the source of truth);
    `_gen.py` regenerates the synthetic ledger. The vectors cover every state, the FAILED-over-GRAD
    precedence, and all three badges.
 2. **Python == golden** and **hand-checked state meaning** — `research.backtest.selftest_tracker`.
-3. **JS ↔ Python differential** — the same self-test runs the live `saudi-tracker.js` on the same ledger
+3. **JS ↔ Python differential** — the same self-test runs the live `tasi-track.js` on the same ledger
    and asserts identical per-symbol output (same input → same output). Also verified on the **real**
    `.claude/outputs/saudi-tracker.jsonl` (25 symbols) during development.
 4. CI-gated in `research-ci.yml` (with `node` available so the differential actually runs).

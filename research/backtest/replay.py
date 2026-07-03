@@ -7,7 +7,7 @@ Faithfulness split (see research/spec/lifecycle.md §4):
                    ledger is a sparse human-driven sample of this.
       A3 STALE   : becomes gate-driven (the setup stopped qualifying) not usage-driven.
       A4 first_seen: first trading day the gate passes (deterministic), matching the live ingest stamping.
-      vs200      : stamped on TASI-W1 events too — faithful to the CURRENT committed saudi-stage2 (which fetches
+      vs200      : stamped on TASI-W1 events too — faithful to the CURRENT committed tasi-w1 (which fetches
                    EMA200 as a descriptor so TASI-W1-only names can be FAILED). Not a research change.
   * `name` = sec_id (the panel carries no company name) — cosmetic only.
 
@@ -48,7 +48,7 @@ def generate_ledger(decided_by_source: dict) -> list:
             "offLow": round(r["off_low"], 1) if r["off_low"] is not None else None,
             "vs200": r["vs200"], "Perf.5Y": r["perf_5y"],
         })
-    # stamp journey origin (earliest event per symbol) — mirrors saudi-tracker.js ingest
+    # stamp journey origin (earliest event per symbol) — mirrors tasi-track.js ingest
     first = {}
     for e in events:  # events are already (sec_id, date)-sorted
         f = first.get(e["symbol"])

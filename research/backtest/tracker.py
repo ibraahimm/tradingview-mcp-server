@@ -1,7 +1,7 @@
-"""Faithful Python reimplementation of the saudi-tracker.js journey + lifecycle state machine.
+"""Faithful Python reimplementation of the tasi-track.js journey + lifecycle state machine.
 
 This is a CONFORMANT port, not a re-derivation: it mirrors `buildItems` in
-.claude/scripts/saudi-tracker.js line-for-line and is proven against that JS via shared golden
+.claude/scripts/tasi-track.js line-for-line and is proven against that JS via shared golden
 vectors (research/spec/lifecycle_vectors/) + a JS<->Python differential test (selftest_tracker.py).
 
 Scope = the COMMITTED methodology only: TASI-W1/TASI-W2 journeys (ACTIVE-TASI-W1/ACTIVE-TASI-W2/GRAD*/FAILED/STALE/
@@ -45,7 +45,7 @@ def _journey_string(evs) -> str:
 
 
 def build_items(ledger, now_ms: int, grad_p5y=GRAD_P5Y, stale_days=STALE_DAYS, horizon_days=HORIZON_DAYS):
-    """Roll the ledger into one journey + state per symbol. Faithful to saudi-tracker.js buildItems."""
+    """Roll the ledger into one journey + state per symbol. Faithful to tasi-track.js buildItems."""
     by_sym: dict = {}
     latest_date = ""
     for e in ledger:
@@ -101,7 +101,7 @@ def build_items(ledger, now_ms: int, grad_p5y=GRAD_P5Y, stale_days=STALE_DAYS, h
 
 
 def conform(ledger, as_of: str, grad_p5y=GRAD_P5Y, stale_days=STALE_DAYS, horizon_days=HORIZON_DAYS):
-    """Per-symbol journey/state dict (keyed + ordered by symbol) matching saudi-tracker.js stage=conform."""
+    """Per-symbol journey/state dict (keyed + ordered by symbol) matching tasi-track.js stage=conform."""
     items, _ = build_items(ledger, ts(as_of), grad_p5y, stale_days, horizon_days)
     out = {}
     for r in sorted(items, key=lambda r: r["symbol"]):

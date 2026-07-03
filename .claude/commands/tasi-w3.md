@@ -1,9 +1,10 @@
-# /saudi-wave3 — Saudi Main Market Third-Wave (Mature Re-Coil) Screen
+# /tasi-w3 — Saudi Main Market Third-Wave (Mature Re-Coil) Screen
 
-**Canonical rule:** `TASI-W3` (defined in `research/spec/rules.yaml`). The command name `/saudi-wave3`
-is kept for continuity; the canonical methodology identifier is `TASI-W3` (rename: `decisions.md` D-2026-07-02-05).
+**Canonical rule:** `TASI-W3` (defined in `research/spec/rules.yaml`). The command name is the lowercase
+operational form of the canonical identifier (command rename: `decisions.md` D-2026-07-03-01; identifier
+rename: D-2026-07-02-05); the former name /saudi-wave3 is retired.
 
-Find **Saudi Main Market (TADAWUL) only** stocks **one leg beyond `/saudi-wave2`**: a **mature
+Find **Saudi Main Market (TADAWUL) only** stocks **one leg beyond `/tasi-w2`**: a **mature
 uptrend** that already ran its TASI-W1 (first turn off the deep low) and TASI-W2 (first coil + advance),
 has climbed back to / near (or made) **new highs**, and is now forming the **NEXT contraction**
 — a fresh EMA coil higher up — that sets up the following leg.
@@ -21,16 +22,16 @@ Orchestration only. All exclusions, metrics, thresholds, and formatting live in 
 helper (not rebuilt each run):
 
 ```
-.claude/scripts/saudi-wave3.js
+.claude/scripts/tasi-w3.js
 ```
 
 Each run only (a) fetches live data, (b) pipes it through the script, (c) prints what it returns.
 Short-lived JSON goes under `.claude/scripts/.tmp/` (deleted at the end); the script writes the CSV
-to `.claude/outputs/saudi-wave3.csv`.
+to `.claude/outputs/tasi-w3.csv`.
 
 > Tool prefix: `mcp__tradingview-screener__`. Script invocation: ESM, run with `node …`.
 
-## Why this differs from /saudi-wave2
+## Why this differs from /tasi-w2
 
 TASI-W2 catches the **first coil** while still deeply corrected (EMA200 only a descriptor, `belowATH`
 20–80). TASI-W3 catches the **next contraction in a mature trend**: it **requires** `close > EMA200`,
@@ -72,10 +73,10 @@ Parse `` for `key=value` tokens. Any key not supplied uses its default. Forward 
 `DDmax` / `belowATH` / `offLow` have **no gate parameters** — computed and shown as descriptors only.
 
 Example calls:
-- `/saudi-wave3`
-- `/saudi-wave3 p3y_min=80` — stricter "must be a big multi-year winner"
-- `/saudi-wave3 nrhi_max=100` — include names sitting right at new highs
-- `/saudi-wave3 value=5000000` — add a SAR 5M liquidity floor
+- `/tasi-w3`
+- `/tasi-w3 p3y_min=80` — stricter "must be a big multi-year winner"
+- `/tasi-w3 nrhi_max=100` — include names sitting right at new highs
+- `/tasi-w3 value=5000000` — add a SAR 5M liquidity floor
 
 ## Universe restriction (Saudi Main Market only — MANDATORY)
 
@@ -107,7 +108,7 @@ Example calls:
 
 4. **Run the filter stage** (omit any param the user didn't supply):
    ```
-   node .claude/scripts/saudi-wave3.js stage=filter input=.claude/scripts/.tmp/screen.json \
+   node .claude/scripts/tasi-w3.js stage=filter input=.claude/scripts/.tmp/screen.json \
      vs200_min=<vs200_min> ema_gap_min=<ema_gap_min> ema_gap_max=<ema_gap_max> ext21_max=<ext21_max> \
      nrhi_min=<nrhi_min> nrhi_max=<nrhi_max> p1m_min=<p1m_min> p1m_max=<p1m_max> p3m_min=<p3m_min> p3m_max=<p3m_max> \
      p6m_min=<p6m_min> p6m_max=<p6m_max> py_min=<py_min> py_max=<py_max> p3y_min=<p3y_min> p3y_max=<p3y_max> \
@@ -117,7 +118,7 @@ Example calls:
 
 5. **Run the report stage**:
    ```
-   node .claude/scripts/saudi-wave3.js stage=report filtered=.claude/scripts/.tmp/filtered.json
+   node .claude/scripts/tasi-w3.js stage=report filtered=.claude/scripts/.tmp/filtered.json
    ```
    Stdout has **two parts split by a line that is exactly `===CHART_LINKS===`**:
    - **Before the sentinel** — Funnel (base → trend → mature(EMA200) → coil → nrHi survivors), then the
@@ -130,9 +131,9 @@ Example calls:
 
 6. **(Optional) Ingest into the unified tracker** — record this run's survivors BEFORE cleanup:
    ```
-   node .claude/scripts/saudi-tracker.js stage=ingest filtered=.claude/scripts/.tmp/filtered.json source=TASI-W3
+   node .claude/scripts/tasi-track.js stage=ingest filtered=.claude/scripts/.tmp/filtered.json source=TASI-W3
    ```
-   Non-fatal: if it errors, surface the message but still finish. View the cohort with `/saudi-track`.
+   Non-fatal: if it errors, surface the message but still finish. View the cohort with `/tasi-track`.
    Skip only if the user asked not to track this run.
 
 7. **Clean up** the temp data files only: delete `.claude/scripts/.tmp/`. Do NOT delete the persistent

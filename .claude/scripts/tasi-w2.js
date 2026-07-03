@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Persistent computed-filter + report renderer for the /saudi-wave2 slash command.
+ * Persistent computed-filter + report renderer for the /tasi-w2 slash command.
  *
- * Strategy: Saudi Main Market (TADAWUL) names that keep the /saudi-stage2 deep-correction
+ * Strategy: Saudi Main Market (TADAWUL) names that keep the /tasi-w1 deep-correction
  * DNA (still well below the all-time high) but are one leg further along — the FIRST wave
  * already advanced and HELD, the stock pulled back into a tight EMA compression, reclaimed
  * its short-term EMA, and is resuming. This is the SECOND-wave / continuation entry:
@@ -18,7 +18,7 @@
  *   2) report  — input: the stage-1 filter JSON (--filtered). Prints ONE box-drawing grid
  *                + summary to stdout, then a "===CHART_LINKS===" sentinel followed by a
  *                markdown "Open chart" list (printed OUTSIDE the code block by the command),
- *                and writes the full untruncated CSV (default .claude/outputs/saudi-wave2.csv).
+ *                and writes the full untruncated CSV (default .claude/outputs/tasi-w2.csv).
  *
  * Computed metrics (percent unless noted):
  *   DDmax     = (ATH - price_52_week_low)/ATH * 100   // peak->trough correction depth
@@ -53,8 +53,8 @@
  * locally so the result is correct regardless of how the screen was built.
  *
  * Usage:
- *   node saudi-wave2.js stage=filter input=screen.json [offlow=40 ema_gap_max=8 ...]
- *   node saudi-wave2.js stage=report filtered=filtered.json [csv=path maxwidth=N]
+ *   node tasi-w2.js stage=filter input=screen.json [offlow=40 ema_gap_max=8 ...]
+ *   node tasi-w2.js stage=report filtered=filtered.json [csv=path maxwidth=N]
  * Input paths accept "-" for stdin.
  */
 
@@ -285,7 +285,7 @@ function stageReport() {
   if (!args.filtered) throw new Error("stage=report requires filtered=<filter.json|->");
   const filtered = readJson(args.filtered);
   const p = filtered.params || params;
-  const csvPath = args.csv || ".claude/outputs/saudi-wave2.csv";
+  const csvPath = args.csv || ".claude/outputs/tasi-w2.csv";
   const rows = filtered.matches || [];
 
   // CSV: full, untruncated values
@@ -376,6 +376,6 @@ try {
   else if (stage === "report") stageReport();
   else throw new Error(`unknown stage='${stage}' (expected filter|report)`);
 } catch (err) {
-  process.stderr.write("saudi-wave2.js error: " + err.message + "\n");
+  process.stderr.write("tasi-w2.js error: " + err.message + "\n");
   process.exit(1);
 }

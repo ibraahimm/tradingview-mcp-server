@@ -77,7 +77,7 @@ def main():
               f"{r0['off_low']:>6.0f}{r0['below_ath']:>5.0f}{str(r0['first_fail']):>9}   "
               f"P6M>0:{dd(d_p6m0)}  offLo≥60:{dd(d_off60)}  P3M≥40:{dd(d_p3m40)}  TASI-W1-window:{w1days}d")
 
-    print("\n(Experimental — hypotheses only. Official TASI_W1 = rules.yaml + saudi-stage2.js.)")
+    print("\n(Experimental — hypotheses only. Official TASI_W1 = rules.yaml + tasi-w1.js.)")
 
 
 if __name__ == "__main__":

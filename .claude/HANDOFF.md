@@ -1,7 +1,7 @@
 
 # HANDOFF — TradingView MCP + Saudi Wave Screening + Research Platform
 
-**Updated:** 2026-07-03 · **Branch:** `feat/saudi-stage2-screen` · **HEAD:** see `git log --oneline -14`
+**Updated:** 2026-07-03 · **Branch:** `feat/tasi-w1-screen` · **HEAD:** see `git log --oneline -14`
 (this session: documentation architecture + decision log, the Tier-1 SSOT lint, the CI-YAML fix, and the
 **canonical rename `W1/W2/W3 → TASI-W1/TASI-W2/TASI-W3`**). All work committed and pushed to `mine`.
 
@@ -17,7 +17,7 @@
 
 1. **TS MCP server + CLI** (`src/`) — the TradingView screener wrapper (unchanged core).
 2. **Saudi wave screening — the live product** (`.claude/commands/` + `.claude/scripts/`) — on-demand
-   slash commands `/saudi-stage2` (TASI-W1), `/saudi-wave2` (TASI-W2), `/saudi-wave3` (TASI-W3), `/saudi-track` (tracker),
+   slash commands `/tasi-w1` (TASI-W1), `/tasi-w2` (TASI-W2), `/tasi-w3` (TASI-W3), `/tasi-track` (tracker),
    each = MCP screen → node helper → print. Persistent CSVs in `.claude/outputs/`.
 3. **Research / backtesting platform** (`research/`, Python + polars) — answers, with rigor, whether the
    wave methodology has a real edge, and keeps the live screens honest.
@@ -32,15 +32,15 @@ re-coil in a normal trend)`. The **tracker** = one journey per symbol across wav
 history in [`research/spec/decisions.md`](../research/spec/decisions.md). **Read the numbers from
 `rules.yaml`; this Session doc does not restate them.**
 
-- **TASI-W1** (`/saudi-stage2`) — deep-correction first-wave entry: listing-age, `DDmax`, `belowATH`, `offLow`,
+- **TASI-W1** (`/tasi-w1`) — deep-correction first-wave entry: listing-age, `DDmax`, `belowATH`, `offLow`,
   and `Perf.3M/6M/3Y/5Y/10Y` gates. ext60 extension cap removed (`decisions.md` D-2026-06-30-01).
-- **TASI-W2** (`/saudi-wave2`) — re-coil continuation of TASI-W1 names: `close>EMA60`, the `EMA21/EMA60` coil, reclaim
+- **TASI-W2** (`/tasi-w2`) — re-coil continuation of TASI-W1 names: `close>EMA60`, the `EMA21/EMA60` coil, reclaim
   `close≥EMA21` (ext21 upper cap removed), plus the deep-correction DNA (`DDmax`/`belowATH`/`offLow`) and Perf gates.
-- **TASI-W3** (`/saudi-wave3`) — mature re-coil near highs: `close>EMA200`, coil, `nrHi` band, `Perf.3Y` minimum
+- **TASI-W3** (`/tasi-w3`) — mature re-coil near highs: `close>EMA200`, coil, `nrHi` band, `Perf.3Y` minimum
   (the discriminator). Not changed this session.
-- **Tracker** (`/saudi-track`): committed methodology is **TASI-W1/TASI-W2 only**. States `ACTIVE-TASI-W1/TASI-W2`, `GRAD★`,
+- **Tracker** (`/tasi-track`): committed methodology is **TASI-W1/TASI-W2 only**. States `ACTIVE-TASI-W1/TASI-W2`, `GRAD★`,
   `FAILED`, `STALE`, `EXPIRED`; badges `NEW/PROMOTED/nearATH`; metric `gainSinceSignal`. Its lifecycle
-  thresholds are owned by `.claude/scripts/saudi-tracker.js` (not `rules.yaml`). TASI-W3-in-tracker proposed
+  thresholds are owned by `.claude/scripts/tasi-track.js` (not `rules.yaml`). TASI-W3-in-tracker proposed
   earlier, never committed (see Open items).
 
 ## 3. Research platform (`research/`)
@@ -50,7 +50,7 @@ history in [`research/spec/decisions.md`](../research/spec/decisions.md). **Read
 - **`engine/`** — polars feature engine (`panel.py`) + `rules.py` (`evaluate_frame(rule, df, params_overrides)`).
 - **`backtest/`** — `event_study`, `governance` (time-split / walk-forward / Bonferroni), `rigor` (dedup +
   market-neutral excess), `robust` (net-of-cost + block-bootstrap + `prob_greater`), `regime`, `lifecycle`,
-  `tracker` (faithful port of `saudi-tracker.js`), `replay`. Each has a `selftest_*.py` CI gate.
+  `tracker` (faithful port of `tasi-track.js`), `replay`. Each has a `selftest_*.py` CI gate.
 - **`spec/conformance/`** — `reference_runner.py` (feature vectors), `rule_runner.py` (rule vectors),
   **`methodology_parity.py`** (live JS ↔ rules.yaml params **+ Tier-1 SSOT lint**: command-doc Step-2
   `(default N)` annotations ↔ rules.yaml).
@@ -113,7 +113,7 @@ the ledger rollback backup is `.claude/outputs/saudi-tracker.jsonl.bak-2026-07-0
 ## 8. Git / push setup
 
 - Remote **`mine` = `git@github.com:ibraahimm/tradingview-mcp-server.git` (SSH)**; deploy key
-  `~/.ssh/mine_tadawul` + repo `core.sshCommand` configured → `git push mine feat/saudi-stage2-screen` works here.
+  `~/.ssh/mine_tadawul` + repo `core.sshCommand` configured → `git push mine feat/tasi-w1-screen` works here.
 - `origin` = `fiale-plus` fork (HTTPS, not for push). **Never commit `package-lock.json`.**
   `.claude/` is gitignored → `git add -f` for new files (already-tracked ones add normally).
 - **Canon (`features.yaml`, `rules.yaml`, `VERSION`) changes only with separate explicit approval**, and get
@@ -139,7 +139,7 @@ finding it produced is recorded in D-2026-07-01-02). A fresh `git status` shows 
 
 ## 10. How to run
 
-- **Live screens:** `/saudi-stage2`, `/saudi-wave2`, `/saudi-wave3`, `/saudi-track`.
+- **Live screens:** `/tasi-w1`, `/tasi-w2`, `/tasi-w3`, `/tasi-track`.
 - **Conformance/parity:** `python research/spec/conformance/{rule_runner,methodology_parity,reference_runner}.py`,
   `python -m research.engine.selftest_screen`, `python -m research.backtest.selftest_{tracker,replay,rigor,robust,regime,lifecycle}`.
 - **Backtests:** `python -m research.{rigor_run,robust_run,regime_run,lifecycle_run,replay_run} research/panel/tadawul_2026-06-28.parquet`.

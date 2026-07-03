@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Persistent cohort tracker for the /saudi-stage2 (TASI-W1, "first wave") and /saudi-wave2 (TASI-W2,
+ * Persistent cohort tracker for the /tasi-w1 (TASI-W1, "first wave") and /tasi-w2 (TASI-W2,
  * "second wave / continuation") slash commands.
  *
  * One UNIFIED journey per symbol across both waves: a name can first appear in TASI-W1, later in
@@ -31,13 +31,13 @@
  *   gainSinceSignal = (close / first_close - 1) * 100   // main progress: P&L from first signal
  *   belowATH                                            // structural recovery toward the ATH
  *
- * Note: the TASI-W1 (/saudi-stage2) screen does not fetch EMAs, so TASI-W1-only names carry no EMA200 /
+ * Note: the TASI-W1 (/tasi-w1) screen does not fetch EMAs, so TASI-W1-only names carry no EMA200 /
  * vs200. The FAILED rule needs that reading, so it is evaluated from the most recent EMA-bearing
  * (i.e. TASI-W2) event; a name that has only ever appeared in TASI-W1 cannot be marked FAILED yet.
  *
  * Usage:
- *   node saudi-tracker.js stage=ingest filtered=<wave_filter.json> source=TASI-W1|TASI-W2 [date=YYYY-MM-DD] [ledger=path]
- *   node saudi-tracker.js stage=report [ledger=path] [grad_p5y=2000] [stale_days=120] [horizon_days=1826] [csv=path]
+ *   node tasi-track.js stage=ingest filtered=<wave_filter.json> source=TASI-W1|TASI-W2 [date=YYYY-MM-DD] [ledger=path]
+ *   node tasi-track.js stage=report [ledger=path] [grad_p5y=2000] [stale_days=120] [horizon_days=1826] [csv=path]
  */
 
 import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync } from "node:fs";
@@ -283,7 +283,7 @@ function stageReport() {
   const horizon_days = num("horizon_days", 1826); // ~5 years
   const ledger = readLedger(ledgerPath);
   if (!ledger.length) {
-    process.stdout.write(`No tracker ledger yet at ${ledgerPath} — run /saudi-stage2 or /saudi-wave2 (which ingest) first.\n`);
+    process.stdout.write(`No tracker ledger yet at ${ledgerPath} — run /tasi-w1 or /tasi-w2 (which ingest) first.\n`);
     return;
   }
 
@@ -365,6 +365,6 @@ try {
   else if (stage === "conform") stageConform();
   else throw new Error(`unknown stage='${stage}' (expected ingest|report|conform)`);
 } catch (err) {
-  process.stderr.write("saudi-tracker.js error: " + err.message + "\n");
+  process.stderr.write("tasi-track.js error: " + err.message + "\n");
   process.exit(1);
 }

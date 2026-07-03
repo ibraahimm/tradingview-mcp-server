@@ -1,12 +1,12 @@
-# /saudi-track — Saudi Wave Cohort Tracker (read-only report)
+# /tasi-track — Saudi Wave Cohort Tracker (read-only report)
 
-Show the **unified journey** of every name surfaced by `/saudi-stage2` (TASI-W1, "first wave") and
-`/saudi-wave2` (TASI-W2, "second wave / continuation"), accumulated in a persistent append-only
+Show the **unified journey** of every name surfaced by `/tasi-w1` (TASI-W1, "first wave") and
+`/tasi-w2` (TASI-W2, "second wave / continuation"), accumulated in a persistent append-only
 ledger. One journey per symbol across both waves: a name can first appear in TASI-W1, later in TASI-W2,
 and the tracker treats that as one continuous journey.
 
 This command is **read-only** — it only renders the current ledger. The ledger itself is written
-by the **optional ingest step** inside `/saudi-stage2` and `/saudi-wave2` when those run. If the
+by the **optional ingest step** inside `/tasi-w1` and `/tasi-w2` when those run. If the
 ledger doesn't exist yet, run one of those first.
 
 ## Architecture (read first)
@@ -14,7 +14,7 @@ ledger doesn't exist yet, run one of those first.
 Orchestration only. All lifecycle math + formatting live in the persistent helper:
 
 ```
-.claude/scripts/saudi-tracker.js      (stage=report)
+.claude/scripts/tasi-track.js      (stage=report)
 .claude/outputs/saudi-tracker.jsonl   (the append-only JSONL ledger — source of truth)
 ```
 
@@ -33,9 +33,9 @@ Parse `` for `key=value` tokens; forward to the script (it owns the defaults):
 | `ledger`       | `.claude/outputs/saudi-tracker.jsonl` | Ledger path (leave default) |
 
 Example calls:
-- `/saudi-track`
-- `/saudi-track csv=.claude/outputs/saudi-tracker-summary.csv`
-- `/saudi-track stale_days=60`
+- `/tasi-track`
+- `/tasi-track csv=.claude/outputs/tasi-track-summary.csv`
+- `/tasi-track stale_days=60`
 
 ## Steps
 
@@ -43,7 +43,7 @@ Example calls:
 
 2. **Run the report stage**:
    ```
-   node .claude/scripts/saudi-tracker.js stage=report grad_p5y=<grad_p5y> stale_days=<stale_days> horizon_days=<horizon_days> [csv=<csv>]
+   node .claude/scripts/tasi-track.js stage=report grad_p5y=<grad_p5y> stale_days=<stale_days> horizon_days=<horizon_days> [csv=<csv>]
    ```
    (Omit any token the user didn't supply — the script applies its own defaults.)
 
@@ -58,7 +58,7 @@ Example calls:
    - **After the sentinel** — a markdown "**Open chart (click a symbol)**" list. **Print as normal
      markdown OUTSIDE the code block.** Do not print the `===CHART_LINKS===` line itself.
    - If the ledger is empty, the script prints a "No tracker ledger yet" message — surface that
-     and tell the user to run `/saudi-stage2` or `/saudi-wave2` first.
+     and tell the user to run `/tasi-w1` or `/tasi-w2` first.
 
 4. **No cleanup, no live fetch.** This command reads only the persistent ledger; it creates no
    temp files and calls no MCP tools.

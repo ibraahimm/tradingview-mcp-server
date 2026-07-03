@@ -195,7 +195,7 @@ def main():
     print(f"\nfiles: {OUT}/w1_replay_daily.csv · w1_replay_evidence.csv (incl. detected) · w1_replay_symbols.csv")
     print("realistic band (declared, challengeable): p6m_min>=-15, p3m_min>=0, p3m_max<=60, offlow_max<=100;")
     print("  p3y_max/p5y_max/p10y_max relaxations are 'extreme' (they redefine deep-recent-correction).")
-    print("(Experimental — hypotheses only. Official TASI_W1 = rules.yaml + saudi-stage2.js.)")
+    print("(Experimental — hypotheses only. Official TASI_W1 = rules.yaml + tasi-w1.js.)")
 
 
 if __name__ == "__main__":

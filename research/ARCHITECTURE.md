@@ -5,7 +5,7 @@
 repository — its three subsystems and how they fit together:
 1. the **TradingView MCP server + CLI** (`src/`) — the market-data screener the product trades on;
 2. the **live Saudi wave-screening product** (`.claude/commands/` + `.claude/scripts/`) —
-   `/saudi-stage2` (TASI-W1), `/saudi-wave2` (TASI-W2), `/saudi-wave3` (TASI-W3), `/saudi-track`;
+   `/tasi-w1` (TASI-W1), `/tasi-w2` (TASI-W2), `/tasi-w3` (TASI-W3), `/tasi-track`;
 3. the **quant research & backtesting platform** (`research/`) — this document's most detailed
    subject, plus the continuous conformance contract with the live screener those strategies trade on.
 
@@ -39,7 +39,7 @@ Python research engine are two implementations of it, kept honest by conformance
 | 1. Orchestrate | `.claude/commands/saudi-*.md` — the command spec; fetch → pipe → print, no inline math | user args → a screen request |
 | 2. Fetch market data | `src/` MCP server (`screen_stocks`) — the TradingView wrapper | filter spec → today's rows (EMA/Perf/…) |
 | 3. Compute + gate | `.claude/scripts/saudi-*.js` — owns all metrics/exclusions/thresholds (mirrors `rules.yaml`) | rows → printed table + `.claude/outputs/*.csv` + append `saudi-tracker.jsonl` |
-| 4. Track journeys | `saudi-tracker.js` (report) — lifecycle math over the ledger | ledger → `/saudi-track` journey view |
+| 4. Track journeys | `tasi-track.js` (report) — lifecycle math over the ledger | ledger → `/tasi-track` journey view |
 
 **Research pipeline** — produces evidence, then possibly a canon change:
 

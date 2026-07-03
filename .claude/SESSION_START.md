@@ -17,10 +17,10 @@ these files in full (repo-relative paths) and run the git commands, to reconstru
 5. research/spec/rules.yaml                    — canonical TASI-W1/TASI-W2/TASI-W3 rule definitions (single source of truth)
 6. research/spec/decisions.md                  — append-only methodology/governance DECISION LOG (why each change,
                                                  and whether it was validated); read before proposing any change
-7. .claude/commands/saudi-stage2.md            — TASI-W1 live command spec
-8. .claude/commands/saudi-wave2.md             — TASI-W2 live command spec
-9. .claude/commands/saudi-wave3.md             — TASI-W3 live command spec
-10. .claude/commands/saudi-track.md            — tracker command spec
+7. .claude/commands/tasi-w1.md            — TASI-W1 live command spec
+8. .claude/commands/tasi-w2.md             — TASI-W2 live command spec
+9. .claude/commands/tasi-w3.md             — TASI-W3 live command spec
+10. .claude/commands/tasi-track.md            — tracker command spec
 11. run: git status --short  AND  git log --oneline -15
                                               — reconstruct working-tree + commit context: uncommitted/untracked
                                                 (WIP) changes AND recent history (HEAD = latest; do not assume)
@@ -28,7 +28,7 @@ these files in full (repo-relative paths) and run the git commands, to reconstru
 Then follow these working rules for the whole session:
 
 A. OFFICIAL METHODOLOGY lives ONLY in research/spec/rules.yaml + the live scripts
-   (.claude/scripts/saudi-stage2.js, saudi-wave2.js) + the command docs, and is PARITY-LOCKED by
+   (.claude/scripts/tasi-w1.js, tasi-w2.js) + the command docs, and is PARITY-LOCKED by
    research/spec/conformance/methodology_parity.py. The live JS and rules.yaml must never drift.
 
 B. EXPERIMENTS live in research/experiments/ and use runtime overrides only (params_overrides) and/or
@@ -48,7 +48,7 @@ D. Discipline: architecture/spec first, then tests/golden fixtures, then impleme
 E. NEVER commit market data (research/panel/*.parquet, research/ingest/raw/) or package-lock.json.
    .claude/ is git-ignored — force-add specific files (git add -f) when they must be tracked.
 
-F. Push with:  git push mine feat/saudi-stage2-screen   (SSH deploy key ~/.ssh/mine_tadawul is already
+F. Push with:  git push mine feat/tasi-w1-screen   (SSH deploy key ~/.ssh/mine_tadawul is already
    wired via core.sshCommand; the `mine` remote is the git@github.com SSH URL). Commit/push only when I ask.
 
 G. Use full repo-relative paths when referring to files. Verify facts against the current code before

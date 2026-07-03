@@ -11,10 +11,10 @@ excluded.
 
 | Command | Purpose | Authoritative spec |
 |---|---|---|
-| `/saudi-stage2` | **TASI-W1** — deep multi-year correction + first recovery wave (entry) | [`.claude/commands/saudi-stage2.md`](../.claude/commands/saudi-stage2.md) |
-| `/saudi-wave2`  | **TASI-W2** — first EMA coil + continuation of TASI-W1 names | [`.claude/commands/saudi-wave2.md`](../.claude/commands/saudi-wave2.md) |
-| `/saudi-wave3`  | **TASI-W3** — mature re-coil near new highs | [`.claude/commands/saudi-wave3.md`](../.claude/commands/saudi-wave3.md) |
-| `/saudi-track`  | Unified TASI-W1/TASI-W2 journey tracker (read-only) | [`.claude/commands/saudi-track.md`](../.claude/commands/saudi-track.md) |
+| `/tasi-w1` | **TASI-W1** — deep multi-year correction + first recovery wave (entry) | [`.claude/commands/tasi-w1.md`](../.claude/commands/tasi-w1.md) |
+| `/tasi-w2`  | **TASI-W2** — first EMA coil + continuation of TASI-W1 names | [`.claude/commands/tasi-w2.md`](../.claude/commands/tasi-w2.md) |
+| `/tasi-w3`  | **TASI-W3** — mature re-coil near new highs | [`.claude/commands/tasi-w3.md`](../.claude/commands/tasi-w3.md) |
+| `/tasi-track`  | Unified TASI-W1/TASI-W2 journey tracker (read-only) | [`.claude/commands/tasi-track.md`](../.claude/commands/tasi-track.md) |
 | `/saudi-momentum` | Rising off the 52-week low in a tight, confirmed uptrend | [`.claude/commands/saudi-momentum.md`](../.claude/commands/saudi-momentum.md) |
 
 **Canonical rule thresholds** for the wave screens (TASI-W1/TASI-W2/TASI-W3) live in
