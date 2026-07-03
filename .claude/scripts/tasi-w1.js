@@ -26,7 +26,7 @@
  *   ATHx     = ATH / price_52_week_high               // >~3 => peak is old/far (e.g. 2006 bubble)
  *
  * Parameters (all optional; percents given as percents, e.g. p3y_max=130 means 130%):
- *   dd_min (50)  below_min (40)  below_max (100)  offlow (35)  offlow_max (80)
+ *   dd_min (50)  below_min (40)  below_max (100)  offlow (30)  offlow_max (80)
  *   p3m_min (5)  p3m_max (40)  p6m_min (-10)  p6m_max (50)  p3y_max (130)
  *   value (0 = no liquidity floor, SAR)  nrhi_min (0 = descriptor only, %)
  * The Perf.* bounds are normally enforced server-side too; the script re-verifies them
@@ -54,7 +54,7 @@ const params = {
   dd_min: num("dd_min", 50),
   below_min: num("below_min", 40),
   below_max: num("below_max", 100), // raised 95->100 (2026-06-30): admit the most-corrected names
-  offlow: num("offlow", 35),        // 20->35 (2026-07-01, formal request): later entry zone
+  offlow: num("offlow", 30),        // 35->30 (2026-07-03, D-2026-07-03-02); was 20->35 (2026-07-01)
   offlow_max: num("offlow_max", 80), // 60->80 (2026-07-01, formal request)
   p3m_min: num("p3m_min", 5),
   p3m_max: num("p3m_max", 40),

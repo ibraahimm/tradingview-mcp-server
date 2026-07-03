@@ -1,4 +1,7 @@
 label,pass,first_fail
 P,true,
 Fcoil,false,ema_comp
-Fpy,false,perf_1y
+Ppy,true,
+Pp1m,true,
+Poff32,true,
+Foff29,false,off_low

@@ -215,6 +215,59 @@ by D-2026-07-02-05.
 
 ---
 
+## D-2026-07-03-02 · 2026-07-03 · Methodology
+
+**Choice.** Two changes to canon, adopted together as one promotion (owner directive of
+2026-07-03, confirmed after evidence review):
+1. **TASI-W2: remove the `p1m_min`/`p1m_max` (Perf.1M band) and `py_min` (Perf.1Y>0) gates
+   entirely** — parameters and funnel predicates deleted. Perf.1M/Perf.1Y remain fetched and
+   displayed as descriptors. TASI-W2's continuation/trend evidence is now expressed solely
+   through structure: `close>EMA60`, the EMA21/EMA60 coil, and the EMA21 reclaim.
+2. **TASI-W1 + TASI-W2: `offlow_min` 35 → 30** — a partial revert of the D-2026-07-01-01 band
+   widening (which had raised the floor to 35 and was retained as return-neutral in
+   D-2026-07-01-02). Values in `rules.yaml`.
+
+**Empirical evidence (recorded distinctly from the rationale).** Forward-tested **before**
+adoption on the full 20-year panel (Report:
+[`research/reports/w2-gates-offlow30-2026-07-03.md`](../reports/w2-gates-offlow30-2026-07-03.md)):
+- The removed TASI-W2 gates were **load-bearing for the historical per-signal edge**: with them,
+  W2 was deflated-significant at 20d and net-positive at all horizons; without them the
+  market-neutral excess collapses to noise and is net-negative after cost at every horizon
+  (P(current>gateless) 0.84–0.97). The change **widens recall (~46% more deduped signals) at the
+  cost of the measured per-signal selection edge.**
+- `offlow_min` 35→30 alone is **return-neutral-to-slightly-diluting** (W2 keeps its deflated 20d
+  significance; ~17% more signals; P(cur>variant) ≈ 0.53–0.73 across rules/horizons).
+
+**Rationale for adoption (the design decision, distinct from the evidence above).** Directed by
+the methodology owner as an intentional design choice, with the adverse gate-removal evidence
+reviewed and acknowledged: TASI-W2 is redefined around its **structural** gates (trend +
+coil + reclaim) rather than point-to-point momentum windows, and the entry band is widened for
+recall. The owner accepts the loss of the historically measured per-signal edge as a trade-off
+of this redefinition. This entry supersedes the "confirmed uptrend (Perf.1Y>0) inversion" as
+part of TASI-W2's definition; prior descriptions of that inversion remain true-when-written.
+
+**Validation status.** Forward-tested before adoption; the test result was **adverse** for
+change 1 and **neutral** for change 2 (see the Report). Adopted notwithstanding, by explicit
+owner decision. Any prior W2 findings (e.g. the RIGOR_RESULT selection-edge finding) were
+measured under the pre-change definition and do not transfer to the new TASI-W2.
+
+**Comparability coordinate.** Reports/backtests after this entry are identified by
+(`spec_version 1.0.0`, `D-2026-07-03-02`). No `VERSION` bump (rule change, not feature change —
+D-2026-07-02-01).
+
+**Evidence.** The Report above; `research/experiments/w2_momentum_gate_removal.py`,
+`research/experiments/offlow30_promotion_test.py` (override-only drivers, committed with this
+change); the promotion commit (canon + JS + docs + vectors + parity minimums together).
+
+**Relations.** Partially reverts D-2026-07-01-01 (offlow floor); supersedes-in-definition the
+TASI-W2 trend-inversion described in D-2026-07-01-01/02 context; evidence method follows
+D-2026-06-30-01 (the ext60 precedent — there the tested gate was inert and removed; here the
+tested gates were load-bearing and removed by design).
+
+**Rollback.** `git revert` the promotion commit.
+
+---
+
 ## Backfilled entries
 
 *Recorded 2026-07-02 from commit history and reports; each keeps its original decision date.*

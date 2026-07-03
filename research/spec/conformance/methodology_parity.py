@@ -35,7 +35,7 @@ DOCS = {"TASI-W1": ROOT / ".claude/commands/tasi-w1.md",
 # Per-rule minimum Step-2 (default N) annotation counts, locked to the verified 2026-07-02 state
 # (D-2026-07-02-03 addendum): a silently removed annotation must FAIL the gate, not shrink coverage.
 # TASI-W3 Step-2 uses only value:<param> placeholders (no canon literals) -> 0 is complete, not a gap.
-MIN_DOC_DEFAULTS = {"TASI-W1": 3, "TASI-W2": 9, "TASI-W3": 0}
+MIN_DOC_DEFAULTS = {"TASI-W1": 3, "TASI-W2": 6, "TASI-W3": 0}  # W2 9->6: p1m_min/p1m_max/py_min removed (D-2026-07-03-02)
 
 # JS object-key -> rules.yaml param name (only the few that differ)
 RENAME = {"offlow": "offlow_min", "value": "value_min"}

@@ -38,7 +38,7 @@ rules:
       dd_min: 50
       below_min: 40
       below_max: 100      # see decisions.md D-2026-06-30-02
-      offlow_min: 35      # see decisions.md D-2026-07-01-01
+      offlow_min: 30      # 35->30, see decisions.md D-2026-07-03-02
       offlow_max: 80      # see decisions.md D-2026-07-01-01
       nrhi_min: 0          # 0 = descriptor only
       value_min: 0         # SAR; 0 = OFF
@@ -64,20 +64,19 @@ rules:
     title: "Second wave (first EMA coil, reclaim, resume)"
     params:
       min_years: 5
-      p1m_min: 0
-      p1m_max: 15
+      # p1m_min/p1m_max (Perf.1M band) REMOVED — see decisions.md D-2026-07-03-02
       p3m_min: 0
       p3m_max: 40
       p6m_min: -10        # see decisions.md D-2026-07-01-01
       p6m_max: 80
-      py_min: 0
+      # py_min (Perf.1Y>0 confirmed-uptrend gate) REMOVED — see decisions.md D-2026-07-03-02
       p3y_max: 130        # see decisions.md D-2026-07-01-01
       p5y_max: 200
       p10y_max: 400
       dd_min: 45
       below_min: 20
       below_max: 80
-      offlow_min: 35      # see decisions.md D-2026-07-01-01
+      offlow_min: 30      # 35->30, see decisions.md D-2026-07-03-02
       offlow_max: 80      # see decisions.md D-2026-07-01-01
       ema_gap_min: -2      # the coil: ema_comp band
       ema_gap_max: 5
@@ -85,10 +84,10 @@ rules:
       value_min: 0
     funnel:
       - {feature: age_years, op: ge, value: "@min_years", null_action: drop}
-      - {feature: perf_1m, op: in_oo, value: ["@p1m_min", "@p1m_max"], null_action: drop}
+      # perf_1m band + perf_1y>0 gates REMOVED (Perf.1M/Perf.1Y are descriptors now) —
+      # see decisions.md D-2026-07-03-02; trend evidence is structural (ext60/ema_comp/ema21gap)
       - {feature: perf_3m, op: in_co, value: ["@p3m_min", "@p3m_max"], null_action: drop}
       - {feature: perf_6m, op: in_oo, value: ["@p6m_min", "@p6m_max"], null_action: drop}
-      - {feature: perf_1y, op: gt, value: "@py_min", null_action: drop}     # confirmed uptrend (TASI-W2 inverts TASI-W1)
       - {feature: perf_3y, op: lt, value: "@p3y_max", null_action: drop}
       - {feature: perf_5y, op: lt, value: "@p5y_max", null_action: skip}
       - {feature: perf_10y, op: lt, value: "@p10y_max", null_action: skip}

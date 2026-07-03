@@ -38,16 +38,15 @@
  *                             a name recovering from a deep drop often still has EMA60 < a falling EMA200)
  *   pullback / resumption   : close >= EMA21   (reclaimed; the 10% extension cap was REMOVED 2026-06-30)
  *                             emaComp in [ema_gap_min, ema_gap_max]      (fast EMA coiled near the mid EMA)
- *                             Perf.1M in (p1m_min, p1m_max)              (monthly momentum already turned up)
- *   confirmed uptrend       : Perf.1Y > py_min
+ *   (Perf.1M band + Perf.1Y>0 gates REMOVED 2026-07-03, D-2026-07-03-02 — descriptors only)
  *   recency / not-overheated: Perf.3M in [p3m_min, p3m_max), Perf.6M in (p6m_min, p6m_max),
  *                             Perf.3Y < p3y_max, Perf.5Y < p5y_max, Perf.10Y < p10y_max
  *
  * Parameters (all optional; percents given as percents):
- *   dd_min (45)  below_min (20)  below_max (80)  offlow (35)  offlow_max (80)
+ *   dd_min (45)  below_min (20)  below_max (80)  offlow (30)  offlow_max (80)
  *   ema_gap_min (-2)  ema_gap_max (5)
- *   p1m_min (0)  p1m_max (15)  p3m_min (0)  p3m_max (40)  p6m_min (-10)  p6m_max (80)
- *   py_min (0)  p3y_max (100)  p5y_max (200)  p10y_max (400)
+ *   p3m_min (0)  p3m_max (40)  p6m_min (-10)  p6m_max (80)
+ *   p3y_max (130)  p5y_max (200)  p10y_max (400)
  *   min_years (5)  value (0 = no liquidity floor, SAR)  nrhi_min (0 = descriptor only, %)
  * The Perf.* bounds are normally enforced server-side too; the script re-verifies them
  * locally so the result is correct regardless of how the screen was built.
@@ -74,17 +73,14 @@ const params = {
   dd_min: num("dd_min", 45),
   below_min: num("below_min", 20),
   below_max: num("below_max", 80),
-  offlow: num("offlow", 35),         // 30->35 (2026-07-01, formal request)
+  offlow: num("offlow", 30),         // 35->30 (2026-07-03, D-2026-07-03-02); was 30->35 (2026-07-01)
   offlow_max: num("offlow_max", 80), // 100->80 (2026-07-01, formal request)
   ema_gap_min: num("ema_gap_min", -2),
   ema_gap_max: num("ema_gap_max", 5),
-  p1m_min: num("p1m_min", 0),
-  p1m_max: num("p1m_max", 15),
   p3m_min: num("p3m_min", 0),
   p3m_max: num("p3m_max", 40),
   p6m_min: num("p6m_min", -10),      // 3->-10 (2026-07-01, formal request)
   p6m_max: num("p6m_max", 80),
-  py_min: num("py_min", 0),
   p3y_max: num("p3y_max", 130),      // 100->130 (2026-07-01, formal request)
   p5y_max: num("p5y_max", 200),
   p10y_max: num("p10y_max", 400),
@@ -185,7 +181,8 @@ function stageFilter() {
     const fbt = s.first_bar_time; // epoch seconds of the first price bar (≈ listing date)
     const avgVol = s.average_volume_30d_calc;
 
-    if ([close, ath, hi, lo, ema21, ema60, ema200, p1m, p3m, p6m, pY, p3y].some((v) => v == null)) {
+    // Perf.1M/Perf.1Y are DESCRIPTORS (gates removed 2026-07-03, D-2026-07-03-02) — null does not drop
+    if ([close, ath, hi, lo, ema21, ema60, ema200, p3m, p6m, p3y].some((v) => v == null)) {
       skipped.push({ symbol: s.symbol, description: s.description });
       continue;
     }
@@ -197,8 +194,6 @@ function stageFilter() {
     // Perf bounds (re-verify; normally enforced server-side)
     if (p3m < params.p3m_min || p3m >= params.p3m_max) continue;
     if (p6m <= params.p6m_min || p6m >= params.p6m_max) continue;
-    if (p1m <= params.p1m_min || p1m >= params.p1m_max) continue; // monthly momentum already turned up, not overheated
-    if (pY <= params.py_min) continue; // confirmed 1-year uptrend
     if (p3y >= params.p3y_max) continue;
     const p5y = s["Perf.5Y"];
     if (p5y != null && p5y >= params.p5y_max) continue;
@@ -323,7 +318,7 @@ function stageReport() {
   const fn = filtered.funnel || {};
   const out = [
     "Funnel (Saudi Main Market, after 9xxx/REIT exclusion):",
-    `  1. base conditions (≥${p.min_years}y listing, Perf.1Y>${p.py_min} + 1M/3M/6M/3Y/5Y/10Y + scope) : ${fn.base ?? "—"}`,
+    `  1. base conditions (≥${p.min_years}y listing, Perf.3M/6M/3Y/5Y/10Y + scope) : ${fn.base ?? "—"}`,
     `  2. after DDmax ≥ ${p.dd_min}%                          : ${fn.afterDD ?? "—"}`,
     `  3. after belowATH ∈ [${p.below_min},${p.below_max}]%                 : ${fn.afterBelow ?? "—"}`,
     `  4. after offLow ∈ [${p.offlow},${p.offlow_max})%                : ${fn.afterOff ?? "—"}`,
@@ -346,8 +341,8 @@ function stageReport() {
   out.push(
     `Filters: ≥${p.min_years}y listing (first_bar_time), DDmax ≥ ${p.dd_min}%, belowATH ∈ [${p.below_min},${p.below_max}]%, offLow ∈ [${p.offlow},${p.offlow_max})%, ` +
       `close > EMA60, close ≥ EMA21, EMA21/EMA60 ∈ [${p.ema_gap_min},${p.ema_gap_max}]%, ` +
-      `Perf.1M ∈ (${p.p1m_min},${p.p1m_max})%, Perf.3M ∈ [${p.p3m_min},${p.p3m_max})%, Perf.6M ∈ (${p.p6m_min},${p.p6m_max})%, ` +
-      `Perf.1Y > ${p.py_min}%, Perf.3Y < ${p.p3y_max}%, Perf.5Y < ${p.p5y_max}%, Perf.10Y < ${p.p10y_max}%` +
+      `Perf.3M ∈ [${p.p3m_min},${p.p3m_max})%, Perf.6M ∈ (${p.p6m_min},${p.p6m_max})%, ` +
+      `Perf.3Y < ${p.p3y_max}%, Perf.5Y < ${p.p5y_max}%, Perf.10Y < ${p.p10y_max}%` +
       (p.value > 0 ? `, value ≥ SAR ${compact(p.value)}` : ", value floor OFF") +
       (p.nrhi_min > 0 ? `, nrHi ≥ ${p.nrhi_min}%` : ", nrHi descriptor") + ".",
   );
