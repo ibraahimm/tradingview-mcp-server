@@ -2,7 +2,7 @@
   "case_id": "w2_defaults",
   "spec_version": "1.0.0",
   "rule": "TASI-W2",
-  "description": "TASI-W2 at default params: a clean continuation pass, a fail on the binding coil (ema_comp out of band), a perf_1y<0 PASS and a perf_1m-out-of-old-band PASS (both gates REMOVED 2026-07-03, D-2026-07-03-02 — pins the removal), and the offlow_min=30 boundary (32 passes, 29 fails).",
+  "description": "TASI-W2 at default params: a clean continuation pass, a fail on the binding coil (ema_comp), the 2026-07-04 guardrails (D-2026-07-04-01) pinned at their boundaries — perf_1m=19 passes / 20 fails (lt ceiling, no lower band: p1m_min stays removed per D-2026-07-03-02), perf_1y=-5 passes / -25 fails (floor -20, weaker than the old >0) — and the offlow_min=30 boundary (32 passes, 29 fails).",
   "input_file": "input.csv",
   "expected_file": "expected.csv"
 }

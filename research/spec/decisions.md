@@ -268,6 +268,47 @@ tested gates were load-bearing and removed by design).
 
 ---
 
+## D-2026-07-04-01 · 2026-07-04 · Methodology
+
+**Choice.** **Refinement of the D-2026-07-03-02 TASI-W2 simplification** (owner directive of
+2026-07-04): restore two **lightweight guardrails** to TASI-W2 — `p1m_max` (predicate
+`perf_1m lt @p1m_max`: Perf.1M below the ceiling, no lower band) and `py_min` (predicate
+`perf_1y gt @py_min`, now a *negative* floor rather than the old confirmed-uptrend
+requirement). **`p1m_min` remains removed.** Values in `rules.yaml`. Intent: avoid overly
+extended short-term moves (Perf.1M ceiling) and severe longer-term weakness (Perf.1Y floor)
+while keeping the recall-oriented, structurally-gated W2 of D-2026-07-03-02.
+
+**Empirical evidence** (Report:
+[`research/reports/w2-guardrails-restore-2026-07-04.md`](../reports/w2-guardrails-restore-2026-07-04.md),
+tested **before** adoption): the guardrails improve on the gateless current rule at every
+horizon (P(variant>current) 0.65–0.81; net back to break-even-or-positive) while dropping only
+~9% of deduped signals. They recover **part, not all**, of the pre-simplification per-signal
+edge (the old full gates remain deflated-significant at 20d; the guardrail variant is
+directionally positive but not deflated-significant).
+
+**Rationale for adoption.** Owner design decision consistent with the evidence direction: a
+quality floor that trims only the extended-move and severe-weakness tails, priced at minimal
+recall cost, refining — not reverting — the 2026-07-03 structural redefinition.
+
+**Validation status.** Forward-tested before adoption; **favorable vs current canon**, partial
+recovery vs the pre-simplification rule; not deflated-significant on its own. Pooled 20-year,
+one vintage; no regime split/OOS.
+
+**Comparability coordinate.** Subsequent Reports/backtests are identified by
+(`spec_version 1.0.0`, `D-2026-07-04-01`). No `VERSION` bump.
+
+**Evidence.** The Report above; `research/experiments/w2_guardrails_restore_test.py`
+(candidate-rule driver, committed); the promotion commit (canon + JS + docs + vectors + parity
+minimums together).
+
+**Relations.** Refines D-2026-07-03-02 (partially restores what it removed, in weakened
+guardrail form: Perf.1M ceiling only, Perf.1Y floor at −20 instead of 0); evidence method
+follows D-2026-06-30-01.
+
+**Rollback.** `git revert` the promotion commit.
+
+---
+
 ## Backfilled entries
 
 *Recorded 2026-07-02 from commit history and reports; each keeps its original decision date.*

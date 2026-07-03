@@ -41,8 +41,9 @@ averages). `/tasi-w2` buys the **continuation**: the first advance has already h
 context (`DDmax`/`belowATH`) is **kept** — same universe of corrected names, one wave further
 along. TASI-W2's trend/continuation evidence is **structural** (`close > EMA60`, the coil, the
 EMA21 reclaim); the former `Perf.1M` band and `Perf.1Y > 0` gates were **removed 2026-07-03**
-(`decisions.md` D-2026-07-03-02 — the entry records the forward-test evidence and the design
-rationale). `Perf.1M`/`Perf.1Y` remain **descriptors** in the table and CSV.
+(`decisions.md` D-2026-07-03-02), then two **lightweight guardrails were restored 2026-07-04**
+(D-2026-07-04-01): `Perf.1M < p1m_max` (not overly extended) and `Perf.1Y > py_min` (no severe
+1-year weakness — a negative floor, not the old uptrend requirement); `p1m_min` remains removed.
 
 ## Moving averages — EMA only
 
@@ -72,10 +73,12 @@ them straight to the script — the script owns the defaults and all the math.
 | `offlow_max` | Max `offLow` — not over-extended off the low (%) |
 | `ema_gap_min`| Min `EMA21/EMA60 − 1` — the coil: fast EMA may sit just below the mid EMA (%) |
 | `ema_gap_max`| Max `EMA21/EMA60 − 1` — fast EMA not far above the mid EMA (still coiled) (%) |
+| `p1m_max`    | Max `Perf.1M` — guardrail: the recent month not overly extended (no lower band) (%) |
 | `p3m_min`    | Min `Perf.3M` (%) |
 | `p3m_max`    | Max `Perf.3M` — not overheated (%) |
 | `p6m_min`    | Min `Perf.6M` (%) |
 | `p6m_max`    | Max `Perf.6M` — only orderly wave-1 advances (%) |
+| `py_min`     | Min `Perf.1Y` — guardrail: no severe 1-year weakness (a negative floor, not an uptrend requirement) (%) |
 | `p3y_max`    | Max `Perf.3Y` — keep to moderate recoveries (%) |
 | `p5y_max`    | Max `Perf.5Y` — allow large recovery (wave 2 wants recovered names) (%) |
 | `p10y_max`   | Max `Perf.10Y` (applied locally; null 10Y = <10y history, allowed) (%) |
@@ -118,10 +121,12 @@ Non-negotiable. **Never substitute symbols from any other market.**
    - `filters`:
      - `{ field:"exchange", operator:"equal", value:"TADAWUL" }`
      - `{ field:"type", operator:"equal", value:"stock" }`
+     - `{ field:"Perf.1M", operator:"less", value:<p1m_max> }`  (default 20)
      - `{ field:"Perf.3M", operator:"greater_or_equal", value:<p3m_min> }`  (default 0)
      - `{ field:"Perf.3M", operator:"less", value:<p3m_max> }`  (default 40)
      - `{ field:"Perf.6M", operator:"greater", value:<p6m_min> }`  (default -10)
      - `{ field:"Perf.6M", operator:"less", value:<p6m_max> }`  (default 80)
+     - `{ field:"Perf.Y", operator:"greater", value:<py_min> }`  (default -20)
      - `{ field:"Perf.3Y", operator:"less", value:<p3y_max> }`  (default 130)
      - `{ field:"Perf.5Y", operator:"less", value:<p5y_max> }`  (default 200)
      - Do **not** push `Perf.10Y` server-side: `Perf.10Y < p10y_max` is applied **locally** so that
@@ -143,8 +148,8 @@ Non-negotiable. **Never substitute symbols from any other market.**
    node .claude/scripts/tasi-w2.js stage=filter input=.claude/scripts/.tmp/screen.json \
      dd_min=<dd_min> below_min=<below_min> below_max=<below_max> offlow=<offlow> offlow_max=<offlow_max> \
      ema_gap_min=<ema_gap_min> ema_gap_max=<ema_gap_max> \
-     p3m_min=<p3m_min> p3m_max=<p3m_max> p6m_min=<p6m_min> p6m_max=<p6m_max> \
-     p3y_max=<p3y_max> p5y_max=<p5y_max> p10y_max=<p10y_max> min_years=<min_years> value=<value> nrhi_min=<nrhi_min> \
+     p1m_max=<p1m_max> p3m_min=<p3m_min> p3m_max=<p3m_max> p6m_min=<p6m_min> p6m_max=<p6m_max> \
+     py_min=<py_min> p3y_max=<p3y_max> p5y_max=<p5y_max> p10y_max=<p10y_max> min_years=<min_years> value=<value> nrhi_min=<nrhi_min> \
      > .claude/scripts/.tmp/filtered.json
    ```
    The script handles the 9xxx/REIT exclusions, computes all metrics, applies every threshold
