@@ -75,7 +75,7 @@ rules:
       p10y_max: 400
       dd_min: 45
       below_min: 20
-      below_max: 80
+      below_max: 95        # 80->95, see decisions.md D-2026-07-04-02
       offlow_min: 30      # 35->30, see decisions.md D-2026-07-03-02
       offlow_max: 80      # see decisions.md D-2026-07-01-01
       ema_gap_min: -2      # the coil: ema_comp band

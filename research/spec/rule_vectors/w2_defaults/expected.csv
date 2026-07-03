@@ -7,3 +7,5 @@ Ppy,true,
 Fpy,false,perf_1y
 Poff32,true,
 Foff29,false,off_low
+Pbath95,true,
+Fbath96,false,below_ath

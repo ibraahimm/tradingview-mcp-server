@@ -44,7 +44,7 @@
  *                             Perf.3Y < p3y_max, Perf.5Y < p5y_max, Perf.10Y < p10y_max
  *
  * Parameters (all optional; percents given as percents):
- *   dd_min (45)  below_min (20)  below_max (80)  offlow (30)  offlow_max (80)
+ *   dd_min (45)  below_min (20)  below_max (95)  offlow (30)  offlow_max (80)
  *   ema_gap_min (-2)  ema_gap_max (5)
  *   p1m_max (20)  p3m_min (0)  p3m_max (40)  p6m_min (-10)  p6m_max (80)
  *   py_min (-20)  p3y_max (130)  p5y_max (200)  p10y_max (400)
@@ -73,7 +73,7 @@ const num = (k, def) => (args[k] !== undefined ? Number(args[k]) : def);
 const params = {
   dd_min: num("dd_min", 45),
   below_min: num("below_min", 20),
-  below_max: num("below_max", 80),
+  below_max: num("below_max", 95),  // 80->95 (2026-07-04, D-2026-07-04-02)
   offlow: num("offlow", 30),         // 35->30 (2026-07-03, D-2026-07-03-02); was 30->35 (2026-07-01)
   offlow_max: num("offlow_max", 80), // 100->80 (2026-07-01, formal request)
   ema_gap_min: num("ema_gap_min", -2),

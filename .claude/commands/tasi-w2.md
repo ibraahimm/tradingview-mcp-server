@@ -101,7 +101,7 @@ Example calls:
 - `/tasi-w2`
 - `/tasi-w2 ema_gap_max=8` — widen the coil band for more candidates
 - `/tasi-w2 offlow=40 value=5000000` — further along + a SAR 5M liquidity floor
-- `/tasi-w2 below_max=95` — admit deeper still-corrected names
+- `/tasi-w2 below_max=80` — restore the pre-2026-07-04 tighter depth ceiling
 
 ## Universe restriction (Saudi Main Market only — MANDATORY)
 
@@ -192,7 +192,7 @@ Non-negotiable. **Never substitute symbols from any other market.**
   **few hits per run** (often 1–5). Widen `ema_gap_max` for a larger pool.
 - **Stage-2 trend uses `close > EMA60` only.** `EMA200` is a descriptor (`vs200`/tag), not a gate —
   see the EMA section above. `★` vs `⚠e` tells you whether the long trend has also turned up.
-- **Deep-correction DNA retained.** `DDmax`/`belowATH` keep the universe to names still 20–80% below
+- **Deep-correction DNA retained.** `DDmax`/`belowATH` keep the universe to names still 20–95% below
   their all-time high — the high `Perf.5Y`/`Perf.10Y` ceilings only permit a large *recovery*, they
   do not admit names at fresh all-time highs. Expect elevated `ATHx` on many hits (old/distant peak);
   that is largely expected for wave 2 — confirm depth on a long-term chart.

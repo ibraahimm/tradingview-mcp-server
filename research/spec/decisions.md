@@ -309,6 +309,41 @@ follows D-2026-06-30-01.
 
 ---
 
+## D-2026-07-04-02 · 2026-07-04 · Methodology
+
+**Choice.** TASI-W2 `below_max` raised **80 → 95** (owner directive of 2026-07-04): the
+deep-correction band widens to `belowATH ∈ [20, 95]`, admitting deeper still-corrected names
+into the continuation screen. `below_min` unchanged. Value in `rules.yaml`.
+
+**Motivation.** A live funnel diagnostic (2026-07-04) showed 7 of 10 audited absentees from
+`/tasi-w2` — all current TASI-W1-cohort names — first-rejected at `below_ath ≤ 80` with values
+84–90: first-wave names whose recoveries had not yet crossed the 80 line, structurally locked
+out of the TASI-W1→TASI-W2 continuation the tracker is meant to observe. The widening restores
+lifecycle continuity between the W1 cohort and the W2 screen.
+
+**Empirical evidence** (Report:
+[`research/reports/w2-below95-2026-07-04.md`](../reports/w2-below95-2026-07-04.md), tested
+**before** adoption): **return-neutral** — ~35% more deduped signals; mild per-signal dilution
+at 20d (P(B95>cur)=0.34), indistinguishable at 60d, marginally better at 120d. A
+recall/selectivity choice, explicitly **not** an edge-improvement claim (same class as
+D-2026-07-01-02).
+
+**Validation status.** Forward-tested before adoption; return-neutral. Pooled 20-year, one
+vintage; no regime split/OOS.
+
+**Comparability coordinate.** Subsequent Reports/backtests: (`spec_version 1.0.0`,
+`D-2026-07-04-02`). No `VERSION` bump.
+
+**Evidence.** The Report above; `research/experiments/w2_below95_test.py` (override driver,
+committed); the funnel diagnostic in-session; the promotion commit.
+
+**Relations.** Follows D-2026-07-04-01 (the same-day guardrail refinement); loosens the W2
+band set by the original rule (and the D-2026-07-01-01 era values) on the depth dimension only.
+
+**Rollback.** `git revert` the promotion commit.
+
+---
+
 ## Backfilled entries
 
 *Recorded 2026-07-02 from commit history and reports; each keeps its original decision date.*
