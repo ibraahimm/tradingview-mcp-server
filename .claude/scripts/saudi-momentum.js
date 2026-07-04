@@ -284,7 +284,9 @@ const SEC_MAX = 11; // truncate Sector
 // part after it as normal markdown. The sentinel line itself is never shown.
 const LINKS_SENTINEL = "===CHART_LINKS===";
 // TradingView interactive chart URL for a TADAWUL symbol.
-const chartUrl = (sym) => `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`; // %3A: a raw ":" breaks terminal link parsers
+// Symbol-page URL: plain dash path, no query string / special chars — robust in every
+// terminal & chat link parser (the ?symbol=TADAWUL:1234 form broke on the ":").
+const chartUrl = (sym) => `https://www.tradingview.com/symbols/${sym.replace(":", "-")}/`;
 
 function stageReport() {
   if (!args.filtered) throw new Error("stage=report requires filtered=<filter.json|->");

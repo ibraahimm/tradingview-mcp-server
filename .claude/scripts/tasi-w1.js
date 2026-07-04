@@ -76,7 +76,9 @@ function readJson(spec) {
 // ---------- formatting helpers ----------
 const REIT_RE = /REIT|Fund|ETF|Sukuk/i;
 const LINKS_SENTINEL = "===CHART_LINKS===";
-const chartUrl = (sym) => `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`; // %3A: a raw ":" breaks terminal link parsers
+// Symbol-page URL: plain dash path, no query string / special chars — robust in every
+// terminal & chat link parser (the ?symbol=TADAWUL:1234 form broke on the ":").
+const chartUrl = (sym) => `https://www.tradingview.com/symbols/${sym.replace(":", "-")}/`;
 // TradingView returns market_cap_basic in USD (fundamental_currency_code = "USD"), while all
 // prices are in SAR. SAR is pegged to USD at 3.75, so convert market cap to SAR for consistency.
 const SAR_PER_USD = 3.75;

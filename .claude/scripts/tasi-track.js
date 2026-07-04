@@ -80,7 +80,9 @@ const dayMs = 86400000;
 
 // ---------- formatting helpers ----------
 const LINKS_SENTINEL = "===CHART_LINKS===";
-const chartUrl = (sym) => `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`; // %3A: a raw ":" breaks terminal link parsers
+// Symbol-page URL: plain dash path, no query string / special chars — robust in every
+// terminal & chat link parser (the ?symbol=TADAWUL:1234 form broke on the ":").
+const chartUrl = (sym) => `https://www.tradingview.com/symbols/${sym.replace(":", "-")}/`;
 const r1 = (x) => (x == null || Number.isNaN(x) ? "—" : x.toFixed(1));
 const pr = (x) => (x == null || Number.isNaN(x) ? "—" : Math.abs(x) >= 100 ? x.toFixed(1) : x.toFixed(2));
 const sgn = (x) => (x == null || Number.isNaN(x) ? "—" : (x >= 0 ? "+" : "") + x.toFixed(1));
