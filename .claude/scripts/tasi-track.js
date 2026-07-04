@@ -93,12 +93,17 @@ function csvCell(s) {
   return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 function renderGrid(headers, rows, aligns) {
-  const w = headers.map((h, i) => Math.max(h.length, ...rows.map((r) => r[i].length)));
+  // Cells may contain "\n" (soft-wrapped, e.g. the Jrny column): column width is the longest
+  // LINE, and a logical row renders as as many physical lines as its tallest cell.
+  const cellLines = (c) => String(c).split("\n");
+  const w = headers.map((h, i) =>
+    Math.max(h.length, ...rows.map((r) => Math.max(...cellLines(r[i]).map((l) => l.length)))),
+  );
   const seg = (ch) => w.map((width) => ch.repeat(width + 2));
   const top = "┌" + seg("─").join("┬") + "┐";
   const mid = "├" + seg("─").join("┼") + "┤";
   const bot = "└" + seg("─").join("┴") + "┘";
-  const fmtRow = (cells) =>
+  const fmtLine = (cells) =>
     "│" +
     cells
       .map((c, i) => {
@@ -107,7 +112,14 @@ function renderGrid(headers, rows, aligns) {
       })
       .join("│") +
     "│";
-  return { text: [top, fmtRow(headers), mid, ...rows.map(fmtRow), bot].join("\n"), width: top.length };
+  const fmtRow = (cells) => {
+    const split = cells.map(cellLines);
+    const height = Math.max(...split.map((l) => l.length));
+    const lines = [];
+    for (let k = 0; k < height; k++) lines.push(fmtLine(split.map((l) => l[k] ?? "")));
+    return lines;
+  };
+  return { text: [top, ...fmtRow(headers), mid, ...rows.flatMap(fmtRow), bot].join("\n"), width: top.length };
 }
 
 // ---------- stage: ingest ----------
@@ -184,6 +196,24 @@ function stageIngest() {
 const HEAD = ["Sym", "Name", "First", "Jrny", "Rns", "Entry", "Now", "Gain%", "bATH", "offL", "5Y", "v200", "State"];
 const ALIGN = ["l", "l", "l", "l", "r", "r", "r", "r", "r", "r", "r", "r", "l"];
 const NAME_MAX = 20;
+
+// Soft-wrap a journey string for display: greedily pack →-separated tokens into lines of at
+// most `max` chars, breaking ONLY at → (the arrow stays at the end of the wrapped line). Full
+// text preserved — render-only; the underlying journey data is untouched.
+const JRNY_WRAP = 34;
+function wrapJourney(s, max = JRNY_WRAP) {
+  s = String(s);
+  if (s.length <= max) return s;
+  const tokens = s.split("→");
+  const lines = [];
+  let cur = tokens[0];
+  for (const tok of tokens.slice(1)) {
+    if ((cur + "→" + tok).length <= max) cur += "→" + tok;
+    else { lines.push(cur + "→"); cur = tok; }
+  }
+  lines.push(cur);
+  return lines.join("\n");
+}
 
 function journeyString(evs) {
   const out = [];
@@ -303,7 +333,7 @@ function stageReport() {
   }
 
   const gridRows = items.map((r) => [
-    r.symbol.replace(/^TADAWUL:/, ""), trunc(r.name, NAME_MAX), r.first_seen, r.journey || "—", String(r.runs),
+    r.symbol.replace(/^TADAWUL:/, ""), trunc(r.name, NAME_MAX), r.first_seen, wrapJourney(r.journey || "—"), String(r.runs),
     pr(r.first_close), pr(r.close), sgn(r.gain), r1(r.belowATH), r1(r.offLow), r1(r.p5y), sgn(r.vs200), r.state,
   ]);
   const grid = renderGrid(HEAD, gridRows, ALIGN);
