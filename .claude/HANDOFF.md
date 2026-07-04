@@ -1,10 +1,11 @@
 
 # HANDOFF — TradingView MCP + Saudi Wave Screening + Research Platform
 
-**Updated:** 2026-07-04 · **Branch:** `feat/saudi-stage2-screen` · **HEAD:** see `git log --oneline -15`
-(this session: the **command rename `/saudi-*` → `/tasi-*`**, three **TASI-W2 methodology promotions**
-(gate removal → guardrails → depth widening), the tracker Jrny render wrap, the chart-link fix, and the
-self-describing generated-Canon-view convention). All work committed and pushed to `mine`.
+**Updated:** 2026-07-04 (session close) · **Branch:** `feat/saudi-stage2-screen` · **HEAD:** see
+`git log --oneline -15` (this session: the **command rename `/saudi-*` → `/tasi-*`**, three **TASI-W2
+methodology promotions** (gate removal → guardrails → depth widening), the tracker Jrny render wrap,
+the self-describing generated-Canon-view convention, and the **chart-link saga** — final in-repo state
+`0cff752`; one environment-side experiment still open, see §9). All work committed and pushed to `mine`.
 
 > This file is a **map, not a substitute** for the repo. The repository is the source of truth. It is
 > **Session state** (disposable, per [`/DOCUMENTATION.md`](../DOCUMENTATION.md)) — it summarizes by
@@ -116,9 +117,14 @@ return-neutral). Rule golden vectors were redesigned alongside (removals + bound
   `git push mine feat/saudi-stage2-screen`. `origin` = fork, not for push.
 - **Never commit `package-lock.json`.** `.claude/` is gitignored → `git add -f` for its files.
 - **Canon (`features.yaml`, `rules.yaml`, `VERSION`) changes only with separate explicit approval.**
-- User-machine note (memory `wsl-tradingview-app-link-wiring`): chart links open in the TradingView
-  desktop app via `~/.local/bin/{wslopen,tvopen}`; scripts emit dash-path https links (`28e477a`) —
-  **do not change link formats in the scripts; the machine opener handles routing.**
+- **User-machine / chart-link note** (memory `wsl-tradingview-app-link-wiring` — READ IT before ever
+  touching link formats): scripts emit `https://www.tradingview.com/chart/?symbol=EXCHANGE%3ACODE`
+  (final form, `0cff752`) — the ONLY form the TradingView desktop app (Store install) intercepts AND
+  navigates, with the colon %-encoded so terminal link matchers can't truncate it. Verified end-to-end
+  by direct dispatch (multiple symbols, both encodings). **Never change this format again** — three
+  reworks in one day (`2e3f88a`→`28e477a`→`c961192`→`0cff752`) all chased what turned out to be a
+  client-side problem. `~/.local/bin/tvopen <code>` is the reliable zero-click opener;
+  `~/.local/bin/wslopen` is `$BROWSER`.
 
 ## 9. Open items / next steps
 
@@ -132,7 +138,18 @@ return-neutral). Rule golden vectors were redesigned alongside (removals + bound
    runtime canon duplication (currently CI-guarded, not eliminated).
 5. (Deferred) **Tier-2 SSOT lint**; (optional) promote the canon-view generator from session scratch to
    a tracked script (e.g. `research/spec/conformance/gen_canon_view.py`).
-6. (Low priority) Bump CI action versions (Node 24 warnings); note `research-ci` paths-filter means
+6. **OPEN (environment, not repo): Shift+Click on chart links corrupts under tmux 3.2a.** Established
+   facts: generated URLs unique+correct; direct dispatch opens correct charts (both encodings); the
+   user's Shift+Click path made different links open one same URL and a valid symbol report
+   "doesn't exist". Outer terminal = **WezTerm 20240203** over **tmux 3.2a** (Ubuntu 22.04 apt max);
+   OSC 8 hyperlink support landed in **tmux 3.4** (changelog-verified). A controlled experiment was
+   prepared and handed to the user (source-build tmux 3.5a + `terminal-features ",*:hyperlinks"` +
+   an OSC-8 printf smoke test, then re-click /tasi-w2 links) — **not yet run**; also pending: the
+   user's observation from Shift+Clicking a bare plain-text URL (their last message echoed the URL
+   byte-perfect into the prompt, suggesting the click selected/pasted rather than opened — unconfirmed).
+   Confidence the tmux upgrade alone fixes clicking: moderate (~60–70%). Workaround in daily use:
+   `tvopen`. NO repo changes for this — the emitted format is proven correct.
+7. (Low priority) Bump CI action versions (Node 24 warnings); note `research-ci` paths-filter means
    `.claude/`-only commits don't trigger CI — tracker gate must be run locally for those.
 
 **Working-tree note (intentional — do not "clean up"):** two items stay uncommitted — a modified
