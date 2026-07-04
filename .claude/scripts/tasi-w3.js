@@ -88,7 +88,7 @@ function readJson(spec) {
 // ---------- formatting helpers ----------
 const REIT_RE = /REIT|Fund|ETF|Sukuk/i;
 const LINKS_SENTINEL = "===CHART_LINKS===";
-const chartUrl = (sym) => `https://www.tradingview.com/chart/?symbol=${sym}`;
+const chartUrl = (sym) => `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`; // %3A: a raw ":" breaks terminal link parsers
 const SAR_PER_USD = 3.75;
 const capSar = (usd) => (usd == null ? null : usd * SAR_PER_USD);
 
