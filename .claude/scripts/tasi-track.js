@@ -80,7 +80,10 @@ const dayMs = 86400000;
 
 // ---------- formatting helpers ----------
 const LINKS_SENTINEL = "===CHART_LINKS===";
-const chartUrl = (sym) => `https://www.tradingview.com/chart/?symbol=${sym}`;
+// Percent-encode the ":" (TADAWUL%3A2340): terminal link matchers truncate the URL at a
+// raw colon in the query (the app then gets symbol=TADAWUL -> "symbol doesn't exist"),
+// while the app decodes %3A and opens the chart correctly (verified 2026-07-04).
+const chartUrl = (sym) => `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`;
 const r1 = (x) => (x == null || Number.isNaN(x) ? "—" : x.toFixed(1));
 const pr = (x) => (x == null || Number.isNaN(x) ? "—" : Math.abs(x) >= 100 ? x.toFixed(1) : x.toFixed(2));
 const sgn = (x) => (x == null || Number.isNaN(x) ? "—" : (x >= 0 ? "+" : "") + x.toFixed(1));

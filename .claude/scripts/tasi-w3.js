@@ -88,7 +88,10 @@ function readJson(spec) {
 // ---------- formatting helpers ----------
 const REIT_RE = /REIT|Fund|ETF|Sukuk/i;
 const LINKS_SENTINEL = "===CHART_LINKS===";
-const chartUrl = (sym) => `https://www.tradingview.com/chart/?symbol=${sym}`;
+// Percent-encode the ":" (TADAWUL%3A2340): terminal link matchers truncate the URL at a
+// raw colon in the query (the app then gets symbol=TADAWUL -> "symbol doesn't exist"),
+// while the app decodes %3A and opens the chart correctly (verified 2026-07-04).
+const chartUrl = (sym) => `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`;
 const SAR_PER_USD = 3.75;
 const capSar = (usd) => (usd == null ? null : usd * SAR_PER_USD);
 
