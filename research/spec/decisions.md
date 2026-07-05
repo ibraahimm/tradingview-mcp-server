@@ -344,6 +344,48 @@ band set by the original rule (and the D-2026-07-01-01 era values) on the depth 
 
 ---
 
+## D-2026-07-05-01 · 2026-07-05 · Methodology
+
+**Choice.** **TASI-W2 guardrails widened** (owner directive of 2026-07-05, an approved executable
+promotion): the two D-2026-07-04-01 guardrail parameters are relaxed —
+1. the **annual weakness filter** `perf_1y > py_min` from **−20% to −40%** (a deeper 1-year
+   drawdown no longer disqualifies), and
+2. the **short-term extension ceiling** `perf_1m < p1m_max` from **20% to 30%** (a stronger
+   recent month no longer disqualifies).
+Predicates and funnel structure unchanged; only the two bounds move. Values in `rules.yaml`.
+No other methodology change authorized or made.
+
+**Empirical evidence** (Report:
+[`research/reports/w2-guardrails-widen-2026-07-05.md`](../reports/w2-guardrails-widen-2026-07-05.md),
+tested **before** adoption): a **recall widening with mild per-signal dilution** — ~11% more
+deduped signals; near-neutral at 20/60d (P(variant>current) 0.43/0.42), diluting at 120d
+(P=0.28). Attribution even between the two relaxations; no spec deflated-significant on this
+base. A weaker adverse signal than the D-2026-07-03-02 gate removal; one class below the
+return-neutral D-2026-07-04-02 widening.
+
+**Rationale for adoption.** Owner directive: widen the guardrails' admission band — the
+guardrails remain in place as tail-trims but bind later, consistent with the recall-oriented,
+structurally-gated TASI-W2 of D-2026-07-03-02/D-2026-07-04-01. Adopted with the mild-dilution
+evidence reviewed and recorded.
+
+**Validation status.** Forward-tested before adoption; **mildly diluting per-signal (worst at
+120d), recall-widening**. Pooled 20-year, one vintage; no regime split/OOS.
+
+**Comparability coordinate.** Subsequent Reports/backtests are identified by
+(`spec_version 1.0.0`, `D-2026-07-05-01`). No `VERSION` bump (rule change, not feature change —
+D-2026-07-02-01).
+
+**Evidence.** The Report above; `research/experiments/w2_guardrails_widen_test.py`
+(override-only driver, committed); the promotion commit (canon + JS + docs + vectors together;
+`w2_defaults` boundary rows re-pinned at the new bounds).
+
+**Relations.** Widens the D-2026-07-04-01 guardrails (same predicates, looser bounds); leaves
+the D-2026-07-03-02 structural redefinition and the D-2026-07-04-02 depth band untouched.
+
+**Rollback.** `git revert` the promotion commit.
+
+---
+
 ## Backfilled entries
 
 *Recorded 2026-07-02 from commit history and reports; each keeps its original decision date.*

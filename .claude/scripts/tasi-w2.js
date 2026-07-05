@@ -46,8 +46,8 @@
  * Parameters (all optional; percents given as percents):
  *   dd_min (45)  below_min (20)  below_max (95)  offlow (30)  offlow_max (80)
  *   ema_gap_min (-2)  ema_gap_max (5)
- *   p1m_max (20)  p3m_min (0)  p3m_max (40)  p6m_min (-10)  p6m_max (80)
- *   py_min (-20)  p3y_max (130)  p5y_max (200)  p10y_max (400)
+ *   p1m_max (30)  p3m_min (0)  p3m_max (40)  p6m_min (-10)  p6m_max (80)
+ *   py_min (-40)  p3y_max (130)  p5y_max (200)  p10y_max (400)
  *   min_years (5)  value (0 = no liquidity floor, SAR)  nrhi_min (0 = descriptor only, %)
  * The Perf.* bounds are normally enforced server-side too; the script re-verifies them
  * locally so the result is correct regardless of how the screen was built.
@@ -78,12 +78,12 @@ const params = {
   offlow_max: num("offlow_max", 80), // 100->80 (2026-07-01, formal request)
   ema_gap_min: num("ema_gap_min", -2),
   ema_gap_max: num("ema_gap_max", 5),
-  p1m_max: num("p1m_max", 20),       // guardrail: Perf.1M ceiling (D-2026-07-04-01)
+  p1m_max: num("p1m_max", 30),       // guardrail: Perf.1M ceiling (D-2026-07-04-01); 20->30 (D-2026-07-05-01)
   p3m_min: num("p3m_min", 0),
   p3m_max: num("p3m_max", 40),
   p6m_min: num("p6m_min", -10),      // 3->-10 (2026-07-01, formal request)
   p6m_max: num("p6m_max", 80),
-  py_min: num("py_min", -20),        // guardrail: Perf.1Y floor (D-2026-07-04-01)
+  py_min: num("py_min", -40),        // guardrail: Perf.1Y floor (D-2026-07-04-01); -20->-40 (D-2026-07-05-01)
   p3y_max: num("p3y_max", 130),      // 100->130 (2026-07-01, formal request)
   p5y_max: num("p5y_max", 200),
   p10y_max: num("p10y_max", 400),

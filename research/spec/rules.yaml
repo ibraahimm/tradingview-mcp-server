@@ -64,12 +64,12 @@ rules:
     title: "Second wave (first EMA coil, reclaim, resume)"
     params:
       min_years: 5
-      p1m_max: 20         # guardrail: Perf.1M ceiling (p1m_min stays removed) — see decisions.md D-2026-07-04-01
+      p1m_max: 30         # guardrail: Perf.1M ceiling (p1m_min stays removed); 20->30, see decisions.md D-2026-07-05-01
       p3m_min: 0
       p3m_max: 40
       p6m_min: -10        # see decisions.md D-2026-07-01-01
       p6m_max: 80
-      py_min: -20         # guardrail: Perf.1Y floor (was >0; removed 2026-07-03, restored weaker) — see decisions.md D-2026-07-04-01
+      py_min: -40         # guardrail: Perf.1Y floor (was >0; removed 2026-07-03, restored weaker); -20->-40, see decisions.md D-2026-07-05-01
       p3y_max: 130        # see decisions.md D-2026-07-01-01
       p5y_max: 200
       p10y_max: 400
