@@ -1,11 +1,11 @@
 
 # HANDOFF — TradingView MCP + Saudi Wave Screening + Research Platform
 
-**Updated:** 2026-07-04 (session close) · **Branch:** `feat/saudi-stage2-screen` · **HEAD:** see
-`git log --oneline -15` (this session: the **command rename `/saudi-*` → `/tasi-*`**, three **TASI-W2
-methodology promotions** (gate removal → guardrails → depth widening), the tracker Jrny render wrap,
-the self-describing generated-Canon-view convention, and the **chart-link saga** — final in-repo state
-`0cff752`; one environment-side experiment still open, see §9). All work committed and pushed to `mine`.
+**Updated:** 2026-07-05 (session close) · **Branch:** `feat/saudi-stage2-screen` · **HEAD:** see
+`git log --oneline -15` (this session: the **TASI-W2 guardrail widening promotion** (D-2026-07-05-01,
+commit `325fc66`, CI green), the canon-view generator **promoted to a tracked script** with a
+professional XLSX layout, and three live runs — `/tasi-w2` ×2, `/tasi-w1` ×1 — that pushed the
+tracker cohort to 45 symbols / **16 PROMOTED W1→W2**). All work committed and pushed to `mine`.
 
 > This file is a **map, not a substitute** for the repo. The repository is the source of truth. It is
 > **Session state** (disposable, per [`/DOCUMENTATION.md`](../DOCUMENTATION.md)) — it summarizes by
@@ -19,8 +19,7 @@ the self-describing generated-Canon-view convention, and the **chart-link saga**
 
 1. **TS MCP server + CLI** (`src/`) — the TradingView screener wrapper (unchanged core).
 2. **Saudi wave screening — the live product** (`.claude/commands/` + `.claude/scripts/`) — on-demand
-   slash commands `/tasi-w1`, `/tasi-w2`, `/tasi-w3`, `/tasi-track` (renamed from `/saudi-*` this
-   session, D-2026-07-03-01; scripts + CSVs renamed with them), each = MCP screen → node helper →
+   slash commands `/tasi-w1`, `/tasi-w2`, `/tasi-w3`, `/tasi-track`, each = MCP screen → node helper →
    print. Persistent CSVs in `.claude/outputs/` (`tasi-w*.csv`); ledger stays `saudi-tracker.jsonl`.
 3. **Research / backtesting platform** (`research/`, Python + polars) — answers, with rigor, whether the
    wave methodology has a real edge, and keeps the live screens honest.
@@ -36,19 +35,19 @@ the self-describing generated-Canon-view convention, and the **chart-link saga**
 **Read the numbers from `rules.yaml`; this Session doc does not restate them.**
 
 - **TASI-W1** (`/tasi-w1`) — deep-correction first-wave entry: listing-age, `DDmax`, `belowATH`,
-  `offLow`, and Perf gates. `offlow_min` lowered this session (part of D-2026-07-03-02).
-- **TASI-W2** (`/tasi-w2`) — **redefined this session across three decisions**: trend/continuation
-  evidence is now **structural** (`close>EMA60`, the EMA21/EMA60 coil, the EMA21 reclaim); the old
-  Perf.1M band + Perf.1Y>0 inversion were removed (D-2026-07-03-02), lightweight guardrails restored
-  (Perf.1M ceiling + negative Perf.1Y floor, D-2026-07-04-01), and the `belowATH` depth band widened
-  for W1→W2 lifecycle continuity (D-2026-07-04-02). Funnel is 16 steps.
+  `offLow`, and Perf gates. **Untouched this session.**
+- **TASI-W2** (`/tasi-w2`) — structural continuation screen (`close>EMA60`, the EMA21/EMA60 coil, the
+  EMA21 reclaim) with two lightweight guardrails (Perf.1M ceiling + negative Perf.1Y floor,
+  D-2026-07-04-01). **This session both guardrail bounds were WIDENED** — same predicates, looser
+  bounds (D-2026-07-05-01; values in `rules.yaml`). Funnel stays 16 steps. The W2 definition has now
+  moved **four times** since 2026-07-03 — see §5 comparability warning.
 - **TASI-W3** (`/tasi-w3`) — mature re-coil near highs: `close>EMA200`, coil, capped EMA21 extension
-  (`ext21_max` — still a W3 gate; only the W1/W2 caps were ever removed), `nrHi` band, `Perf.3Y` min
-  discriminator. **Untouched all session.**
+  (`ext21_max`), `nrHi` band, `Perf.3Y` min discriminator. **Untouched all session.**
 - **Tracker** (`/tasi-track`): committed methodology is **TASI-W1/TASI-W2 only**. States
   `ACTIVE-TASI-W1/W2`, `GRAD★`, `FAILED`, `STALE`, `EXPIRED`; badges `NEW/PROMOTED/nearATH`. Lifecycle
-  thresholds owned by `.claude/scripts/tasi-track.js` (not `rules.yaml`). Jrny column now soft-wraps at
-  `→` (render-only, `76d6d47`). Cohort as of 2026-07-04: 40 symbols, **8 PROMOTED W1→W2**.
+  thresholds owned by `.claude/scripts/tasi-track.js` (not `rules.yaml`). Cohort as of 2026-07-05:
+  **45 symbols / 223 events, 16 PROMOTED W1→W2, 3 FAILED** (2250, 4040, 8100 — 8100 failed the same
+  day it promoted).
 
 ## 3. Research platform (`research/`)
 
@@ -57,13 +56,12 @@ the self-describing generated-Canon-view convention, and the **chart-link saga**
 - **`backtest/`** — event_study, governance, rigor, robust, regime, lifecycle, tracker (faithful JS
   port), replay; each with a `selftest_*` CI gate.
 - **`spec/conformance/`** — `reference_runner`, `rule_runner`, **`methodology_parity`** (live JS ↔
-  rules.yaml params + Tier-1 SSOT lint on command-doc Step-2 `(default N)` annotations, with per-rule
-  minimum counts — updated alongside each promotion this session).
-- **CI:** `.github/workflows/research-ci.yml` — green through run #32 (later commits touched only
-  `.claude/`, outside the paths filter; the tracker gate ran green locally).
-- **Reports (dated, point-in-time):** `RIGOR_RESULT.md` (pre-rename findings),
-  `reports/canonical-rename-2026-07-02.md`, `reports/w2-gates-offlow30-2026-07-03.md`,
-  `reports/w2-guardrails-restore-2026-07-04.md`, `reports/w2-below95-2026-07-04.md`.
+  rules.yaml params + Tier-1 SSOT lint on command-doc Step-2 `(default N)` annotations), and — new
+  this session — **`gen_canon_view.py`** (the tracked canon-view generator; see §4).
+- **CI:** `.github/workflows/research-ci.yml` — green through the `325fc66` promotion run.
+- **Reports (dated, point-in-time):** `RIGOR_RESULT.md`, `reports/canonical-rename-2026-07-02.md`,
+  `reports/w2-gates-offlow30-2026-07-03.md`, `reports/w2-guardrails-restore-2026-07-04.md`,
+  `reports/w2-below95-2026-07-04.md`, **`reports/w2-guardrails-widen-2026-07-05.md`** (this session).
 
 ## 4. Governance & documentation architecture — READ THIS
 
@@ -73,13 +71,16 @@ the self-describing generated-Canon-view convention, and the **chart-link saga**
 - **Documentation architecture** ([`/DOCUMENTATION.md`](../DOCUMENTATION.md), D-2026-07-02-02): one home
   per fact; the decision log is append-only; `spec_version` versions the feature spec only
   (D-2026-07-02-01).
-- **Comparability coordinate is now (`spec_version 1.0.0`, `D-2026-07-04-02`).** Any W2
-  backtest/Report older than 2026-07-03 was measured under a materially different W2 definition and
-  does not transfer (each decision entry says so explicitly).
-- **Generated-Canon-view convention** (session memory `generated-canon-view-convention`): any artifact
-  derived from `rules.yaml` must carry a self-describing scope banner + generator-proven completeness
-  checks (params + funnel predicates incl. structural literals + tags). Reference artifacts:
-  `.claude/outputs/tasi-rules-comparison.{md,xlsx}` (gitignored; regenerate on canon change).
+- **Comparability coordinate is now (`spec_version 1.0.0`, `D-2026-07-05-01`).** Any W2
+  backtest/Report older than 2026-07-05 was measured under a different W2 definition and does not
+  transfer (each decision entry says so explicitly).
+- **Generated-Canon-view convention** (memory `generated-canon-view-convention`): any artifact derived
+  from `rules.yaml` must carry a self-describing scope banner + generator-proven completeness checks.
+  **The generator is now a tracked script** — `research/spec/conformance/gen_canon_view.py` (auto
+  date/commit defaults; asserts its own completeness; professional XLSX layout: frozen styled headers,
+  per-rule banding, autofilter, PASS-highlighted checks sheet). Run it after ANY canon change; the
+  artifacts `.claude/outputs/tasi-rules-comparison.{md,xlsx}` stay gitignored outputs. Tooling only —
+  not a CI gate, no decision entry (outputs-only convention, same basis as the 2026-07-03 adoption).
 
 ## 5. Key findings (so you don't re-derive them)
 
@@ -87,29 +88,32 @@ Pre-rename findings (RIGOR_RESULT era): TASI-W1 = TIMING/recall, no selection ed
 real NORMAL-regime selection edge not cleanly surviving ~31 bps; **TASI-W3 @120d = the one full-gauntlet
 survivor** (still needs walk-forward + OOS); W1→W2 is the tradeable refinement.
 
-This session's forward tests (Reports in `research/reports/`, all pooled 20y, one vintage):
-- **The removed W2 momentum gates were LOAD-BEARING** for the historical per-signal edge (net-negative
-  without them); removal was adopted anyway as an owner design decision — evidence and rationale are
-  recorded **separately** in D-2026-07-03-02.
-- **The restored guardrails recover part, not all, of that edge** (favorable vs the gateless rule at
-  every horizon; not deflated-significant alone) — D-2026-07-04-01.
-- **offlow 35→30 and below_max 80→95: return-neutral recall widenings** — D-2026-07-03-02 /
-  D-2026-07-04-02.
+W2 evidence chain 2026-07-03 → 07-05 (Reports in `research/reports/`, all pooled 20y, one vintage):
+- **Momentum-gate removal (D-2026-07-03-02): the removed gates were LOAD-BEARING**; adopted anyway as
+  an owner design decision, evidence recorded separately.
+- **Guardrail restoration (D-2026-07-04-01): recovers part, not all, of that edge.**
+- **offlow 35→30 / below_max 80→95 (D-2026-07-03-02 / D-2026-07-04-02): return-neutral recall widenings.**
+- **Guardrail widening (D-2026-07-05-01, this session): recall widening (~11% more signals) with MILD
+  per-signal dilution, worst at 120d** — one class below return-neutral; numbers in
+  `reports/w2-guardrails-widen-2026-07-05.md`. Adopted by owner directive with evidence recorded.
+
+Live confirmation of lifecycle continuity (2026-07-05 runs): roughly half of the day's W2 survivors
+were admissions the widened guardrails newly allow; 7 W1→W2 promotions were recorded in one day; the
+best cohort gainers are all PROMOTED journeys.
 
 ## 6. Methodology change history
 
-All in [`research/spec/decisions.md`](../research/spec/decisions.md) — the single home. This session:
-command rename (D-2026-07-03-01, Governance, supersedes D-2026-07-02-05 sub-decision 2); W2
-simplification + offlow (D-2026-07-03-02, Methodology, adverse evidence recorded); W2 guardrails
-(D-2026-07-04-01, Methodology, refinement); W2 depth widening (D-2026-07-04-02, Methodology,
-return-neutral). Rule golden vectors were redesigned alongside (removals + boundaries pinned).
+All in [`research/spec/decisions.md`](../research/spec/decisions.md) — the single home. Recent:
+command rename (D-2026-07-03-01); W2 simplification + offlow (D-2026-07-03-02, adverse evidence
+recorded); W2 guardrails restored (D-2026-07-04-01); W2 depth widening (D-2026-07-04-02); **W2
+guardrails widened (D-2026-07-05-01, this session — annual weakness filter and short-term extension
+ceiling both relaxed; `w2_defaults` golden-vector boundary rows re-pinned alongside).**
 
 ## 7. Data
 
 - **`research/panel/tadawul_2026-06-28.parquet`** — the working panel. **GITIGNORED, never committed.**
   Vintage 2026-06-28: 951,419 rows / 291 securities; manifest committed in `research/ingest/manifests/`.
-- Ledger `.claude/outputs/saudi-tracker.jsonl` (Data/State; name deliberately kept at the rename —
-  D-2026-07-03-01 records why).
+- Ledger `.claude/outputs/saudi-tracker.jsonl` (Data/State; 45 symbols / 223 events as of 2026-07-05).
 
 ## 8. Git / push setup
 
@@ -119,37 +123,27 @@ return-neutral). Rule golden vectors were redesigned alongside (removals + bound
 - **Canon (`features.yaml`, `rules.yaml`, `VERSION`) changes only with separate explicit approval.**
 - **User-machine / chart-link note** (memory `wsl-tradingview-app-link-wiring` — READ IT before ever
   touching link formats): scripts emit `https://www.tradingview.com/chart/?symbol=EXCHANGE%3ACODE`
-  (final form, `0cff752`) — the ONLY form the TradingView desktop app (Store install) intercepts AND
-  navigates, with the colon %-encoded so terminal link matchers can't truncate it. Verified end-to-end
-  by direct dispatch (multiple symbols, both encodings). **Never change this format again** — three
-  reworks in one day (`2e3f88a`→`28e477a`→`c961192`→`0cff752`) all chased what turned out to be a
-  client-side problem. `~/.local/bin/tvopen <code>` is the reliable zero-click opener;
-  `~/.local/bin/wslopen` is `$BROWSER`.
+  (final form, `0cff752`) — **never change this format again**. `~/.local/bin/tvopen <code>` is the
+  reliable zero-click opener; `~/.local/bin/wslopen` is `$BROWSER`.
 
 ## 9. Open items / next steps
 
 1. **TASI-W3 @120d walk-forward** (confirm pre-2020, not just recency) + true OOS on a future vintage —
-   the top research item, untouched by this session's W2 changes.
-2. **Re-baseline W2 analytics**: the W2 definition moved three times 2026-07-03/04; any new W2
-   backtest must pin (`1.0.0`, `D-2026-07-04-02`) and must not be compared to RIGOR_RESULT-era W2
-   numbers.
+   the top research item, still untouched by all the W2 changes.
+2. **Re-baseline W2 analytics**: the W2 definition moved four times 2026-07-03/04/05; any new W2
+   backtest must pin (`1.0.0`, `D-2026-07-05-01`) and must not be compared to earlier W2 numbers.
+   Watch the 120d dilution recorded in D-2026-07-05-01 — if it matters live, rollback is a single
+   revert of `325fc66`.
 3. (Optional) **TASI-W3-in-tracker** integration — proposed long ago, never committed.
 4. (Deferred) **Command Step-2 → read defaults from `rules.yaml` at run time** — removes the last
    runtime canon duplication (currently CI-guarded, not eliminated).
-5. (Deferred) **Tier-2 SSOT lint**; (optional) promote the canon-view generator from session scratch to
-   a tracked script (e.g. `research/spec/conformance/gen_canon_view.py`).
-6. **OPEN (environment, not repo): Shift+Click on chart links corrupts under tmux 3.2a.** Established
-   facts: generated URLs unique+correct; direct dispatch opens correct charts (both encodings); the
-   user's Shift+Click path made different links open one same URL and a valid symbol report
-   "doesn't exist". Outer terminal = **WezTerm 20240203** over **tmux 3.2a** (Ubuntu 22.04 apt max);
-   OSC 8 hyperlink support landed in **tmux 3.4** (changelog-verified). A controlled experiment was
-   prepared and handed to the user (source-build tmux 3.5a + `terminal-features ",*:hyperlinks"` +
-   an OSC-8 printf smoke test, then re-click /tasi-w2 links) — **not yet run**; also pending: the
-   user's observation from Shift+Clicking a bare plain-text URL (their last message echoed the URL
-   byte-perfect into the prompt, suggesting the click selected/pasted rather than opened — unconfirmed).
-   Confidence the tmux upgrade alone fixes clicking: moderate (~60–70%). Workaround in daily use:
-   `tvopen`. NO repo changes for this — the emitted format is proven correct.
-7. (Low priority) Bump CI action versions (Node 24 warnings); note `research-ci` paths-filter means
+5. (Deferred) **Tier-2 SSOT lint.** *(The canon-view generator promotion is DONE this session — §4.)*
+6. **OPEN (environment, not repo): Shift+Click on chart links corrupts under tmux 3.2a.** Prepared
+   experiment (source-build tmux 3.5a + `terminal-features ",*:hyperlinks"` + OSC-8 smoke test) —
+   **still not run**. Facts + confidence assessment recorded in the 2026-07-04 HANDOFF (git history,
+   `1c47ec7`) and memory `wsl-tradingview-app-link-wiring`. Daily workaround: `tvopen`. NO repo
+   changes for this — the emitted format is proven correct.
+7. (Low priority) Bump CI action versions (Node 24 warnings); `research-ci` paths-filter means
    `.claude/`-only commits don't trigger CI — tracker gate must be run locally for those.
 
 **Working-tree note (intentional — do not "clean up"):** two items stay uncommitted — a modified
@@ -163,6 +157,7 @@ recorded in D-2026-07-01-02). A fresh `git status` shows both; leave them.
   not in canon).
 - **Conformance/parity:** `python research/spec/conformance/{rule_runner,methodology_parity,reference_runner}.py`,
   `python -m research.engine.selftest_screen`, `python -m research.backtest.selftest_{tracker,replay,rigor,robust,regime,lifecycle}`.
+- **Canon-view regen (after any canon change):** `python research/spec/conformance/gen_canon_view.py`.
 - **Backtests:** `python -m research.{rigor_run,robust_run,regime_run,lifecycle_run,replay_run} research/panel/tadawul_2026-06-28.parquet`.
-- **Experiments (hypotheses only):** `python -m research.experiments.{w1_replay_60d,w1_variant_replay,w1_p6m_variants,wave_start_study,w2_momentum_gate_removal,offlow30_promotion_test,w2_guardrails_restore_test,w2_below95_test} research/panel/tadawul_2026-06-28.parquet`.
+- **Experiments (hypotheses only):** `python -m research.experiments.{w1_replay_60d,w1_variant_replay,w1_p6m_variants,wave_start_study,w2_momentum_gate_removal,offlow30_promotion_test,w2_guardrails_restore_test,w2_below95_test,w2_guardrails_widen_test} research/panel/tadawul_2026-06-28.parquet`.
 - **Open a chart on this machine:** `tvopen <code>` (defaults to TADAWUL).
